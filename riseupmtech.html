@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rise Up MTech — Tecnologia que Cresce com Você</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --white: #fafaf8;
+      --cream: #f5f3ee;
+      --sage: #7a9e7e;
+      --sage-light: #c8deca;
+      --sage-dark: #4a7550;
+      --gray: #6b6b6b;
+      --gray-light: #e8e6e1;
+      --font-display: 'Playfair Display', serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--white);
+      color: var(--black);
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 60px;
+      background: rgba(250, 250, 248, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s;
+    }
+    nav.scrolled { border-color: var(--gray-light); }
+
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--black);
+      text-decoration: none;
+      letter-spacing: -0.3px;
+    }
+    .nav-logo span { color: var(--sage-dark); }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--gray);
+      text-decoration: none;
+      letter-spacing: 0.3px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--black); }
+
+    .nav-cta {
+      background: var(--black);
+      color: var(--white) !important;
+      padding: 10px 22px;
+      border-radius: 100px;
+      font-weight: 500 !important;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: var(--sage-dark) !important; color: var(--white) !important; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 120px 60px 80px;
+      gap: 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px; right: -200px;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, var(--sage-light) 0%, transparent 70%);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--sage-light);
+      color: var(--sage-dark);
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.2s forwards;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--sage-dark);
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(42px, 5vw, 64px);
+      font-weight: 500;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.4s forwards;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--sage-dark);
+    }
+
+    .hero p {
+      font-size: 17px;
+      font-weight: 300;
+      color: var(--gray);
+      line-height: 1.7;
+      max-width: 480px;
+      margin-bottom: 40px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.6s forwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.8s forwards;
+    }
+
+    .btn-primary {
+      background: var(--black);
+      color: var(--white);
+      padding: 14px 28px;
+      border-radius: 100px;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: 1px solid var(--black);
+    }
+    .btn-primary:hover {
+      background: var(--sage-dark);
+      border-color: var(--sage-dark);
+    }
+
+    .btn-secondary {
+      color: var(--black);
+      padding: 14px 28px;
+      border-radius: 100px;
+      font-size: 15px;
+      font-weight: 400;
+      text-decoration: none;
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-secondary:hover { color: var(--sage-dark); }
+    .btn-secondary::after {
+      content: '→';
+      transition: transform 0.2s;
+    }
+    .btn-secondary:hover::after { transform: translateX(4px); }
+
+    .hero-visual {
+      position: relative;
+      opacity: 0;
+      animation: fadeIn 1.2s 0.6s forwards;
+    }
+
+    .hero-card {
+      background: var(--white);
+      border: 1px solid var(--gray-light);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+    }
+
+    .hero-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .hero-card-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .hero-card-badge {
+      background: #e8f5e9;
+      color: #2e7d32;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 100px;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .hero-stat {
+      background: var(--cream);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .hero-stat-value {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 500;
+      color: var(--black);
+      margin-bottom: 4px;
+    }
+    .hero-stat-label {
+      font-size: 12px;
+      color: var(--gray);
+      font-weight: 400;
+    }
+
+    .hero-platforms {
+      display: flex;
+      gap: 10px;
+    }
+    .platform-tag {
+      background: var(--cream);
+      border: 1px solid var(--gray-light);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--black);
+    }
+    .platform-tag.active {
+      background: var(--sage-light);
+      border-color: var(--sage);
+      color: var(--sage-dark);
+    }
+
+    /* LOGOS */
+    .logos {
+      padding: 48px 60px;
+      border-top: 1px solid var(--gray-light);
+      border-bottom: 1px solid var(--gray-light);
+      display: flex;
+      align-items: center;
+      gap: 60px;
+    }
+    .logos-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      min-width: 120px;
+    }
+    .logos-list {
+      display: flex;
+      gap: 48px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .logo-item {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--gray);
+      opacity: 0.6;
+      letter-spacing: -0.3px;
+    }
+
+    /* SERVICES */
+    .services {
+      padding: 120px 60px;
+      background: var(--cream);
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--sage-dark);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 500;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--gray);
+      max-width: 480px;
+      line-height: 1.7;
+      margin-bottom: 64px;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .service-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 40px 36px;
+      border: 1px solid var(--gray-light);
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .service-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--sage);
+      transform: scaleX(0);
+      transition: transform 0.3s;
+      transform-origin: left;
+    }
+    .service-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+    .service-card:hover::before { transform: scaleX(1); }
+
+    .service-icon {
+      width: 48px; height: 48px;
+      background: var(--sage-light);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 24px;
+    }
+
+    .service-card h3 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      letter-spacing: -0.3px;
+    }
+
+    .service-card p {
+      font-size: 14px;
+      color: var(--gray);
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* HOW IT WORKS */
+    .how {
+      padding: 120px 60px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 100px;
+      align-items: center;
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .step {
+      display: flex;
+      gap: 24px;
+      padding: 32px 0;
+      border-bottom: 1px solid var(--gray-light);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .step:first-child { padding-top: 0; }
+    .step:last-child { border-bottom: none; }
+
+    .step-number {
+      font-family: var(--font-display);
+      font-size: 13px;
+      color: var(--gray);
+      min-width: 24px;
+      padding-top: 4px;
+    }
+
+    .step-content h3 {
+      font-size: 17px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      letter-spacing: -0.2px;
+    }
+
+    .step-content p {
+      font-size: 14px;
+      color: var(--gray);
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    .how-visual {
+      background: var(--cream);
+      border-radius: 24px;
+      padding: 48px;
+      border: 1px solid var(--gray-light);
+    }
+
+    .flow-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--gray-light);
+    }
+    .flow-item:last-child { border-bottom: none; }
+
+    .flow-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--sage);
+      flex-shrink: 0;
+    }
+    .flow-dot.active { background: var(--sage-dark); width: 12px; height: 12px; }
+
+    .flow-label {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--black);
+    }
+
+    .flow-status {
+      margin-left: auto;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 100px;
+    }
+    .flow-status.done { background: #e8f5e9; color: #2e7d32; }
+    .flow-status.pending { background: #fff8e1; color: #f57f17; }
+    .flow-status.running { background: var(--sage-light); color: var(--sage-dark); }
+
+    /* PRICING */
+    .pricing {
+      padding: 120px 60px;
+      background: var(--cream);
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 64px;
+    }
+
+    .pricing-card {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 40px;
+      border: 1px solid var(--gray-light);
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .pricing-card.featured {
+      background: var(--black);
+      border-color: var(--black);
+      color: var(--white);
+    }
+
+    .pricing-card:not(.featured):hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    }
+
+    .pricing-badge {
+      position: absolute;
+      top: -12px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--sage-dark);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 14px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .pricing-name {
+      font-size: 13px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gray);
+      margin-bottom: 16px;
+    }
+    .pricing-card.featured .pricing-name { color: rgba(255,255,255,0.6); }
+
+    .pricing-price {
+      font-family: var(--font-display);
+      font-size: 48px;
+      font-weight: 500;
+      letter-spacing: -2px;
+      margin-bottom: 4px;
+    }
+    .pricing-period {
+      font-size: 13px;
+      color: var(--gray);
+      margin-bottom: 32px;
+    }
+    .pricing-card.featured .pricing-period { color: rgba(255,255,255,0.5); }
+
+    .pricing-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+    .pricing-features li {
+      font-size: 14px;
+      font-weight: 300;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--black);
+    }
+    .pricing-card.featured .pricing-features li { color: rgba(255,255,255,0.85); }
+    .pricing-features li::before {
+      content: '✓';
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--sage-dark);
+      flex-shrink: 0;
+    }
+    .pricing-card.featured .pricing-features li::before { color: var(--sage-light); }
+
+    .pricing-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 100px;
+      font-size: 15px;
+      font-weight: 500;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      transition: all 0.2s;
+      border: 1px solid var(--black);
+      background: transparent;
+      color: var(--black);
+      cursor: pointer;
+      font-family: var(--font-body);
+    }
+    .pricing-btn:hover {
+      background: var(--black);
+      color: var(--white);
+    }
+    .pricing-card.featured .pricing-btn {
+      background: var(--white);
+      color: var(--black);
+      border-color: var(--white);
+    }
+    .pricing-card.featured .pricing-btn:hover {
+      background: var(--sage-light);
+      border-color: var(--sage-light);
+    }
+
+    /* CONTACT */
+    .contact {
+      padding: 120px 60px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 100px;
+      align-items: start;
+    }
+
+    .contact-info h2 {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 500;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      margin-bottom: 20px;
+    }
+    .contact-info h2 em { font-style: italic; color: var(--sage-dark); }
+
+    .contact-info p {
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--gray);
+      line-height: 1.7;
+      margin-bottom: 40px;
+    }
+
+    .contact-detail {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: var(--gray);
+    }
+    .contact-detail strong { color: var(--black); font-weight: 500; }
+
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--black);
+      letter-spacing: 0.2px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 14px 18px;
+      border: 1px solid var(--gray-light);
+      border-radius: 12px;
+      font-size: 15px;
+      font-family: var(--font-body);
+      font-weight: 300;
+      color: var(--black);
+      background: var(--white);
+      transition: border-color 0.2s;
+      outline: none;
+      resize: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--sage);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-submit {
+      background: var(--black);
+      color: var(--white);
+      padding: 16px;
+      border-radius: 100px;
+      font-size: 15px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+    .form-submit:hover { background: var(--sage-dark); }
+
+    /* FOOTER */
+    footer {
+      padding: 48px 60px;
+      border-top: 1px solid var(--gray-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--black);
+      text-decoration: none;
+    }
+    .footer-logo span { color: var(--sage-dark); }
+
+    .footer-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+    .footer-links a {
+      font-size: 13px;
+      color: var(--gray);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--black); }
+
+    .footer-copy {
+      font-size: 13px;
+      color: var(--gray);
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s, transform 0.7s;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <a href="#" class="nav-logo">Rise Up <span>MTech</span></a>
+    <ul class="nav-links">
+      <li><a href="#services">Serviços</a></li>
+      <li><a href="#how">Como funciona</a></li>
+      <li><a href="#pricing">Planos</a></li>
+      <li><a href="#contact" class="nav-cta">Fale conosco</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">Plataforma de Media Automation</div>
+      <h1>Tecnologia<br><em>orgânica</em> para<br>crescimento acelerado</h1>
+      <p>Automatize a criação e gestão de campanhas em Google, Meta e TikTok a partir de um único plano de mídia — sem esforço manual, sem erros.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-primary">Começar agora</a>
+        <a href="#how" class="btn-secondary">Ver como funciona</a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div class="hero-card-header">
+          <span class="hero-card-title">Campanha em execução</span>
+          <span class="hero-card-badge">● Live</span>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-value">6</div>
+            <div class="hero-stat-label">Criativos ativos</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">3</div>
+            <div class="hero-stat-label">Plataformas</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">100%</div>
+            <div class="hero-stat-label">Automatizado</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">0</div>
+            <div class="hero-stat-label">Erros manuais</div>
+          </div>
+        </div>
+        <div class="hero-platforms">
+          <div class="platform-tag active">Google Ads</div>
+          <div class="platform-tag active">Meta</div>
+          <div class="platform-tag">TikTok</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOGOS -->
+  <div class="logos">
+    <span class="logos-label">Integra com</span>
+    <div class="logos-list">
+      <span class="logo-item">Google Ads</span>
+      <span class="logo-item">Meta Ads</span>
+      <span class="logo-item">TikTok Ads</span>
+      <span class="logo-item">BigQuery</span>
+      <span class="logo-item">Google Sheets</span>
+    </div>
+  </div>
+
+  <!-- SERVICES -->
+  <section class="services" id="services">
+    <div class="reveal">
+      <div class="section-label">O que fazemos</div>
+      <h2 class="section-title">Uma plataforma,<br>todas as mídias</h2>
+      <p class="section-sub">Da planilha de mídia à campanha ativa em minutos. Sem código, sem complexidade.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-icon">⚡</div>
+        <h3>Automação de Campanhas</h3>
+        <p>Criação automática de campanhas, ad groups e anúncios em múltiplas plataformas a partir do seu plano de mídia.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">🎯</div>
+        <h3>Gestão de Criativos</h3>
+        <p>Upload e vinculação automática de imagens, vídeos e HTML5 aos anúncios corretos em cada plataforma.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">📊</div>
+        <h3>Sincronização em Tempo Real</h3>
+        <p>Status de cada campanha atualizado automaticamente no BigQuery e Google Sheets assim que são criadas.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">🔁</div>
+        <h3>Idempotência Total</h3>
+        <p>O sistema detecta o que já foi criado e continua de onde parou — nunca duplica campanhas nem perde progresso.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">👥</div>
+        <h3>Segmentação de Audiências</h3>
+        <p>Aplicação automática de segmentos de audiência por ad group, garantindo que cada criativo chegue ao público certo.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">📈</div>
+        <h3>Consultoria Estratégica</h3>
+        <p>Além da tecnologia, oferecemos inteligência de mídia para que suas campanhas entreguem o máximo resultado.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how" id="how">
+    <div>
+      <div class="section-label reveal">Como funciona</div>
+      <h2 class="section-title reveal">Do plano de mídia<br>à campanha ativa</h2>
+      <p class="section-sub reveal">Um fluxo simples e automatizado que elimina o trabalho manual de implementação de mídia.</p>
+
+      <div class="steps">
+        <div class="step reveal">
+          <span class="step-number">01</span>
+          <div class="step-content">
+            <h3>Preencha o plano de mídia</h3>
+            <p>Insira os dados da campanha na planilha Google Sheets — nome, período, investimento, plataformas e criativos.</p>
+          </div>
+        </div>
+        <div class="step reveal">
+          <span class="step-number">02</span>
+          <div class="step-content">
+            <h3>Defina os criativos</h3>
+            <p>Faça upload dos arquivos de imagem, vídeo ou HTML5 e associe cada um à sua linha de campanha.</p>
+          </div>
+        </div>
+        <div class="step reveal">
+          <span class="step-number">03</span>
+          <div class="step-content">
+            <h3>Marque como pronto</h3>
+            <p>Altere o status para "ready to setup" — o sistema detecta automaticamente e inicia a implementação.</p>
+          </div>
+        </div>
+        <div class="step reveal">
+          <span class="step-number">04</span>
+          <div class="step-content">
+            <h3>Monitore em tempo real</h3>
+            <p>Acompanhe o status de cada campanha, ad group e criativo direto na planilha ou no BigQuery.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="how-visual reveal">
+      <div style="font-size:13px;font-weight:500;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:24px;">Status em tempo real</div>
+      <div class="flow-item">
+        <div class="flow-dot active"></div>
+        <span class="flow-label">Plano de mídia</span>
+        <span class="flow-status done">Sincronizado</span>
+      </div>
+      <div class="flow-item">
+        <div class="flow-dot active"></div>
+        <span class="flow-label">Material request</span>
+        <span class="flow-status done">Aprovado</span>
+      </div>
+      <div class="flow-item">
+        <div class="flow-dot active"></div>
+        <span class="flow-label">Google Display — 5 ads</span>
+        <span class="flow-status done">Implementado</span>
+      </div>
+      <div class="flow-item">
+        <div class="flow-dot"></div>
+        <span class="flow-label">YouTube — 1 ad</span>
+        <span class="flow-status pending">Pendente</span>
+      </div>
+      <div class="flow-item">
+        <div class="flow-dot"></div>
+        <span class="flow-label">Meta — 4 ads</span>
+        <span class="flow-status running">Em breve</span>
+      </div>
+      <div class="flow-item">
+        <div class="flow-dot"></div>
+        <span class="flow-label">TikTok — 2 ads</span>
+        <span class="flow-status running">Em breve</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing" id="pricing">
+    <div class="reveal">
+      <div class="section-label">Planos</div>
+      <h2 class="section-title">Simples e transparente</h2>
+      <p class="section-sub">Escolha o plano ideal para o volume da sua operação. Sem surpresas na fatura.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card reveal">
+        <div class="pricing-name">Starter</div>
+        <div class="pricing-price">R$499</div>
+        <div class="pricing-period">por mês</div>
+        <ul class="pricing-features">
+          <li>1 conta de anunciante</li>
+          <li>Google Ads (Display + Search)</li>
+          <li>Até 50 criativos/mês</li>
+          <li>Sincronização com Sheets</li>
+          <li>Suporte por email</li>
+        </ul>
+        <a href="#contact" class="pricing-btn">Começar</a>
+      </div>
+
+      <div class="pricing-card featured reveal">
+        <div class="pricing-badge">Mais popular</div>
+        <div class="pricing-name">Growth</div>
+        <div class="pricing-price">R$1.299</div>
+        <div class="pricing-period">por mês</div>
+        <ul class="pricing-features">
+          <li>Até 5 contas de anunciante</li>
+          <li>Google + Meta + TikTok</li>
+          <li>Até 200 criativos/mês</li>
+          <li>BigQuery integrado</li>
+          <li>Dashboard de performance</li>
+          <li>Suporte prioritário</li>
+        </ul>
+        <a href="#contact" class="pricing-btn">Começar</a>
+      </div>
+
+      <div class="pricing-card reveal">
+        <div class="pricing-name">Enterprise</div>
+        <div class="pricing-price">Custom</div>
+        <div class="pricing-period">sob consulta</div>
+        <ul class="pricing-features">
+          <li>Contas ilimitadas</li>
+          <li>Todas as plataformas</li>
+          <li>Criativos ilimitados</li>
+          <li>Integrações customizadas</li>
+          <li>SLA garantido</li>
+          <li>Gerente dedicado</li>
+        </ul>
+        <a href="#contact" class="pricing-btn">Falar com time</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <div class="contact-info reveal">
+      <div class="section-label">Contato</div>
+      <h2>Pronto para <em>crescer</em>?</h2>
+      <p>Fale com a gente e descubra como a Rise Up MTech pode transformar a operação de mídia da sua empresa.</p>
+      <div class="contact-detail">
+        <span>📧</span>
+        <span><strong>Email</strong> — leonardo.gardezani@gmail.com</span>
+      </div>
+      <div class="contact-detail">
+        <span>🌐</span>
+        <span><strong>Site</strong> — riseupmtech.com</span>
+      </div>
+      <div class="contact-detail">
+        <span>📍</span>
+        <span><strong>Localização</strong> — São Paulo, Brasil</span>
+      </div>
+    </div>
+
+    <form class="contact-form reveal" onsubmit="handleSubmit(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nome</label>
+          <input type="text" placeholder="Seu nome" required>
+        </div>
+        <div class="form-group">
+          <label>Empresa</label>
+          <input type="text" placeholder="Nome da empresa">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" placeholder="seu@email.com" required>
+      </div>
+      <div class="form-group">
+        <label>Plano de interesse</label>
+        <select>
+          <option value="">Selecione um plano</option>
+          <option>Starter — R$499/mês</option>
+          <option>Growth — R$1.299/mês</option>
+          <option>Enterprise — Sob consulta</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Mensagem</label>
+        <textarea rows="4" placeholder="Conte um pouco sobre sua operação de mídia..."></textarea>
+      </div>
+      <button type="submit" class="form-submit">Enviar mensagem →</button>
+    </form>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="#" class="footer-logo">Rise Up <span>MTech</span></a>
+    <ul class="footer-links">
+      <li><a href="#services">Serviços</a></li>
+      <li><a href="#pricing">Planos</a></li>
+      <li><a href="/terms-of-service">Termos de Uso</a></li>
+      <li><a href="/privacy-policy">Privacidade</a></li>
+    </ul>
+    <span class="footer-copy">© 2026 Rise Up MTech</span>
+  </footer>
+
+  <script>
+    // Navbar scroll
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    // Reveal on scroll
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => observer.observe(el));
+
+    // Form submit
+    function handleSubmit(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('.form-submit');
+      btn.textContent = '✓ Mensagem enviada!';
+      btn.style.background = 'var(--sage-dark)';
+      setTimeout(() => {
+        btn.textContent = 'Enviar mensagem →';
+        btn.style.background = '';
+        e.target.reset();
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
