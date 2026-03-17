@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rise Up MTech — Automação de Mídia Digital</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet">
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -20,8 +20,8 @@
       --accent-lt: #d4ecd9;
       --white:     #ffffff;
       --border:    #e2e0d8;
-      --ff-display: 'Fraunces', serif;
-      --ff-body:    'Figtree', sans-serif;
+      --ff-display: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --ff-body:    'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
 
     html { scroll-behavior: smooth; }
@@ -38,7 +38,7 @@
     }
     nav.scrolled { border-color: var(--border); }
     .nav-logo { font-family: var(--ff-display); font-size: 19px; font-weight: 600; color: var(--ink); text-decoration: none; letter-spacing: -0.4px; }
-    .nav-logo em { font-style: italic; color: var(--accent); }
+    .nav-logo em { font-style: normal; font-weight: 300; color: var(--accent); }
     .nav-links { display: flex; gap: 32px; list-style: none; align-items: center; }
     .nav-links a { font-size: 14px; font-weight: 400; color: var(--ink-soft); text-decoration: none; letter-spacing: 0.1px; transition: color 0.2s; }
     .nav-links a:hover { color: var(--ink); }
@@ -81,11 +81,11 @@
     .hero h1 {
       font-family: var(--ff-display);
       font-size: clamp(44px, 6.5vw, 88px);
-      font-weight: 600; line-height: 1.0; letter-spacing: -2.5px;
+      font-weight: 700; line-height: 1.0; letter-spacing: -3px;
       color: var(--ink); margin-bottom: 28px;
       opacity: 0; animation: up 0.8s 0.25s forwards;
     }
-    .hero h1 em { font-style: italic; color: var(--accent); font-weight: 400; }
+    .hero h1 em { font-style: normal; color: var(--accent); font-weight: 300; }
 
     .hero-sub {
       font-size: 18px; font-weight: 300; color: var(--ink-soft);
@@ -126,7 +126,7 @@
     /* ── SECTION BASE ── */
     .section-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
     .section-h { font-family: var(--ff-display); font-size: clamp(28px, 3.5vw, 48px); font-weight: 600; letter-spacing: -1px; line-height: 1.1; margin-bottom: 20px; }
-    .section-h em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .section-h em { font-style: normal; font-weight: 300; color: var(--accent); }
     .section-p { font-size: 16px; font-weight: 300; color: var(--ink-soft); line-height: 1.75; max-width: 520px; }
 
     /* ── PROBLEM ── */
@@ -234,7 +234,7 @@
     /* ── FOOTER ── */
     footer { padding: 40px 60px; border-top: 1px solid var(--border); background: var(--bg); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
     .footer-logo { font-family: var(--ff-display); font-size: 17px; font-weight: 600; color: var(--ink); text-decoration: none; }
-    .footer-logo em { font-style: italic; color: var(--accent); }
+    .footer-logo em { font-style: normal; font-weight: 300; color: var(--accent); }
     .footer-links { display: flex; gap: 28px; list-style: none; flex-wrap: wrap; }
     .footer-links a { font-size: 13px; color: var(--ink-muted); text-decoration: none; transition: color 0.2s; }
     .footer-links a:hover { color: var(--ink); }
@@ -650,7 +650,7 @@
           <h2 class="section-h">Pronto para automatizar<br>sua operação de <em>mídia</em>?</h2>
           <p class="section-p">Fale com a gente e descubra como a Rise Up MTech pode transformar a forma como sua equipe implementa campanhas.</p>
           <div style="margin-top: 36px;">
-            <div class="contact-detail"><span>📧</span><span><strong>Email</strong> — contato@riseupmtech.com</span></div>
+            <div class="contact-detail"><span>📧</span><span><strong>Email</strong> — <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ec8f8382988d9883ac9e859f89999c8198898f84c28f8381">[email&#160;protected]</a></span></div>
             <div class="contact-detail"><span>🌐</span><span><strong>Site</strong> — riseupmtech.com</span></div>
             <div class="contact-detail"><span>📍</span><span><strong>Localização</strong> — São Paulo, Brasil</span></div>
           </div>
@@ -726,7 +726,7 @@
       <h2>11. Lei Aplicável</h2>
       <p>Estes Termos são regidos pelas leis brasileiras. Quaisquer disputas serão resolvidas no foro da comarca de São Paulo, SP.</p>
       <h2>12. Contato</h2>
-      <p>Para dúvidas sobre estes Termos: <a href="mailto:contato@riseupmtech.com">contato@riseupmtech.com</a></p>
+      <p>Para dúvidas sobre estes Termos: <a href="/cdn-cgi/l/email-protection#177478796376637857657e647262677a6372747f3974787a"><span class="__cf_email__" data-cfemail="e2818d8c9683968da2908b918797928f9687818acc818d8f">[email&#160;protected]</span></a></p>
     </div>
   </div>
 
@@ -763,17 +763,17 @@
       <h2>7. Segurança</h2>
       <p>Adotamos criptografia em trânsito e em repouso, controle de acesso baseado em funções, monitoramento contínuo e backups regulares.</p>
       <h2>8. Seus Direitos (LGPD)</h2>
-      <p>Você tem direito a acessar, corrigir, anonimizar, bloquear ou eliminar seus dados, além de portabilidade e revogação de consentimento. Para exercer seus direitos: <a href="mailto:contato@riseupmtech.com">contato@riseupmtech.com</a></p>
+      <p>Você tem direito a acessar, corrigir, anonimizar, bloquear ou eliminar seus dados, além de portabilidade e revogação de consentimento. Para exercer seus direitos: <a href="/cdn-cgi/l/email-protection#0b6864657f6a7f644b7962786e7e7b667f6e686325686466"><span class="__cf_email__" data-cfemail="294a46475d485d46695b405a4c5c59445d4c4a41074a4644">[email&#160;protected]</span></a></p>
       <h2>9. Cookies</h2>
       <p>Utilizamos cookies essenciais para o funcionamento da Plataforma e analíticos para entender o uso do site. Você pode configurar seu navegador para recusá-los.</p>
       <h2>10. Encarregado de Dados (DPO)</h2>
-      <p>Contato do DPO: <a href="mailto:contato@riseupmtech.com">contato@riseupmtech.com</a></p>
+      <p>Contato do DPO: <a href="/cdn-cgi/l/email-protection#7b1814150f1a0f143b0912081e0e0b160f1e181355181416"><span class="__cf_email__" data-cfemail="82e1edecf6e3f6edc2f0ebf1e7f7f2eff6e7e1eaace1edef">[email&#160;protected]</span></a></p>
       <h2>11. Alterações nesta Política</h2>
       <p>Notificaremos mudanças significativas por email com pelo menos 15 dias de antecedência.</p>
     </div>
   </div>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // Navbar scroll
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 20));
@@ -812,22 +812,3 @@
       document.getElementById('privacyWrap').style.display = 'none';
       document.getElementById(page === 'terms' ? 'termsWrap' : 'privacyWrap').style.display = 'block';
       window.scrollTo(0, 0); closeMenu(); return false;
-    }
-    function showMain() {
-      document.getElementById('mainWrap').style.display = 'block';
-      document.getElementById('termsWrap').style.display = 'none';
-      document.getElementById('privacyWrap').style.display = 'none';
-      window.scrollTo(0, 0); return false;
-    }
-
-    // Form
-    function handleSubmit(e) {
-      e.preventDefault();
-      const btn = e.target.querySelector('.form-submit');
-      btn.textContent = '✓ Mensagem enviada!';
-      btn.style.background = 'var(--accent)';
-      setTimeout(() => { btn.textContent = 'Enviar mensagem →'; btn.style.background = ''; e.target.reset(); }, 3000);
-    }
-  </script>
-</body>
-</html>
