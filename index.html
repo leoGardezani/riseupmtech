@@ -789,6 +789,11 @@
     }, { threshold: 0.08 });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
+    // Fallback: mostra tudo após 1.5s caso o observer não dispare
+    setTimeout(() => {
+      document.querySelectorAll('.reveal:not(.visible)').forEach(el => el.classList.add('visible'));
+    }, 1500);
+
     // Mobile menu
     function toggleMenu() {
       const t = document.getElementById('navToggle');
