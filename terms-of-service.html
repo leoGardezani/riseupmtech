@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Termos de Uso — Rise Up MTech</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #0a0a0a; --white: #fafaf8;
+      --sage-dark: #4a7550; --gray: #6b6b6b; --gray-light: #e8e6e1;
+      --font-display: 'Playfair Display', serif; --font-body: 'DM Sans', sans-serif;
+    }
+    body { font-family: var(--font-body); background: var(--white); color: var(--black); }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 24px 60px; background: rgba(250,250,248,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--gray-light); }
+    .nav-logo { font-family: var(--font-display); font-size: 20px; font-weight: 500; color: var(--black); text-decoration: none; }
+    .nav-logo span { color: var(--sage-dark); }
+    .nav-back { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--gray); text-decoration: none; transition: color 0.2s; }
+    .nav-back:hover { color: var(--black); }
+    .nav-back::before { content: '←'; }
+    .container { max-width: 800px; margin: 0 auto; padding: 120px 60px 80px; }
+    h1 { font-family: var(--font-display); font-size: clamp(32px, 4vw, 48px); font-weight: 500; letter-spacing: -1px; margin-bottom: 12px; }
+    .legal-date { font-size: 13px; color: var(--gray); margin-bottom: 48px; padding-bottom: 24px; border-bottom: 1px solid var(--gray-light); }
+    h2 { font-family: var(--font-display); font-size: 22px; font-weight: 500; margin-top: 40px; margin-bottom: 12px; }
+    p { font-size: 15px; font-weight: 300; color: var(--gray); line-height: 1.8; margin-bottom: 16px; }
+    ul { margin: 12px 0 16px 24px; }
+    ul li { font-size: 15px; font-weight: 300; color: var(--gray); line-height: 1.8; margin-bottom: 8px; }
+    a { color: var(--sage-dark); }
+    footer { padding: 40px 60px; border-top: 1px solid var(--gray-light); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .footer-logo { font-family: var(--font-display); font-size: 16px; font-weight: 500; color: var(--black); text-decoration: none; }
+    .footer-logo span { color: var(--sage-dark); }
+    .footer-links { display: flex; gap: 24px; list-style: none; flex-wrap: wrap; }
+    .footer-links a { font-size: 13px; color: var(--gray); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--black); }
+    .footer-copy { font-size: 13px; color: var(--gray); }
+    @media (max-width: 768px) { nav { padding: 18px 24px; } .container { padding: 90px 24px 60px; } footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; } }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="nav-logo">Rise Up <span>MTech</span></a>
+    <a href="/" class="nav-back">Voltar ao site</a>
+  </nav>
+  <div class="container">
+    <h1>Termos de Uso</h1>
+    <p class="legal-date">Última atualização: 17 de março de 2026</p>
+    <h2>1. Aceitação dos Termos</h2>
+    <p>Ao acessar ou utilizar os serviços da Rise Up MTech ("Plataforma"), você concorda com estes Termos de Uso. Se você não concordar com qualquer parte destes termos, não utilize nossos serviços.</p>
+    <h2>2. Descrição dos Serviços</h2>
+    <p>A Rise Up MTech oferece uma plataforma de automação de mídia digital que permite a criação, gestão e sincronização de campanhas publicitárias em plataformas como Google Ads, Meta Ads e TikTok Ads, integrada com Google Sheets e BigQuery.</p>
+    <h2>3. Uso Permitido</h2>
+    <p>Você concorda em utilizar a Plataforma apenas para fins legais e de acordo com estes Termos. É proibido:</p>
+    <ul>
+      <li>Usar a Plataforma para criar campanhas que violem as políticas das plataformas de anúncios integradas</li>
+      <li>Tentar acessar sistemas ou dados de outros usuários sem autorização</li>
+      <li>Realizar engenharia reversa ou decompilação do software</li>
+      <li>Utilizar a Plataforma para fins fraudulentos ou ilegais</li>
+      <li>Compartilhar credenciais de acesso com terceiros não autorizados</li>
+    </ul>
+    <h2>4. Integrações com Terceiros</h2>
+    <p>A Plataforma integra com serviços de terceiros (Google Ads, Meta Ads, TikTok Ads, BigQuery). O uso desses serviços está sujeito aos respectivos termos e políticas de cada provedor. A Rise Up MTech não se responsabiliza por alterações nas APIs ou políticas dessas plataformas.</p>
+    <h2>5. Dados e Credenciais</h2>
+    <p>Você é responsável pela segurança das credenciais de acesso às plataformas integradas. A Rise Up MTech processa esses dados exclusivamente para a prestação dos serviços contratados e não os compartilha com terceiros, exceto quando exigido por lei.</p>
+    <h2>6. Propriedade Intelectual</h2>
+    <p>Todo o conteúdo da Plataforma, incluindo software, design, textos e logotipos, é de propriedade da Rise Up MTech e está protegido por leis de propriedade intelectual. Os criativos e dados de campanhas permanecem de propriedade do cliente.</p>
+    <h2>7. Limitação de Responsabilidade</h2>
+    <p>A Rise Up MTech não se responsabiliza por danos indiretos, incidentais ou consequentes decorrentes do uso da Plataforma, incluindo perda de receita, dados ou oportunidades de negócio resultantes de falhas nas plataformas de anúncios integradas.</p>
+    <h2>8. Disponibilidade do Serviço</h2>
+    <p>Nos esforçamos para manter a Plataforma disponível continuamente, mas não garantimos disponibilidade ininterrupta. Manutenções programadas serão comunicadas com antecedência sempre que possível.</p>
+    <h2>9. Cancelamento</h2>
+    <p>Você pode cancelar sua conta a qualquer momento. Após o cancelamento, seus dados serão mantidos por 30 dias antes da exclusão definitiva, salvo obrigação legal de retenção.</p>
+    <h2>10. Alterações nos Termos</h2>
+    <p>Reservamo-nos o direito de modificar estes Termos a qualquer momento. Notificaremos os usuários sobre mudanças significativas por email. O uso continuado da Plataforma após as alterações constitui aceitação dos novos Termos.</p>
+    <h2>11. Lei Aplicável</h2>
+    <p>Estes Termos são regidos pelas leis brasileiras. Quaisquer disputas serão resolvidas no foro da comarca de São Paulo, SP.</p>
+    <h2>12. Contato</h2>
+    <p>Para dúvidas sobre estes Termos: <a href="mailto:contato@riseupmtech.com">contato@riseupmtech.com</a></p>
+  </div>
+  <footer>
+    <a href="/" class="footer-logo">Rise Up <span>MTech</span></a>
+    <ul class="footer-links">
+      <li><a href="/">Início</a></li>
+      <li><a href="/terms-of-service.html">Termos de Uso</a></li>
+      <li><a href="/privacy-policy.html">Privacidade</a></li>
+    </ul>
+    <span class="footer-copy">© 2026 Rise Up MTech</span>
+  </footer>
+</body>
+</html>
