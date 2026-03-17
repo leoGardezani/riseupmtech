@@ -372,9 +372,9 @@
     .footer-copy { font-size: 13px; color: var(--gray); }
 
     /* ── LEGAL PAGES ── */
-    .legal-page { display: none; min-height: 100vh; padding: 120px 60px 80px; max-width: 800px; margin: 0 auto; }
-    .legal-page.active { display: block; }
-    .main-content.hidden { display: none; }
+    .legal-page { display: none; min-height: 100vh; padding: 120px 60px 80px; background: var(--white); }
+
+
 
     .legal-page h1 { font-family: var(--font-display); font-size: clamp(32px, 4vw, 48px); font-weight: 500; letter-spacing: -1px; margin-bottom: 12px; }
     .legal-page .legal-date { font-size: 13px; color: var(--gray); margin-bottom: 48px; padding-bottom: 24px; border-bottom: 1px solid var(--gray-light); }
@@ -516,7 +516,7 @@
 
   <!-- NAV -->
   <nav id="navbar">
-    <a href="#" class="nav-logo" onclick="showMain()">Rise Up <span>MTech</span></a>
+    <a href="#" class="nav-logo" onclick="return showMain()">Rise Up <span>MTech</span></a>
     <button class="nav-toggle" id="navToggle" onclick="toggleMenu()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -764,12 +764,12 @@
 
     <!-- FOOTER -->
     <footer>
-      <a href="#" class="footer-logo" onclick="showMain()">Rise Up <span>MTech</span></a>
+      <a href="#" class="footer-logo" onclick="return showMain()">Rise Up <span>MTech</span></a>
       <ul class="footer-links">
         <li><a href="#services">Serviços</a></li>
         <li><a href="#pricing">Planos</a></li>
-        <li><a href="#" onclick="showLegal('terms')">Termos de Uso</a></li>
-        <li><a href="#" onclick="showLegal('privacy')">Privacidade</a></li>
+        <li><a href="#" onclick="return showLegal('terms')">Termos de Uso</a></li>
+        <li><a href="#" onclick="return showLegal('privacy')">Privacidade</a></li>
       </ul>
       <span class="footer-copy">© 2026 Rise Up MTech</span>
     </footer>
@@ -778,7 +778,7 @@
 
   <!-- TERMS OF SERVICE -->
   <div class="legal-page" id="termsPage">
-    <div style="max-width:800px;margin:0 auto;">
+    <div style="max-width:800px;margin:0 auto;width:100%;">
       <button class="legal-back" onclick="showMain()">Voltar ao site</button>
       <h1>Termos de Uso</h1>
       <p class="legal-date">Última atualização: 17 de março de 2026</p>
@@ -830,7 +830,7 @@
 
   <!-- PRIVACY POLICY -->
   <div class="legal-page" id="privacyPage">
-    <div style="max-width:800px;margin:0 auto;">
+    <div style="max-width:800px;margin:0 auto;width:100%;">
       <button class="legal-back" onclick="showMain()">Voltar ao site</button>
       <h1>Política de Privacidade</h1>
       <p class="legal-date">Última atualização: 17 de março de 2026</p>
@@ -941,19 +941,21 @@
 
     // Legal pages
     function showLegal(page) {
-      document.getElementById('mainContent').classList.add('hidden');
-      document.getElementById('termsPage').classList.remove('active');
-      document.getElementById('privacyPage').classList.remove('active');
-      if (page === 'terms')   document.getElementById('termsPage').classList.add('active');
-      if (page === 'privacy') document.getElementById('privacyPage').classList.add('active');
+      document.getElementById('mainContent').style.display = 'none';
+      document.getElementById('termsPage').style.display = 'none';
+      document.getElementById('privacyPage').style.display = 'none';
+      if (page === 'terms')   document.getElementById('termsPage').style.display = 'block';
+      if (page === 'privacy') document.getElementById('privacyPage').style.display = 'block';
       window.scrollTo(0, 0);
       closeMenu();
+      return false;
     }
     function showMain() {
-      document.getElementById('mainContent').classList.remove('hidden');
-      document.getElementById('termsPage').classList.remove('active');
-      document.getElementById('privacyPage').classList.remove('active');
+      document.getElementById('mainContent').style.display = 'block';
+      document.getElementById('termsPage').style.display = 'none';
+      document.getElementById('privacyPage').style.display = 'none';
       window.scrollTo(0, 0);
+      return false;
     }
 
     // Handle direct URL hash for legal pages
