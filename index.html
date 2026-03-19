@@ -193,27 +193,42 @@
 
     /* ── PRICING ── */
     .pricing { padding: 120px 60px; background: var(--bg-2); }
-    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 64px; }
-    .pricing-card { background: var(--white); border-radius: 16px; padding: 40px; border: 1.5px solid var(--border); position: relative; transition: all 0.25s; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 64px; }
+    .pricing-card { background: var(--white); border-radius: 16px; padding: 40px; border: 1.5px solid var(--border); position: relative; transition: all 0.25s; display: flex; flex-direction: column; }
     .pricing-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.08); }
     .pricing-card.featured { background: var(--ink); border-color: var(--ink); color: var(--white); }
     .pricing-featured-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: var(--white); font-size: 11px; font-weight: 600; padding: 4px 16px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
-    .pricing-tier { font-size: 12px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 20px; }
+    .pricing-tier { font-size: 12px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 12px; }
     .pricing-card.featured .pricing-tier { color: rgba(255,255,255,0.45); }
-    .pricing-amount { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 52px; font-weight: 700; letter-spacing: -2.5px; line-height: 1; margin-bottom: 6px; }
-    .pricing-period { font-size: 13px; color: var(--ink-muted); margin-bottom: 32px; }
+    .pricing-tag { display: inline-block; background: var(--accent-lt); color: var(--accent); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 100px; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 20px; }
+    .pricing-card.featured .pricing-tag { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+    .pricing-name { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .pricing-desc { font-size: 14px; font-weight: 300; color: var(--ink-soft); line-height: 1.6; margin-bottom: 28px; min-height: 60px; }
+    .pricing-card.featured .pricing-desc { color: rgba(255,255,255,0.6); }
+    .pricing-amount-wrap { margin-bottom: 8px; }
+    .pricing-amount { font-size: 42px; font-weight: 700; letter-spacing: -2px; line-height: 1; }
+    .pricing-amount small { font-size: 18px; font-weight: 400; letter-spacing: 0; }
+    .pricing-period { font-size: 13px; color: var(--ink-muted); margin-bottom: 28px; }
     .pricing-card.featured .pricing-period { color: rgba(255,255,255,0.4); }
-    .pricing-divider { height: 1px; background: var(--border); margin-bottom: 28px; }
+    .pricing-divider { height: 1px; background: var(--border); margin-bottom: 24px; }
     .pricing-card.featured .pricing-divider { background: rgba(255,255,255,0.1); }
-    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 13px; margin-bottom: 36px; }
+    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 11px; margin-bottom: 32px; flex: 1; }
     .pricing-features li { font-size: 14px; font-weight: 300; display: flex; gap: 10px; align-items: flex-start; }
     .pricing-features li::before { content: '✓'; font-size: 12px; font-weight: 700; color: var(--accent); margin-top: 2px; flex-shrink: 0; }
     .pricing-card.featured .pricing-features li { color: rgba(255,255,255,0.8); }
     .pricing-card.featured .pricing-features li::before { color: #7dcf8e; }
-    .pricing-btn { display: block; width: 100%; padding: 13px; border-radius: 8px; font-size: 15px; font-weight: 500; text-align: center; text-decoration: none; cursor: pointer; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; transition: all 0.2s; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); }
+    .pricing-tiers { display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px; }
+    .pricing-tier-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-2); border-radius: 8px; font-size: 13px; }
+    .pricing-card.featured .pricing-tier-row { background: rgba(255,255,255,0.08); }
+    .pricing-tier-row span:first-child { color: var(--ink-soft); font-weight: 400; }
+    .pricing-card.featured .pricing-tier-row span:first-child { color: rgba(255,255,255,0.6); }
+    .pricing-tier-row span:last-child { font-weight: 600; color: var(--ink); }
+    .pricing-card.featured .pricing-tier-row span:last-child { color: var(--white); }
+    .pricing-btn { display: block; width: 100%; padding: 13px; border-radius: 8px; font-size: 15px; font-weight: 500; text-align: center; text-decoration: none; cursor: pointer; font-family: var(--ff-body); transition: all 0.2s; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); margin-top: auto; }
     .pricing-btn:hover { background: var(--ink); color: var(--white); }
     .pricing-card.featured .pricing-btn { background: var(--white); color: var(--ink); border-color: var(--white); }
     .pricing-card.featured .pricing-btn:hover { background: var(--accent-lt); border-color: var(--accent-lt); }
+    @media (max-width: 768px) { .pricing-grid { grid-template-columns: 1fr; } .pricing { padding: 72px 24px; } }
 
     /* ── CONTACT ── */
     .contact { padding: 120px 60px; background: var(--white); }
@@ -263,7 +278,7 @@
     /* ── RESPONSIVE ── */
     @media (max-width: 1024px) {
       nav { padding: 0 32px; }
-      .hero, .logos, .problem, .how, .features, .platforms, .pricing, .contact { padding-left: 32px; padding-right: 32px; }
+      .hero, .logos, .problem, .how, .features, .platforms,
       footer { padding: 36px 32px; }
       .problem-grid { grid-template-columns: 1fr; gap: 48px; }
       .how-grid { grid-template-columns: 1fr 1fr; }
@@ -290,11 +305,10 @@
       .hero::before { display: none; }
       .hero-metrics { gap: 32px; }
       .logos { padding: 32px 24px; }
-      .problem, .how, .features, .platforms, .pricing, .contact { padding: 72px 24px; }
+      .problem, .how, .features, .platforms,
       .how-grid { grid-template-columns: 1fr; }
       .features-grid { grid-template-columns: 1fr; }
       .platforms-grid { grid-template-columns: 1fr; }
-      .pricing-grid { grid-template-columns: 1fr; max-width: 420px; }
       footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
       .form-row { grid-template-columns: 1fr; }
       .hero-actions { flex-direction: column; align-items: stretch; }
@@ -315,7 +329,8 @@
       <li><a href="#how" onclick="closeMenu()">Como funciona</a></li>
       <li><a href="#features" onclick="closeMenu()">Funcionalidades</a></li>
       <li><a href="#platforms" onclick="closeMenu()">Plataformas</a></li>
-      <li><a href="#pricing" onclick="closeMenu()">Planos</a></li>
+      
+      <li><a href="#pricing" onclick="closeMenu()">Produtos</a></li>
       <li><a href="#contact" class="nav-cta" onclick="closeMenu()">Fale conosco</a></li>
     </ul>
   </nav>
@@ -588,58 +603,104 @@
     <!-- PRICING -->
     <section class="pricing" id="pricing">
       <div class="reveal">
-        <div class="section-eyebrow">Planos</div>
-        <h2 class="section-h">Preço simples,<br>valor claro</h2>
-        <p class="section-p">Escolha o plano para o volume da sua operação. Sem taxas por implementação, sem surpresas.</p>
+        <div class="section-eyebrow">Produtos & Preços</div>
+        <h2 class="section-h">Escolha o módulo<br>certo para sua operação</h2>
+        <p class="section-p">Do ETL à implementação completa — produtos modulares que crescem com a sua agência.</p>
       </div>
       <div class="pricing-grid">
+
+        <!-- Chrome ETL -->
         <div class="pricing-card reveal">
-          <div class="pricing-tier">Starter</div>
-          <div class="pricing-amount">R$499</div>
-          <div class="pricing-period">por mês</div>
+          <div class="pricing-tier">Extração de dados</div>
+          <div class="pricing-tag">Chrome Extension</div>
+          <div class="pricing-name">Rise Up Chrome ETL</div>
+          <div class="pricing-desc">Extração de dados de mídia direto no seu navegador. 9 plataformas integradas, sem precisar de engenharia.</div>
+          <div class="pricing-tiers">
+            <div class="pricing-tier-row"><span>1 conta</span><span>R$250/mês</span></div>
+            <div class="pricing-tier-row"><span>5 contas</span><span>R$500/mês</span></div>
+            <div class="pricing-tier-row"><span>10+ contas</span><span>R$1.000/mês</span></div>
+          </div>
           <div class="pricing-divider"></div>
           <ul class="pricing-features">
-            <li>1 conta de anunciante</li>
-            <li>Google Ads — Display e Search</li>
-            <li>Até 50 criativos por mês</li>
-            <li>Sincronização com Sheets</li>
-            <li>Suporte por email</li>
+            <li>Google Ads, Meta, DV360, TikTok</li>
+            <li>Pinterest, Amazon Ads, LinkedIn Ads</li>
+            <li>Google Analytics, Mercado Livre Ads</li>
+            <li>Export direto para Sheets e Excel</li>
           </ul>
           <a href="#contact" class="pricing-btn">Começar</a>
         </div>
+
+        <!-- Desdobramento de Peças -->
+        <div class="pricing-card reveal">
+          <div class="pricing-tier">Criativo</div>
+          <div class="pricing-tag">IA Generativa</div>
+          <div class="pricing-name">Desdobramento de Peças</div>
+          <div class="pricing-desc">Upload de um KV — a IA desdobra automaticamente em todos os formatos: IAB, Meta, TikTok, OOH e rádio.</div>
+          <div class="pricing-amount-wrap">
+            <div class="pricing-amount"><small>R$</small>5.000</div>
+          </div>
+          <div class="pricing-period">por mês · contas ilimitadas</div>
+          <div class="pricing-divider"></div>
+          <ul class="pricing-features">
+            <li>Todos os formatos IAB (display)</li>
+            <li>Formatos Meta (feed, stories, reels)</li>
+            <li>Formatos TikTok (in-feed, topview)</li>
+            <li>OOH e rádio</li>
+            <li>Contas ilimitadas</li>
+          </ul>
+          <a href="#contact" class="pricing-btn">Começar</a>
+        </div>
+
+        <!-- Implementação -->
         <div class="pricing-card featured reveal">
           <div class="pricing-featured-badge">Mais popular</div>
-          <div class="pricing-tier">Growth</div>
-          <div class="pricing-amount">R$1.299</div>
-          <div class="pricing-period">por mês</div>
+          <div class="pricing-tier">Automação</div>
+          <div class="pricing-tag">ETL + Implementação</div>
+          <div class="pricing-name">Módulo de Implementação</div>
+          <div class="pricing-desc">Tudo do ETL mais automação completa de campanhas em todas as plataformas de mídia.</div>
+          <div class="pricing-tiers">
+            <div class="pricing-tier-row"><span>1 conta</span><span>R$5.000/mês</span></div>
+            <div class="pricing-tier-row"><span>3 contas</span><span>R$10.000/mês</span></div>
+            <div class="pricing-tier-row"><span>5+ contas</span><span>Custom</span></div>
+          </div>
           <div class="pricing-divider"></div>
           <ul class="pricing-features">
-            <li>Até 5 contas de anunciante</li>
-            <li>Google + Meta + TikTok</li>
-            <li>Até 200 criativos por mês</li>
-            <li>BigQuery integrado</li>
-            <li>Dashboard de performance</li>
-            <li>Suporte prioritário</li>
-          </ul>
-          <a href="#contact" class="pricing-btn">Começar</a>
-        </div>
-        <div class="pricing-card reveal">
-          <div class="pricing-tier">Enterprise</div>
-          <div class="pricing-amount">Custom</div>
-          <div class="pricing-period">sob consulta</div>
-          <div class="pricing-divider"></div>
-          <ul class="pricing-features">
-            <li>Contas ilimitadas</li>
-            <li>Todas as plataformas</li>
-            <li>Criativos ilimitados</li>
-            <li>Integrações customizadas</li>
-            <li>SLA garantido</li>
-            <li>Gerente de conta dedicado</li>
+            <li>Tudo do Chrome ETL incluso</li>
+            <li>Criação automática de campanhas</li>
+            <li>Google, Meta, TikTok, DV360</li>
+            <li>Pinterest, Amazon, LinkedIn, ML Ads</li>
+            <li>Sincronização BQ em tempo real</li>
+            <li>Dashboard de operação</li>
           </ul>
           <a href="#contact" class="pricing-btn">Falar com o time</a>
         </div>
+
+        <!-- Módulo Completo -->
+        <div class="pricing-card reveal">
+          <div class="pricing-tier">Solução completa</div>
+          <div class="pricing-tag">Enterprise</div>
+          <div class="pricing-name">Módulo Completo</div>
+          <div class="pricing-desc">Implementação + Reports automatizados + Desdobramento de peças + BQ + Taxonomia. Tudo em um só lugar.</div>
+          <div class="pricing-amount-wrap">
+            <div class="pricing-amount" style="font-size:32px;">A partir de</div>
+            <div class="pricing-amount"><small>R$</small>25.000</div>
+          </div>
+          <div class="pricing-period">por conta · negociação direta</div>
+          <div class="pricing-divider"></div>
+          <ul class="pricing-features">
+            <li>Tudo dos módulos anteriores</li>
+            <li>Report engine (PPT → React dinâmico)</li>
+            <li>BigQuery como fonte única de verdade</li>
+            <li>Taxonomia automatizada</li>
+            <li>Gerente de conta dedicado</li>
+            <li>SLA garantido</li>
+          </ul>
+          <a href="#contact" class="pricing-btn">Falar com o time</a>
+        </div>
+
       </div>
     </section>
+
 
     <!-- CONTACT -->
     <section class="contact" id="contact">
@@ -680,7 +741,7 @@
       <a href="#" class="footer-logo" onclick="return showMain()">Rise Up <em>MTech</em></a>
       <ul class="footer-links">
         <li><a href="#how">Como funciona</a></li>
-        <li><a href="#pricing">Planos</a></li>
+        
         <li><a href="#" onclick="return showLegal('terms')">Termos de Uso</a></li>
         <li><a href="#" onclick="return showLegal('privacy')">Privacidade</a></li>
       </ul>
