@@ -1298,6 +1298,432 @@ function initChartsCamp(){
   });
 }
 
+
+// ── REPO DATA ──
+const REPO_ASSETS = [
+  {id:1,name:'Banner_300x250_V1',camp:'Awareness Q1',plat:'Google Ads',type:'image',date:'01 Mar 2025',
+   img:'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&h=338&fit=crop',
+   dims:'300×250px',size:'48KB',fmt:'JPG',version:'v1',kv:'KV_Awareness_Q1',tags:['IAB','Display','300x250'],approved:true},
+  {id:2,name:'Banner_728x90_V1',camp:'Awareness Q1',plat:'Google Ads',type:'image',date:'01 Mar 2025',
+   img:'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=728&h=90&fit=crop',
+   dims:'728×90px',size:'32KB',fmt:'JPG',version:'v1',kv:'KV_Awareness_Q1',tags:['IAB','Leaderboard'],approved:true},
+  {id:3,name:'Banner_160x600_V1',camp:'Awareness Q1',plat:'Google Ads',type:'image',date:'02 Mar 2025',
+   img:'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=160&h=600&fit=crop',
+   dims:'160×600px',size:'38KB',fmt:'JPG',version:'v1',kv:'KV_Awareness_Q1',tags:['IAB','Skyscraper'],approved:true},
+  {id:4,name:'Responsive_HTML5_V1',camp:'Awareness Q1',plat:'Google Ads',type:'html5',date:'03 Mar 2025',
+   img:'https://images.unsplash.com/photo-1558655146-d09347e92766?w=600&h=338&fit=crop',
+   dims:'Responsivo',size:'120KB',fmt:'HTML5 ZIP',version:'v1',kv:'KV_Awareness_Q1',tags:['HTML5','Animado'],approved:true},
+  {id:5,name:'Feed_1080x1080_V1',camp:'Performance — Leads',plat:'Meta Ads',type:'image',date:'04 Mar 2025',
+   img:'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=600&h=600&fit=crop',
+   dims:'1080×1080px',size:'210KB',fmt:'JPG',version:'v1',kv:'KV_Leads_V1',tags:['Meta','Feed','1:1'],approved:true},
+  {id:6,name:'Stories_1080x1920_V1',camp:'Performance — Leads',plat:'Meta Ads',type:'image',date:'04 Mar 2025',
+   img:'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=338&h=600&fit=crop',
+   dims:'1080×1920px',size:'284KB',fmt:'JPG',version:'v2',kv:'KV_Leads_V1',tags:['Meta','Stories','9:16'],approved:true},
+  {id:7,name:'Carrossel_1080x1080_V2',camp:'Retargeting',plat:'Meta Ads',type:'image',date:'05 Mar 2025',
+   img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=600&fit=crop',
+   dims:'1080×1080px',size:'196KB',fmt:'JPG',version:'v2',kv:'KV_Retargeting',tags:['Meta','Carrossel'],approved:true},
+  {id:8,name:'Reels_1080x1920_V1',camp:'Retargeting',plat:'Meta Ads',type:'video',date:'06 Mar 2025',
+   img:'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=338&h=600&fit=crop',
+   dims:'1080×1920px',size:'8,4MB',fmt:'MP4 · 15s',version:'v1',kv:'KV_Retargeting',tags:['Meta','Reels','Vídeo'],approved:true},
+  {id:9,name:'TopView_1080x1920_V1',camp:'TikTok — Gen Z',plat:'TikTok Ads',type:'video',date:'07 Mar 2025',
+   img:'https://images.unsplash.com/photo-1558655146-d09347e92766?w=338&h=600&fit=crop',
+   dims:'1080×1920px',size:'12,2MB',fmt:'MP4 · 30s',version:'v1',kv:'KV_GenZ',tags:['TikTok','TopView','Vídeo'],approved:true},
+  {id:10,name:'InFeed_1080x1920_V1',camp:'TikTok — Gen Z',plat:'TikTok Ads',type:'video',date:'07 Mar 2025',
+   img:'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=338&h=600&fit=crop',
+   dims:'1080×1920px',size:'9,8MB',fmt:'MP4 · 15s',version:'v1',kv:'KV_GenZ',tags:['TikTok','InFeed','Vídeo'],approved:true},
+  {id:11,name:'PreRoll_1920x1080_V1',camp:'Performance — Leads',plat:'YouTube',type:'video',date:'08 Mar 2025',
+   img:'https://images.unsplash.com/photo-1551817958-11e40576f80e?w=600&h=338&fit=crop',
+   dims:'1920×1080px',size:'18,4MB',fmt:'MP4 · 15s',version:'v1',kv:'KV_Leads_V1',tags:['YouTube','PreRoll','Vídeo'],approved:true},
+  {id:12,name:'Bumper_1920x1080_V1',camp:'Awareness Q1',plat:'YouTube',type:'video',date:'08 Mar 2025',
+   img:'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&h=338&fit=crop',
+   dims:'1920×1080px',size:'6,2MB',fmt:'MP4 · 6s',version:'v1',kv:'KV_Awareness_Q1',tags:['YouTube','Bumper','Vídeo'],approved:true},
+  {id:13,name:'OOH_Outdoor_6x3m',camp:'Awareness Q1',plat:'OOH',type:'image',date:'10 Mar 2025',
+   img:'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&h=300&fit=crop',
+   dims:'6000×3000px',size:'14MB',fmt:'TIFF 300dpi',version:'v1',kv:'KV_Awareness_Q1',tags:['OOH','Outdoor'],approved:true},
+  {id:14,name:'OOH_MidiaMóvel_V1',camp:'Awareness Q1',plat:'OOH',type:'image',date:'10 Mar 2025',
+   img:'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop',
+   dims:'3000×2000px',size:'8,4MB',fmt:'TIFF 300dpi',version:'v1',kv:'KV_Awareness_Q1',tags:['OOH','Mídia Móvel'],approved:true},
+  {id:15,name:'Radio_30s_V1',camp:'Awareness Q1',plat:'Rádio',type:'audio',date:'12 Mar 2025',
+   img:'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&h=338&fit=crop',
+   dims:'—',size:'2,8MB',fmt:'MP3 · 30s · 320kbps',version:'v1',kv:'KV_Awareness_Q1',tags:['Rádio','30s'],approved:true},
+  {id:16,name:'Radio_15s_V1',camp:'Performance — Leads',plat:'Rádio',type:'audio',date:'12 Mar 2025',
+   img:'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&h=338&fit=crop',
+   dims:'—',size:'1,4MB',fmt:'MP3 · 15s · 320kbps',version:'v1',kv:'KV_Leads_V1',tags:['Rádio','15s'],approved:true},
+];
+
+const PENDING_ASSETS = [
+  {id:101,name:'Feed_1080x1080_V3',camp:'Performance — Leads',plat:'Meta Ads',type:'image',date:'25 Mar 2025',
+   img:'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=600&fit=crop',
+   dims:'1080×1080px',size:'198KB',fmt:'JPG',version:'v3',kv:'KV_Leads_V2',
+   tags:['Meta','Feed','1:1'],submittedBy:'IA Desdobramento',submittedAt:'25 Mar 2025 14:32'},
+  {id:102,name:'Stories_1080x1920_V3',camp:'Performance — Leads',plat:'Meta Ads',type:'image',date:'25 Mar 2025',
+   img:'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=338&h=600&fit=crop',
+   dims:'1080×1920px',size:'242KB',fmt:'JPG',version:'v3',kv:'KV_Leads_V2',
+   tags:['Meta','Stories','9:16'],submittedBy:'IA Desdobramento',submittedAt:'25 Mar 2025 14:32'},
+  {id:103,name:'Banner_300x250_V2',camp:'Awareness Q1',plat:'Google Ads',type:'image',date:'24 Mar 2025',
+   img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=338&fit=crop',
+   dims:'300×250px',size:'52KB',fmt:'JPG',version:'v2',kv:'KV_Awareness_Q2',
+   tags:['IAB','Display'],submittedBy:'IA Desdobramento',submittedAt:'24 Mar 2025 09:15'},
+  {id:104,name:'TopView_1080x1920_V2',camp:'TikTok — Gen Z',plat:'TikTok Ads',type:'video',date:'23 Mar 2025',
+   img:'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=338&h=600&fit=crop',
+   dims:'1080×1920px',size:'14,8MB',fmt:'MP4 · 30s',version:'v2',kv:'KV_GenZ_V2',
+   tags:['TikTok','TopView','Vídeo'],submittedBy:'IA Desdobramento',submittedAt:'23 Mar 2025 16:44'},
+  {id:105,name:'Radio_30s_V2',camp:'Awareness Q1',plat:'Rádio',type:'audio',date:'22 Mar 2025',
+   img:'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&h=338&fit=crop',
+   dims:'—',size:'2,9MB',fmt:'MP3 · 30s · 320kbps',version:'v2',kv:'KV_Awareness_Q2',
+   tags:['Rádio','30s'],submittedBy:'IA Desdobramento',submittedAt:'22 Mar 2025 11:20'},
+];
+
+let repoTypeFilter = '';
+
+function typeIcon(t){return {image:'🖼',video:'▶',html5:'⟨/⟩',audio:'♪'}[t]||'📄';}
+function typeLabel(t){return {image:'Imagem',video:'Vídeo',html5:'HTML5',audio:'Áudio'}[t]||t;}
+
+function setType(type,el){
+  repoTypeFilter=type;
+  document.querySelectorAll('.repo-type-pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  filterRepo();
+}
+
+function filterRepo(){
+  const camp=document.getElementById('rf-camp').value;
+  const plat=document.getElementById('rf-plat').value;
+  const filtered=REPO_ASSETS.filter(a=>(!camp||a.camp===camp)&&(!plat||a.plat===plat)&&(!repoTypeFilter||a.type===repoTypeFilter));
+  renderRepo(filtered);
+}
+
+function renderRepo(assets){
+  const grid=document.getElementById('repoGrid');
+  const cnt=document.getElementById('repo-count');
+  if(cnt) cnt.textContent=assets.length+' asset'+(assets.length!==1?'s':'');
+  if(!assets.length){grid.innerHTML='<div style="grid-column:1/-1;padding:60px;text-align:center;background:var(--bg)"><div style="font-family:var(--fh);font-size:18px;text-transform:uppercase;color:var(--ink-muted);font-weight:700">Nenhum criativo encontrado</div></div>';return;}
+  grid.innerHTML=assets.map(a=>`
+    <div class="repo-card">
+      <div class="repo-thumb-wrap">
+        <img class="repo-thumb" src="${a.img}" alt="${a.name}" loading="lazy" style="${a.type==='audio'?'filter:grayscale(1);opacity:.5;':''}" onerror="this.style.background='var(--bg3)'">
+        <div class="type-tag">${typeIcon(a.type)} ${typeLabel(a.type)}</div>
+        <div class="approved-tag">✓ Aprovado</div>
+        <div class="repo-actions">
+          <button class="repo-action" onclick="downloadAsset(${a.id})">↓ Download</button>
+          <button class="repo-action" onclick="openDetail(${a.id})">⊕ Detalhes</button>
+          <button class="repo-action" onclick="copyLink(${a.id})">⎘ Link</button>
+          <button class="repo-action" onclick="sendToPlatform(${a.id})">↑ Enviar</button>
+        </div>
+      </div>
+      <div class="repo-info">
+        <div class="repo-name">${a.name}</div>
+        <div class="repo-meta">${a.plat} · ${a.fmt} · ${a.size} · ${a.date}</div>
+        <div class="repo-tags">${a.tags.map(t=>`<span class="repo-tag">${t}</span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderPending(){
+  const grid=document.getElementById('pendingGrid');
+  const cnt=document.getElementById('pending-count');
+  if(!grid) return;
+  if(cnt) cnt.textContent=PENDING_ASSETS.length+' aguardando';
+  grid.innerHTML=PENDING_ASSETS.map(a=>`
+    <div class="repo-card" style="outline:2px solid #f59e0b;outline-offset:-2px">
+      <div class="repo-thumb-wrap">
+        <img class="repo-thumb" src="${a.img}" alt="${a.name}" loading="lazy" style="${a.type==='audio'?'filter:grayscale(1);opacity:.5;':''}" onerror="this.style.background='var(--bg3)'">
+        <div class="type-tag">${typeIcon(a.type)} ${typeLabel(a.type)}</div>
+        <div style="position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;padding:3px 8px;background:#f59e0b;color:#fff">⏳ Pendente</div>
+      </div>
+      <div class="repo-info">
+        <div class="repo-name">${a.name}</div>
+        <div class="repo-meta">${a.plat} · ${a.fmt} · ${a.size}</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:8px">Por ${a.submittedBy} · ${a.submittedAt}</div>
+        <div class="repo-tags">${a.tags.map(t=>`<span class="repo-tag">${t}</span>`).join('')}</div>
+        <div style="display:flex;gap:6px;margin-top:12px">
+          <button onclick="approveAsset(${a.id})" style="flex:1;padding:8px;background:var(--ink);color:#fff;border:none;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">✓ Aprovar</button>
+          <button onclick="rejectAsset(${a.id})" style="flex:1;padding:8px;background:transparent;color:var(--danger);border:1px solid #fecaca;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">✕ Reprovar</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function approveAsset(id){
+  const idx=PENDING_ASSETS.findIndex(a=>a.id===id);
+  if(idx<0) return;
+  const a={...PENDING_ASSETS[idx],approved:true};
+  delete a.submittedBy; delete a.submittedAt;
+  REPO_ASSETS.push(a);
+  PENDING_ASSETS.splice(idx,1);
+  renderPending(); filterRepo();
+  toast('✓ '+a.name+' aprovado','ok');
+}
+function rejectAsset(id){
+  const idx=PENDING_ASSETS.findIndex(a=>a.id===id);
+  if(idx<0) return;
+  const name=PENDING_ASSETS[idx].name;
+  PENDING_ASSETS.splice(idx,1);
+  renderPending();
+  toast('✕ '+name+' reprovado','er');
+}
+
+function openDetail(id){
+  const a=REPO_ASSETS.find(x=>x.id===id);
+  if(!a) return;
+  document.getElementById('dm-title').textContent=a.name;
+  document.getElementById('dm-meta').textContent=a.plat+' · '+a.camp+' · '+a.version.toUpperCase();
+  const img=document.getElementById('dm-img');
+  img.src=a.img; img.alt=a.name;
+  img.style.filter=a.type==='audio'?'grayscale(1)':'';
+  document.getElementById('dm-specs').innerHTML=[{l:'Dimensões',v:a.dims},{l:'Formato',v:a.fmt},{l:'Tamanho',v:a.size}].map(s=>`<div class="detail-spec"><div class="detail-spec-lbl">${s.l}</div><div class="detail-spec-val">${s.v}</div></div>`).join('');
+  document.getElementById('dm-specs2').innerHTML=[{l:'KV Origem',v:a.kv},{l:'Versão',v:a.version.toUpperCase()},{l:'Upload',v:a.date}].map(s=>`<div class="detail-spec"><div class="detail-spec-lbl">${s.l}</div><div class="detail-spec-val">${s.v}</div></div>`).join('');
+  document.getElementById('dm-actions').innerHTML=`<button class="detail-btn" onclick="downloadAsset(${id})">↓ Download</button><button class="detail-btn ghost" onclick="copyLink(${id})">⎘ Copiar link</button><button class="detail-btn ghost" onclick="sendToPlatform(${id})">↑ Enviar para ${a.plat}</button>`;
+  document.getElementById('detailModal').classList.add('open');
+}
+function closeDetail(e){if(e.target===document.getElementById('detailModal'))closeDetailBtn();}
+function closeDetailBtn(){document.getElementById('detailModal').classList.remove('open');}
+function downloadAsset(id){const a=REPO_ASSETS.find(x=>x.id===id);toast('Baixando '+a.name,'ok');}
+function copyLink(id){const a=REPO_ASSETS.find(x=>x.id===id);toast('Link copiado: '+a.name,'ok');}
+function sendToPlatform(id){const a=REPO_ASSETS.find(x=>x.id===id);toast('Enviando para '+a.plat+'...','ok');}
+
+// ── AUDIENCE DATA ──
+const AUD_DATA=[
+  {name:'Interesse — Tecnologia',plat:'Meta Ads',size:'2,4M pessoas',criativos:[
+    {name:'Feed_1080x1080',ctr:'4,2%',cpm:'R$11',leads:'420',score:95},
+    {name:'Stories_1080x1920',ctr:'3,8%',cpm:'R$10',leads:'380',score:88},
+    {name:'Carrossel_V2',ctr:'5,1%',cpm:'R$10',leads:'510',score:99},
+  ]},
+  {name:'Remarketing — Site',plat:'Meta Ads',size:'180k pessoas',criativos:[
+    {name:'Feed_1080x1080',ctr:'6,8%',cpm:'R$19',leads:'840',score:99},
+    {name:'Carrossel_V2',ctr:'7,2%',cpm:'R$18',leads:'920',score:99},
+    {name:'Stories_1080x1920',ctr:'4,9%',cpm:'R$20',leads:'340',score:80},
+  ]},
+  {name:'Lookalike 1% — Leads',plat:'Meta Ads',size:'480k pessoas',criativos:[
+    {name:'Stories_1080x1920',ctr:'2,8%',cpm:'R$12',leads:'280',score:72},
+    {name:'Feed_1080x1080',ctr:'2,1%',cpm:'R$13',leads:'210',score:58},
+    {name:'Carrossel_V2',ctr:'3,4%',cpm:'R$11',leads:'340',score:80},
+  ]},
+  {name:'In-Market — Software B2B',plat:'Google Ads',size:'820k pessoas',criativos:[
+    {name:'Banner_300x250_V1',ctr:'2,4%',cpm:'R$15',leads:'240',score:68},
+    {name:'Banner_728x90',ctr:'1,8%',cpm:'R$14',leads:'180',score:52},
+  ]},
+  {name:'Gen Z — 18-24',plat:'TikTok Ads',size:'3,2M pessoas',criativos:[
+    {name:'TopView_TK',ctr:'1,8%',cpm:'R$7',leads:'88',score:62},
+    {name:'InFeed_TK_V1',ctr:'1,4%',cpm:'R$8',leads:'66',score:48},
+  ]},
+];
+
+const HEATMAP_CREATIVES=['Feed_1080','Stories','Carrossel','Banner_300','TopView_TK'];
+const HEATMAP_DATA=[[4.2,3.8,5.1,null,null],[6.8,4.9,7.2,null,null],[2.1,2.8,3.4,null,null],[null,null,null,2.4,null],[null,null,null,null,1.8]];
+const HEATMAP_AUDS=['Interesse — Tec.','Remarketing','Lookalike 1%','In-Market B2B','Gen Z 18-24'];
+
+const TOP3_AUD=[
+  {name:'Carrossel_V2',plat:'Meta Ads',img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=400&fit=crop',audience:'Remarketing — Site',aud_size:'180k pessoas',ctr:'7,2%',cpm:'R$18',leads:'920',score:99,insight:'Melhor combinação do período. Alta intenção + formato carrossel geram CTR 3× acima da média.'},
+  {name:'Feed_1080x1080',plat:'Meta Ads',img:'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=400&h=400&fit=crop',audience:'Remarketing — Site',aud_size:'180k pessoas',ctr:'6,8%',cpm:'R$19',leads:'840',score:99,insight:'Feed estático performa bem em audiências quentes de remarketing.'},
+  {name:'Carrossel_V2',plat:'Meta Ads',img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=400&fit=crop',audience:'Interesse — Tecnologia',aud_size:'2,4M pessoas',ctr:'5,1%',cpm:'R$10',leads:'510',score:95,insight:'Melhor custo-benefício: audiência grande + CPM baixo + CTR alto. Alto potencial de escala.'},
+];
+
+const KPI_DATA=[
+  {lbl:'Investimento',val:'R$284k',delta:'↑ 12%',dir:'up',target:'Meta R$310k · 91,6%',feat:true},
+  {lbl:'Impressões',  val:'18,4M', delta:'↑ 8%', dir:'up',target:'Meta 20M · 92%'},
+  {lbl:'Cliques',     val:'342k',  delta:'↓ 3%', dir:'dn',target:'Meta 380k · 90%'},
+  {lbl:'Leads',       val:'4.820', delta:'↑ 18%',dir:'up',target:'Meta 5.000 · 96,4%'},
+  {lbl:'CPL',         val:'R$58,9',delta:'↑ efic.',dir:'up',target:'Meta R$65'},
+  {lbl:'ROAS',        val:'3,4x',  delta:'↑ 0,4x',dir:'up',target:'Meta 3,0x ✓'},
+];
+
+function renderOverviewKPIs(){
+  const el=document.getElementById('ov-kpis');
+  if(!el) return;
+  el.innerHTML=KPI_DATA.map(k=>`<div class="kpi ${k.feat?'feat':''}"><div class="kpi-lbl">${k.lbl}</div><div class="kpi-val">${k.val}</div><div class="kpi-delta ${k.dir}">${k.delta}</div><div class="kpi-target">${k.target}</div></div>`).join('');
+}
+
+function renderOverviewTop3(){
+  const el=document.getElementById('ov-top3');
+  if(!el) return;
+  const cards = TOP3_AUD.map((t,i)=>{
+    const d=document.createElement('div');
+    d.style.cssText='background:var(--bg);overflow:hidden';
+    d.innerHTML=[
+      '<div style="position:relative">',
+        '<img src="'+t.img+'" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block" loading="lazy">',
+        '<div style="position:absolute;top:10px;left:10px;background:var(--ink);color:#fff;font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:3px 10px">#'+(i+1)+'</div>',
+        '<div style="position:absolute;top:10px;right:10px;background:var(--bg);font-family:var(--mono);font-size:9px;color:var(--ink);padding:3px 8px;border:1px solid var(--border)">Score '+t.score+'</div>',
+      '</div>',
+      '<div style="padding:18px 20px">',
+        '<div style="font-family:var(--fh);font-weight:700;font-size:16px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">'+t.name+'</div>',
+        '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);letter-spacing:.08em;margin-bottom:12px">'+t.plat+'</div>',
+        '<div style="background:var(--bg2);padding:10px 12px;margin-bottom:12px;border-left:2px solid var(--ink)">',
+          '<div style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:4px">// audiência</div>',
+          '<div style="font-size:12px;font-weight:600">'+t.audience+'</div>',
+          '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:2px">'+t.aud_size+'</div>',
+        '</div>',
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px">',
+          '<div style="background:var(--bg2);padding:8px 10px"><div style="font-family:var(--mono);font-size:8px;color:var(--ink-muted)">CTR</div><div style="font-family:var(--fh);font-weight:700;font-size:18px">'+t.ctr+'</div></div>',
+          '<div style="background:var(--bg2);padding:8px 10px"><div style="font-family:var(--mono);font-size:8px;color:var(--ink-muted)">LEADS</div><div style="font-family:var(--fh);font-weight:700;font-size:18px">'+t.leads+'</div></div>',
+          '<div style="background:var(--bg2);padding:8px 10px"><div style="font-family:var(--mono);font-size:8px;color:var(--ink-muted)">CPM</div><div style="font-family:var(--fh);font-weight:700;font-size:18px">'+t.cpm+'</div></div>',
+        '</div>',
+        '<div style="font-size:12px;color:var(--ink-soft);line-height:1.6;border-top:1px solid var(--border-d);padding-top:10px">'+t.insight+'</div>',
+      '</div>'
+    ].join('');
+    return d;
+  });
+  el.innerHTML='';
+  cards.forEach(card=>el.appendChild(card));
+}
+
+function renderOverviewStatus(){
+  document.getElementById('ov-stI').textContent=STATUS_DATA.filter(s=>s.status==='implemented').length;
+  document.getElementById('ov-stP').textContent=STATUS_DATA.filter(s=>s.status==='pending').length;
+  document.getElementById('ov-stE').textContent=STATUS_DATA.filter(s=>s.status==='error').length;
+  document.getElementById('ov-stS').textContent=STATUS_DATA.filter(s=>s.status==='stand_by').length;
+  const recent=STATUS_DATA.slice(0,6);
+  document.getElementById('ov-statusTable').innerHTML=recent.map(s=>`
+    <tr>
+      <td class="td-bold">${s.criativo}</td>
+      <td class="td-mono">${s.plat}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.camp}</td>
+      <td>${badgeH(s.status)}</td>
+      <td class="td-mono" style="color:var(--ink-muted)">${s.upd}</td>
+    </tr>`).join('');
+}
+
+function renderAudHeatmap(){
+  const maxVal=7.5;
+  function cellColor(v){
+    if(v===null) return 'background:var(--bg3);color:var(--ink-muted)';
+    const t=v/maxVal;
+    const g=Math.round(255*(1-t));
+    return `background:rgb(${Math.round(13+g)},${Math.round(13+g)},${Math.round(13+g)});color:${t>0.5?'#fff':'#0d0d0d'}`;
+  }
+  let html=`<thead><tr><th style="min-width:160px">Audiência</th>${HEATMAP_CREATIVES.map(h=>`<th>${h}</th>`).join('')}<th>Melhor criativo</th></tr></thead><tbody>`;
+  HEATMAP_DATA.forEach((row,i)=>{
+    const vals=row.filter(v=>v!==null);
+    const best=vals.length?Math.max(...vals):null;
+    const bestIdx=row.indexOf(best);
+    html+=`<tr><td class="td-bold" style="white-space:nowrap">${HEATMAP_AUDS[i]}</td>${row.map((v,j)=>`<td style="${cellColor(v)};text-align:center;font-family:var(--mono);font-size:11px;padding:10px 8px">${v!==null?(j===bestIdx?`<strong>${v}%</strong>`:v+'%'):'—'}</td>`).join('')}<td style="font-family:var(--mono);font-size:10px;color:var(--ink-soft)">${bestIdx>=0?HEATMAP_CREATIVES[bestIdx]:'—'}${best?`<div style="color:var(--ink-muted);font-size:9px">CTR ${best}%</div>`:''}</td></tr>`;
+  });
+  html+='</tbody>';
+  document.getElementById('audHeatmap').innerHTML=html;
+}
+
+function renderAudCards(){
+  document.getElementById('audCards').innerHTML=AUD_DATA.map(a=>{
+    const best=[...a.criativos].sort((x,y)=>y.score-x.score)[0];
+    return `<div style="background:var(--bg);padding:20px 22px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div><div style="font-family:var(--fh);font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:.04em">${a.name}</div><div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);letter-spacing:.08em;margin-top:3px">${a.plat} · ${a.size}</div></div>
+        <div style="font-family:var(--mono);font-size:9px;padding:3px 10px;background:var(--bg3);color:var(--ink-mid)">${a.criativos.length} criativos</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${a.criativos.map(cr=>`<div><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px"><span style="font-size:12px;font-weight:500">${cr.name}</span><span style="font-family:var(--mono);font-size:10px;color:var(--ink-mid)">CTR ${cr.ctr}</span></div><div style="display:flex;gap:8px;align-items:center"><div style="flex:1;height:3px;background:var(--bg3);position:relative"><div style="width:${cr.score}%;height:100%;background:${cr.score>=90?'var(--success)':cr.score>=65?'var(--warn)':'var(--ink-muted)'};position:absolute;top:0;left:0"></div></div><span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);width:60px;text-align:right">${cr.leads} leads</span></div></div>`).join('')}
+      </div>
+      <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border-d)"><div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:4px">// melhor combinação</div><div style="font-size:12px;font-weight:600">${best.name}</div><div style="display:flex;gap:12px;margin-top:6px"><div><div style="font-family:var(--mono);font-size:8px;color:var(--ink-muted)">CTR</div><div style="font-family:var(--fh);font-weight:700;font-size:16px">${best.ctr}</div></div><div><div style="font-family:var(--mono);font-size:8px;color:var(--ink-muted)">LEADS</div><div style="font-family:var(--fh);font-weight:700;font-size:16px">${best.leads}</div></div><div><div style="font-family:var(--mono);font-size:8px;color:var(--ink-muted)">CPM</div><div style="font-family:var(--fh);font-weight:700;font-size:16px">${best.cpm}</div></div></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── BIG TABLE ──
+function rnd(a,b){return+(a+(Math.random()*(b-a))).toFixed(2);}
+function rndInt(a,b){return Math.floor(a+Math.random()*(b-a));}
+function fmt(n){return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'k':n.toFixed(0);}
+
+const BT_COUNTRIES=['BR','AR','MX','CL','CO'];
+const BT_BUS=['Performance','Brand','Digital'];
+const BT_BRANDS=['Produto A','Produto B','Produto C'];
+const BT_CAMP_TYPES=['awareness','consideration','conversion','retargeting'];
+const BT_MEDIA=['Google Ads','Meta Ads','TikTok Ads','YouTube','LinkedIn','DV360'];
+const BT_MEDIUMS=['cpc','cpm','cpv','cpe'];
+const BT_AUDS=['Remarketing — Site','Lookalike 1%','Interesse — Tecnologia','In-Market B2B','Gen Z 18-24','Mulheres 25-34','Homens 35-44','Broad'];
+const BT_CAMPS=['Awareness Q1','Performance — Leads','Retargeting','Brand Search','TikTok — Gen Z','LinkedIn B2B','Video Reach'];
+const BT_CREATIVES=['Banner_300x250_V1','Banner_728x90_V1','Stories_1080x1920_V1','Feed_1080x1080_V1','Carrossel_1080x1080_V2','TopView_1080x1920_V1','InFeed_1080x1920_V1','Reels_1080x1920_V1','PreRoll_1920x1080_V1','Bumper_1920x1080_V1','Banner_160x600_V1','Responsive_HTML5_V1','OOH_Outdoor_6x3m','Radio_30s_V1'];
+
+function genRow(id){
+  const source=BT_MEDIA[rndInt(0,BT_MEDIA.length)];
+  const imp=rndInt(80000,4000000);
+  const reach=Math.floor(imp*rnd(0.4,0.9));
+  const freq=+(imp/reach).toFixed(1);
+  const inv=rndInt(2000,80000);
+  const clicks=Math.floor(imp*rnd(0.005,0.09));
+  const ctr=+((clicks/imp)*100).toFixed(2);
+  const eng=Math.floor(clicks*rnd(0.3,2.5));
+  const cpm=+((inv/imp)*1000).toFixed(2);
+  const cpc=clicks>0?+(inv/clicks).toFixed(2):0;
+  const leads=rndInt(0,Math.floor(clicks*0.15));
+  const conv=Math.floor(leads*rnd(0.3,0.9));
+  const cpl=leads>0?+(inv/leads).toFixed(2):null;
+  const roas=+(rnd(0.8,6.5)).toFixed(1);
+  const cpv=(source==='YouTube'||source==='TikTok Ads')?+(inv/Math.max(1,Math.floor(imp*rnd(0.1,0.45)))).toFixed(2):null;
+  const cpe=eng>0?+(inv/eng).toFixed(2):null;
+  const day=rndInt(1,28);
+  return {id,creative_name:BT_CREATIVES[rndInt(0,BT_CREATIVES.length)],country:BT_COUNTRIES[rndInt(0,BT_COUNTRIES.length)],bu:BT_BUS[rndInt(0,BT_BUS.length)],brand:BT_BRANDS[rndInt(0,BT_BRANDS.length)],campaign_name:BT_CAMPS[rndInt(0,BT_CAMPS.length)],campaign_type:BT_CAMP_TYPES[rndInt(0,BT_CAMP_TYPES.length)],source,medium:BT_MEDIUMS[rndInt(0,BT_MEDIUMS.length)],audience:BT_AUDS[rndInt(0,BT_AUDS.length)],impressions:imp,reach,frequency:freq,investment:inv,start_date:`${String(day).padStart(2,'0')}/03/2025`,clicks,ctr,engagements:eng,cpm,cpc,cpv,cpe,leads,cpl,conversions:conv,roas};
+}
+
+const BT_ALL_DATA=Array.from({length:120},(_,i)=>genRow(i+1));
+let btFiltered=[...BT_ALL_DATA];
+let btSortCol=null,btSortDir=1;
+
+function btFilter(){
+  const q=document.getElementById('btSearch').value.toLowerCase();
+  const plat=document.getElementById('bt-fplat').value;
+  const camp=document.getElementById('bt-fcamp').value;
+  btFiltered=BT_ALL_DATA.filter(r=>{
+    const mQ=!q||r.creative_name.toLowerCase().includes(q)||r.campaign_name.toLowerCase().includes(q)||r.source.toLowerCase().includes(q)||r.audience.toLowerCase().includes(q)||r.brand.toLowerCase().includes(q);
+    return mQ&&(!plat||r.source===plat)&&(!camp||r.campaign_name===camp);
+  });
+  if(btSortCol) btApplySort();
+  btRender();
+}
+
+function btSort(col){
+  if(btSortCol===col) btSortDir*=-1; else{btSortCol=col;btSortDir=1;}
+  document.querySelectorAll('.bt-table thead th').forEach(th=>th.classList.remove('sort-asc','sort-desc'));
+  document.querySelectorAll('.bt-table thead th').forEach(th=>{if(th.getAttribute('onclick')===`btSort('${col}')`)th.classList.add(btSortDir===1?'sort-asc':'sort-desc');});
+  btApplySort(); btRender();
+}
+function btApplySort(){
+  btFiltered.sort((a,b)=>{const va=a[btSortCol],vb=b[btSortCol];if(va===null&&vb===null)return 0;if(va===null)return 1;if(vb===null)return -1;return typeof va==='string'?va.localeCompare(vb)*btSortDir:(va-vb)*btSortDir;});
+}
+
+function dash(v,pre='',suf=''){return v===null||v===undefined?'<span style="color:var(--ink-muted)">—</span>':pre+v+suf;}
+
+function btRender(){
+  const info=document.getElementById('bt-info');
+  if(info) info.textContent=btFiltered.length+' / '+BT_ALL_DATA.length+' linhas';
+  const body=document.getElementById('btBody');
+  if(!body) return;
+  body.innerHTML=btFiltered.map(r=>`<tr>
+    <td>${r.creative_name}</td>
+    <td class="tax">${r.country}</td><td class="tax">${r.bu}</td><td class="tax">${r.brand}</td>
+    <td class="tax" style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${r.campaign_name}</td>
+    <td class="tax"><span class="plat-tag">${r.campaign_type}</span></td>
+    <td><span class="plat-tag">${r.source}</span></td>
+    <td class="tax">${r.medium}</td>
+    <td class="tax" style="max-width:140px;overflow:hidden;text-overflow:ellipsis">${r.audience}</td>
+    <td class="num">${fmt(r.impressions)}</td><td class="num">${fmt(r.reach)}</td>
+    <td class="num">${r.frequency}</td><td class="num">R$${fmt(r.investment)}</td>
+    <td class="tax">${r.start_date}</td>
+    <td class="num">${fmt(r.clicks)}</td><td class="num">${r.ctr}%</td><td class="num">${fmt(r.engagements)}</td>
+    <td class="num">R$${r.cpm}</td><td class="num">R$${r.cpc}</td>
+    <td class="num">${dash(r.cpv,'R$')}</td><td class="num">${dash(r.cpe,'R$')}</td>
+    <td class="num">${r.leads}</td><td class="num">${dash(r.cpl,'R$')}</td>
+    <td class="num">${r.conversions}</td><td class="num">${r.roas}x</td>
+  </tr>`).join('');
+}
+
+function btDownload(type){
+  const cols=['creative_name','country','bu','brand','campaign_name','campaign_type','source','medium','audience','impressions','reach','frequency','investment','start_date','clicks','ctr','engagements','cpm','cpc','cpv','cpe','leads','cpl','conversions','roas'];
+  const headers=['Criativo','País','BU','Marca','Campanha','Tipo','Plataforma','Meio','Audiência','Impressões','Alcance','Frequência','Investimento','Início','Cliques','CTR','Engajamentos','CPM','CPC','CPV','CPE','Leads','CPL','Conversões','ROAS'];
+  const rows=btFiltered.map(r=>cols.map(col=>r[col]===null?'':r[col]));
+  if(type==='csv'){
+    const csv=[headers,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='bigtable_riseup.csv';a.click();
+    toast('CSV exportado','ok');
+  } else {
+    const xls='<html xmlns:o="urn:schemas-microsoft-com:office:office"><head><meta charset="UTF-8"></head><body><table>'+[headers,...rows].map(r=>'<tr>'+r.map(v=>`<td>${v}</td>`).join('')+'</tr>').join('')+'</table></body></html>';
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([xls],{type:'application/vnd.ms-excel'}));a.download='bigtable_riseup.xls';a.click();
+    toast('Excel exportado','ok');
+  }
+}
+
+function refreshAll(){toast('Filtros aplicados','ok');}
+
 // ── CHART RESIZE ──
 function setupChartResize(){
   if(!window.ResizeObserver) return;
@@ -1324,7 +1750,7 @@ window.addEventListener('load',()=>{
   // small timeout ensures DOM is painted before Chart.js measures canvas
   setTimeout(()=>{
     btRender();
-  renderOverviewKPIs();
+    renderOverviewKPIs();
     renderOverviewTop3();
     renderOverviewStatus();
     initCharts();
