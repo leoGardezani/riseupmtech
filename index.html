@@ -3,29 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rise Up MTech — Infraestrutura de Mídia</title>
+<title>ライズアップエムテック — Infraestrutura de Mídia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #050508;
-    --bg2: #080810;
-    --surface: #0d0d1a;
-    --surface2: #111120;
-    --orange: #c45e00;
-    --orange-bright: #ff7a1a;
-    --orange-glow: rgba(196,94,0,0.15);
-    --text: #e8e8f0;
-    --text-dim: #e8e8f0;
-    --text-dimmer: #3a3a5a;
-    --border: rgba(196,94,0,0.2);
-    --border-dim: rgba(255,255,255,0.04);
-    --grid: rgba(196,94,0,0.04);
+    --bg:       #02020a;
+    --bg2:      #05050f;
+    --surface:  #07071a;
+    --surface2: #0a0a20;
+    --cyan:     #00e5ff;
+    --cyan-dim: rgba(0,229,255,0.15);
+    --cyan-glow:rgba(0,229,255,0.08);
+    --magenta:  #ff2d78;
+    --mag-dim:  rgba(255,45,120,0.12);
+    --text:     #e8eeff;
+    --text-dim: #e8eeff;
+    --text-off: #a0a0cc;
+    --border:   rgba(0,229,255,0.18);
+    --border-m: rgba(255,45,120,0.18);
+    --border-d: rgba(255,255,255,0.05);
+    --grid:     rgba(0,229,255,0.025);
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
-
   body {
     background: var(--bg);
     color: var(--text);
@@ -34,99 +36,111 @@
     overflow-x: hidden;
   }
 
+  /* ── GRID BG ── */
   body::before {
     content: '';
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background-image:
       linear-gradient(var(--grid) 1px, transparent 1px),
       linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-    background-size: 60px 60px;
+    background-size: 48px 48px;
     pointer-events: none;
     z-index: 0;
   }
 
+  /* ── SCANLINES ── */
   body::after {
     content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px);
     pointer-events: none;
     z-index: 0;
   }
 
-  .wrap {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 48px;
-    width: 100%;
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 48px; width: 100%; }
+
+  /* ── KATAKANA RAIN ── */
+  #kataCanvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.07;
   }
 
-  /* ─── NAV ─── */
+  /* ── NAV ── */
   nav {
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 100;
-    background: rgba(5,5,8,0.85);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
     height: 64px;
     display: flex;
     align-items: center;
+    background: rgba(2,2,10,0.88);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), var(--magenta), transparent);
+    opacity: 0.5;
   }
 
   .nav-inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 48px;
+    max-width: 1100px; margin: 0 auto; padding: 0 48px;
     width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between;
   }
 
+  /* LOGO with JP/EN hover */
   .nav-logo {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 14px;
-    letter-spacing: 0.1em;
-    color: var(--orange-bright);
-    text-transform: uppercase;
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    color: var(--cyan);
+    cursor: default;
+    position: relative;
   }
-  .nav-logo span { color: var(--text-dim); }
+  .nav-logo .jp { display: inline; transition: opacity 0.3s; }
+  .nav-logo .en { position: absolute; left: 0; top: 0; opacity: 0; white-space: nowrap; transition: opacity 0.3s; color: var(--cyan); }
+  .nav-logo .en span { color: var(--text-dim); }
+  .nav-logo:hover .jp { opacity: 0; }
+  .nav-logo:hover .en { opacity: 1; }
 
   .nav-links { display: flex; gap: 40px; list-style: none; }
   .nav-links a {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.15em;
+    font-size: 11px; letter-spacing: 0.15em;
     color: var(--text-dim);
-    text-decoration: none;
-    text-transform: uppercase;
+    text-decoration: none; text-transform: uppercase;
     transition: color 0.2s;
   }
-  .nav-links a:hover { color: var(--orange-bright); }
+  .nav-links a:hover { color: var(--cyan); text-shadow: 0 0 12px var(--cyan); }
 
   .nav-cta {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    color: var(--orange-bright);
-    text-decoration: none;
-    text-transform: uppercase;
-    border: 1px solid var(--orange);
+    font-size: 11px; letter-spacing: 0.1em;
+    color: var(--cyan); text-decoration: none; text-transform: uppercase;
+    border: 1px solid var(--border);
     padding: 8px 20px;
     transition: all 0.2s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
   }
-  .nav-cta:hover { background: var(--orange-glow); box-shadow: 0 0 20px rgba(196,94,0,0.3); }
+  .nav-cta:hover {
+    background: var(--cyan-dim);
+    box-shadow: 0 0 20px rgba(0,229,255,0.3), inset 0 0 20px rgba(0,229,255,0.05);
+  }
 
-  /* ─── HERO ─── */
+  /* ── HERO ── */
   .hero {
     position: relative;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
     text-align: center;
     padding: 120px 48px 80px;
     overflow: hidden;
@@ -135,253 +149,399 @@
 
   .hero-orb {
     position: absolute;
-    width: 800px; height: 800px;
+    width: 900px; height: 900px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(196,94,0,0.12) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, rgba(255,45,120,0.03) 50%, transparent 70%);
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
-    animation: pulse 6s ease-in-out infinite;
+    animation: orb 8s ease-in-out infinite;
+  }
+  @keyframes orb {
+    0%,100% { transform: translate(-50%,-50%) scale(1); opacity: 0.6; }
+    50%      { transform: translate(-50%,-50%) scale(1.1); opacity: 1; }
   }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
-    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+  /* JP decorative text behind hero */
+  .hero-jp-bg {
+    position: absolute;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(80px, 14vw, 200px);
+    font-weight: 700;
+    color: rgba(0,229,255,0.03);
+    letter-spacing: 0.1em;
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+    top: 50%; transform: translateY(-50%);
   }
 
   .hero-tag {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.3em;
-    color: var(--orange);
-    text-transform: uppercase;
-    margin-bottom: 32px;
-    opacity: 0;
-    animation: fadeUp 0.8s 0.2s forwards;
+    font-size: 11px; letter-spacing: 0.35em;
+    color: var(--magenta);
+    text-transform: uppercase; margin-bottom: 28px;
+    opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
   }
-  .hero-tag::before { content: '// '; color: var(--text-dimmer); }
+  .hero-tag::before { content: '// '; color: var(--text-off); }
 
   .hero h1 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: clamp(64px, 10vw, 140px);
-    line-height: 0.9;
-    letter-spacing: -0.02em;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: clamp(60px, 10vw, 130px);
+    line-height: 0.92;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    margin-bottom: 48px;
+    margin-bottom: 40px;
     opacity: 0;
     animation: fadeUp 0.8s 0.4s forwards;
   }
-  .hero h1 .line-dim { color: var(--text-dimmer); display: block; }
-  .hero h1 .line-orange { color: var(--orange-bright); display: block; text-shadow: 0 0 60px rgba(255,122,26,0.4); }
-  .hero h1 .line-main { display: block; }
+  .hero h1 .l1 { display: block; color: var(--cyan); text-shadow: 0 0 40px rgba(0,229,255,0.5), 0 0 80px rgba(0,229,255,0.2); }
+  .hero h1 .l2 { display: block; color: var(--magenta); text-shadow: 0 0 40px rgba(255,45,120,0.5), 0 0 80px rgba(255,45,120,0.2); }
+  .hero h1 .l3 { display: block; color: var(--text); }
 
   .hero-sub {
-    max-width: 520px;
-    font-size: 15px;
-    line-height: 1.7;
-    color: var(--text-dim);
-    margin-bottom: 56px;
-    opacity: 0;
-    animation: fadeUp 0.8s 0.6s forwards;
+    max-width: 500px; font-size: 15px; line-height: 1.7;
+    color: var(--text-dim); margin-bottom: 52px;
+    opacity: 0; animation: fadeUp 0.8s 0.6s forwards;
   }
 
   .hero-actions {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    animation: fadeUp 0.8s 0.8s forwards;
+    display: flex; gap: 16px; align-items: center; justify-content: center;
+    flex-wrap: wrap;
+    opacity: 0; animation: fadeUp 0.8s 0.8s forwards;
   }
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* BUTTONS */
+  /* corner-cut buttons */
   .btn-primary {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--bg);
-    background: var(--orange-bright);
-    padding: 14px 32px;
-    text-decoration: none;
+    font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--bg); background: var(--cyan);
+    padding: 14px 36px; text-decoration: none;
     transition: all 0.2s;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
     position: relative;
-    overflow: hidden;
   }
-  .btn-primary::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.15); transform: translateX(-100%); transition: transform 0.3s; }
-  .btn-primary:hover::after { transform: translateX(0); }
-  .btn-primary:hover { box-shadow: 0 0 40px rgba(255,122,26,0.5); }
+  .btn-primary:hover { box-shadow: 0 0 40px rgba(0,229,255,0.6); }
 
   .btn-ghost {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    text-decoration: none;
-    padding: 14px 32px;
-    border: 1px solid var(--border-dim);
+    font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-dim); text-decoration: none;
+    padding: 14px 36px;
+    border: 1px solid var(--border-d);
     transition: all 0.2s;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
   }
-  .btn-ghost:hover { color: var(--text); border-color: var(--border); }
+  .btn-ghost:hover { color: var(--cyan); border-color: var(--border); box-shadow: 0 0 20px rgba(0,229,255,0.15); }
 
-  /* ─── TICKER ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TICKER ── */
   .ticker {
-    position: relative;
-    z-index: 1;
+    position: relative; z-index: 1;
     overflow: hidden;
-    border-top: 1px solid var(--border-dim);
-    border-bottom: 1px solid var(--border-dim);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     background: var(--surface);
-    padding: 16px 0;
+    padding: 14px 0;
   }
-  .ticker-inner { display: flex; gap: 80px; animation: ticker 30s linear infinite; white-space: nowrap; }
-  .ticker-item { font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 0.15em; color: var(--text-dimmer); text-transform: uppercase; flex-shrink: 0; }
-  .ticker-item span { color: var(--orange); margin: 0 8px; }
-  @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-  /* ─── SECTION BASE ─── */
-  section {
-    position: relative;
-    z-index: 1;
-    padding: 120px 0;
+  .ticker::before, .ticker::after {
+    content: '';
+    position: absolute; top: 0; bottom: 0;
+    width: 80px; z-index: 2;
+    pointer-events: none;
   }
+  .ticker::before { left: 0; background: linear-gradient(90deg, var(--surface), transparent); }
+  .ticker::after  { right: 0; background: linear-gradient(-90deg, var(--surface), transparent); }
 
-  .section-header { margin-bottom: 80px; text-align: center; }
+  .ticker-inner { display: flex; gap: 64px; animation: tick 28s linear infinite; white-space: nowrap; }
+  .ticker-item {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; letter-spacing: 0.18em;
+    color: var(--text);
+    text-transform: uppercase; flex-shrink: 0;
+  }
+  .ticker-item span { color: var(--cyan); margin: 0 8px; }
+  @keyframes tick { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
+  /* ── SECTION BASE ── */
+  section { position: relative; z-index: 1; padding: 120px 0; }
+
+  .section-header { margin-bottom: 72px; text-align: center; }
   .section-tag {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.3em;
-    color: var(--orange);
-    text-transform: uppercase;
-    margin-bottom: 20px;
+    font-size: 11px; letter-spacing: 0.3em;
+    color: var(--magenta); text-transform: uppercase; margin-bottom: 20px;
   }
-  .section-tag::before { content: '// '; color: var(--text-dimmer); }
-
+  .section-tag::before { content: '// '; color: var(--text-off); }
   .section-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: clamp(40px, 6vw, 80px);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: clamp(36px, 5.5vw, 72px);
     text-transform: uppercase;
-    line-height: 0.95;
-    letter-spacing: -0.01em;
+    line-height: 0.95; letter-spacing: 0.04em;
   }
-  .section-title em { font-style: normal; color: var(--orange-bright); }
+  .section-title em { font-style: normal; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.4); }
 
-  /* ─── MANIFESTO ─── */
+  /* ── MANIFESTO ── */
   .manifesto {
     background: var(--surface);
     border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    padding: 120px 0;
+    border-bottom: 1px solid var(--border-m);
+    padding: 100px 0;
+    position: relative;
+  }
+  .manifesto::before {
+    content: 'デジタルメディア';
+    position: absolute;
+    right: 5%; top: 50%; transform: translateY(-50%);
+    font-size: 80px; color: rgba(0,229,255,0.03);
+    font-family: 'Share Tech Mono', monospace;
+    pointer-events: none;
+    white-space: nowrap;
   }
   .manifesto-text {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 300;
-    font-size: clamp(22px, 3vw, 38px);
-    line-height: 1.3;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 400;
+    font-size: clamp(20px, 2.8vw, 34px);
+    line-height: 1.4;
     color: var(--text);
-    letter-spacing: 0.01em;
     text-align: center;
   }
-  .manifesto-text strong { font-weight: 700; color: var(--orange-bright); }
-  .manifesto-text .dim { color: var(--text-dim); }
+  .manifesto-text strong { font-weight: 700; color: var(--cyan); }
+  .manifesto-text .mag { color: var(--magenta); font-weight: 600; }
 
-  /* ─── PRODUTOS ─── */
+  /* ── PRODUTOS ── */
   .produtos-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 2px;
-    background: var(--border-dim);
+    background: var(--border-d);
   }
 
   .produto-card {
     background: var(--bg);
-    padding: 48px;
+    padding: 44px;
     position: relative;
     overflow: hidden;
     transition: background 0.3s;
-    text-align: left;
+    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
   }
-  .produto-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--orange); transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
-  .produto-card:hover::before { transform: scaleX(1); }
+  .produto-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, var(--cyan), var(--magenta));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.5s ease;
+  }
+  .produto-card::after {
+    content: attr(data-jp);
+    position: absolute;
+    bottom: 16px; right: 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; color: rgba(0,229,255,0.15);
+    letter-spacing: 0.1em;
+    pointer-events: none;
+  }
   .produto-card:hover { background: var(--surface); }
+  .produto-card:hover::before { transform: scaleX(1); }
 
-  .produto-num { font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: var(--text-dimmer); margin-bottom: 32px; }
-  .produto-icon { font-size: 32px; margin-bottom: 20px; filter: grayscale(1) opacity(0.6); transition: filter 0.3s; }
-  .produto-card:hover .produto-icon { filter: none; opacity: 1; }
-  .produto-nome { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; letter-spacing: 0.02em; margin-bottom: 16px; color: var(--text); }
-  .produto-desc { font-size: 14px; line-height: 1.7; color: var(--text-dim); margin-bottom: 32px; }
-  .produto-preco { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--orange-bright); letter-spacing: 0.05em; }
-  .produto-tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
-  .produto-tag { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: var(--text-dimmer); border: 1px solid var(--border-dim); padding: 4px 10px; text-transform: uppercase; }
+  .produto-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; letter-spacing: 0.25em;
+    color: var(--text-off); margin-bottom: 28px;
+  }
+  .produto-icon { font-size: 28px; margin-bottom: 18px; }
+  .produto-nome {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 26px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    margin-bottom: 14px; color: var(--text);
+  }
+  .produto-desc { font-size: 14px; line-height: 1.7; color: var(--text-dim); margin-bottom: 28px; }
+  .produto-preco {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px; color: var(--cyan); letter-spacing: 0.05em;
+  }
+  .produto-tag-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 20px; }
+  .produto-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; letter-spacing: 0.12em;
+    color: var(--text-off);
+    border: 1px solid var(--border-d);
+    padding: 3px 10px; text-transform: uppercase;
+  }
 
-  /* ─── PLATAFORMAS ─── */
-  .plataformas { background: var(--surface); border-top: 1px solid var(--border-dim); padding: 120px 0; }
-
-  .plataformas-header { text-align: center; margin-bottom: 80px; }
-  .plataformas-count { display: none; }
-
-  .plataformas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--border-dim); }
+  /* ── PLATAFORMAS ── */
+  .plataformas { background: var(--surface); border-top: 1px solid var(--border-d); padding: 120px 0; }
+  .plataformas-header { text-align: center; margin-bottom: 72px; }
+  .plataformas-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px; background: var(--border-d);
+  }
 
   .plat-item {
     background: var(--bg2);
-    padding: 36px 32px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    transition: background 0.3s;
-    position: relative;
-    overflow: hidden;
+    padding: 32px 28px;
+    display: flex; align-items: center; gap: 18px;
+    transition: background 0.2s;
+    position: relative; overflow: hidden;
   }
-  .plat-item::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--orange); transform: scaleY(0); transition: transform 0.3s; }
+  .plat-item::after {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+    background: linear-gradient(180deg, var(--cyan), var(--magenta));
+    transform: scaleY(0); transition: transform 0.3s;
+  }
   .plat-item:hover { background: var(--surface2); }
   .plat-item:hover::after { transform: scaleY(1); }
 
-  .plat-logo { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; filter: brightness(0) invert(1) opacity(0.3); transition: filter 0.3s; }
-  .plat-item:hover .plat-logo { filter: brightness(0) saturate(100%) invert(48%) sepia(79%) saturate(600%) hue-rotate(5deg) brightness(103%) contrast(101%) opacity(1); }
+  .plat-logo {
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    filter: brightness(0) invert(1) opacity(0.25);
+    transition: filter 0.3s;
+  }
+  .plat-item:hover .plat-logo {
+    filter: drop-shadow(0 0 6px var(--cyan)) brightness(0) saturate(100%) invert(1) opacity(1);
+  }
   .plat-logo svg { width: 100%; height: 100%; }
+  .plat-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 17px; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .plat-type {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; color: var(--text-off);
+    text-transform: uppercase; letter-spacing: 0.12em; margin-top: 4px;
+  }
 
-  .plat-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .plat-type { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-dimmer); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
-
-  /* ─── COMO FUNCIONA ─── */
-  .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: var(--border-dim); margin-top: 80px; }
-
-  .step-card { background: var(--bg); padding: 40px 32px; text-align: left; }
-  .step-num { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 64px; color: var(--border); line-height: 1; margin-bottom: 24px; }
-  .step-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+  /* ── STEPS ── */
+  .steps-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 2px; background: var(--border-d); margin-top: 72px;
+  }
+  .step-card {
+    background: var(--bg);
+    padding: 36px 28px; text-align: left;
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+  }
+  .step-num {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 56px;
+    color: var(--cyan);
+    text-shadow: 0 0 20px rgba(0,229,255,0.3);
+    line-height: 1; margin-bottom: 20px;
+  }
+  .step-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 19px;
+    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;
+  }
   .step-desc { font-size: 13px; line-height: 1.7; color: var(--text-dim); }
 
-  /* ─── CTA ─── */
-  .cta-section { background: var(--surface); border-top: 1px solid var(--border); text-align: center; padding: 160px 0; }
-  .cta-glitch { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: clamp(48px, 8vw, 100px); text-transform: uppercase; line-height: 0.95; margin-bottom: 40px; display: inline-block; }
-  .cta-glitch .line1 { color: var(--text-dimmer); display: block; }
-  .cta-glitch .line2 { color: var(--orange-bright); display: block; text-shadow: 0 0 80px rgba(255,122,26,0.5); }
-  .cta-sub { font-size: 15px; color: var(--text-dim); max-width: 460px; margin: 0 auto 48px; line-height: 1.7; }
-
-  /* ─── FOOTER ─── */
-  footer {
+  /* ── CTA ── */
+  .cta-section {
+    background: var(--surface);
+    border-top: 1px solid var(--border-m);
+    text-align: center;
+    padding: 160px 0;
     position: relative;
-    z-index: 1;
-    border-top: 1px solid var(--border-dim);
-    padding: 48px 0;
+    overflow: hidden;
   }
-  .footer-inner { max-width: 1100px; margin: 0 auto; padding: 0 48px; display: flex; justify-content: space-between; align-items: center; }
-  .footer-logo { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--orange-bright); letter-spacing: 0.1em; }
-  .footer-copy { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-dimmer); letter-spacing: 0.1em; text-transform: uppercase; }
-  .footer-links { display: flex; gap: 32px; list-style: none; }
-  .footer-links a { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.15em; color: var(--text-dimmer); text-decoration: none; text-transform: uppercase; transition: color 0.2s; }
-  .footer-links a:hover { color: var(--orange-bright); }
+  .cta-section::before {
+    content: 'スケールアップ';
+    position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-size: clamp(60px, 12vw, 160px);
+    color: rgba(255,45,120,0.04);
+    font-family: 'Share Tech Mono', monospace;
+    pointer-events: none;
+    white-space: nowrap;
+    letter-spacing: 0.1em;
+  }
+  .cta-main {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: clamp(44px, 7vw, 90px);
+    text-transform: uppercase; line-height: 0.95;
+    margin-bottom: 36px;
+    position: relative;
+  }
+  .cta-main .l1 { display: block; color: var(--text); }
+  .cta-main .l2 { display: block; color: var(--magenta); text-shadow: 0 0 60px rgba(255,45,120,0.5); }
+  .cta-sub { font-size: 15px; color: var(--text-dim); max-width: 440px; margin: 0 auto 44px; line-height: 1.7; }
 
-  /* ─── RESPONSIVE ─── */
+  /* ── FOOTER ── */
+  footer { position: relative; z-index: 1; border-top: 1px solid var(--border-d); padding: 44px 0; }
+  .footer-inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 48px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-logo {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px; color: var(--cyan); letter-spacing: 0.1em;
+    position: relative; cursor: default;
+  }
+  .footer-logo .jp { display: inline; transition: opacity 0.3s; }
+  .footer-logo .en { position: absolute; left: 0; top: 0; opacity: 0; white-space: nowrap; transition: opacity 0.3s; }
+  .footer-logo:hover .jp { opacity: 0; }
+  .footer-logo:hover .en { opacity: 1; }
+
+  .footer-copy {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; color: var(--text-off);
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .footer-links { display: flex; gap: 28px; list-style: none; }
+  .footer-links a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; letter-spacing: 0.15em;
+    color: var(--text-off); text-decoration: none;
+    text-transform: uppercase; transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--cyan); }
+
+  /* ── GLITCH ── */
+  .glitch {
+    position: relative;
+  }
+  .glitch::before, .glitch::after {
+    content: attr(data-text);
+    position: absolute; top: 0; left: 0;
+    width: 100%; overflow: hidden;
+  }
+  .glitch::before {
+    color: var(--cyan);
+    animation: glitch1 4s infinite;
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+  }
+  .glitch::after {
+    color: var(--magenta);
+    animation: glitch2 4s infinite;
+    clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+  }
+  @keyframes glitch1 {
+    0%,90%,100% { transform: none; opacity: 0; }
+    92%   { transform: translate(-2px, 1px); opacity: 0.8; }
+    94%   { transform: translate(2px, -1px); opacity: 0.6; }
+    96%   { transform: translate(-1px, 2px); opacity: 0.7; }
+  }
+  @keyframes glitch2 {
+    0%,90%,100% { transform: none; opacity: 0; }
+    92%   { transform: translate(2px, -1px); opacity: 0.7; }
+    94%   { transform: translate(-2px, 1px); opacity: 0.5; }
+    96%   { transform: translate(1px, -2px); opacity: 0.6; }
+  }
+
+  /* ── RESPONSIVE ── */
   @media (max-width: 900px) {
     .wrap, .nav-inner, .footer-inner { padding: 0 24px; }
     .nav-links { display: none; }
@@ -390,35 +550,41 @@
     .produtos-grid { grid-template-columns: 1fr; }
     .plataformas-grid { grid-template-columns: repeat(2, 1fr); }
     .steps-grid { grid-template-columns: repeat(2, 1fr); }
-    .footer-inner { flex-direction: column; gap: 24px; text-align: center; }
+    .footer-inner { flex-direction: column; gap: 20px; text-align: center; }
     .footer-links { display: none; }
-    .plataformas-header { flex-direction: column; gap: 16px; }
   }
 </style>
 </head>
 <body>
 
+<!-- KATAKANA RAIN CANVAS -->
+<canvas id="kataCanvas"></canvas>
+
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <div class="nav-logo">Rise Up<span>_MTech</span></div>
+    <div class="nav-logo">
+      <span class="jp">ライズアップ_エムテック</span>
+      <span class="en">Rise Up<span>_MTech</span></span>
+    </div>
     <ul class="nav-links">
       <li><a href="#produtos">Produtos</a></li>
       <li><a href="#plataformas">Plataformas</a></li>
       <li><a href="#como-funciona">Como Funciona</a></li>
     </ul>
-    <a href="#contato" class="nav-cta">Acesso</a>
+    <a href="#contato" class="nav-cta">アクセス / Acesso</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero" id="inicio">
   <div class="hero-orb"></div>
-  <div class="hero-tag">Infraestrutura de Mídia Digital</div>
-  <h1>
-    <span class="line-dim">Controle</span>
-    <span class="line-orange">Total</span>
-    <span class="line-main">da Mídia.</span>
+  <div class="hero-jp-bg">メディア制御</div>
+  <div class="hero-tag">インフラストラクチャ — Infraestrutura de Mídia Digital</div>
+  <h1 class="glitch" data-text="">
+    <span class="l1">Controle</span>
+    <span class="l2">Total</span>
+    <span class="l3">da Mídia.</span>
   </h1>
   <p class="hero-sub">
     Um sistema integrado que extrai, organiza e dispara campanhas em 9 plataformas — sem atrito, sem planilha manual, sem margem para erro humano.
@@ -457,7 +623,11 @@
 <section class="manifesto">
   <div class="wrap">
     <p class="manifesto-text">
-      <span class="dim">Agências gastam semanas em</span> planilhas manuais, uploads repetidos e conciliação de dados entre plataformas. <strong>Isso acabou.</strong> <span class="dim">Rise Up MTech é o sistema que lê seu planejamento, monta as campanhas e entrega performance — tudo em uma arquitetura conectada,</span> <strong>do briefing ao relatório.</strong>
+      Agências gastam semanas em planilhas manuais, uploads repetidos e conciliação de dados entre plataformas.
+      <strong>Isso acabou.</strong>
+      Rise Up MTech é o sistema que lê seu planejamento, monta as campanhas e entrega performance —
+      tudo em uma arquitetura conectada,
+      <span class="mag">do briefing ao relatório.</span>
     </p>
   </div>
 </section>
@@ -466,12 +636,12 @@
 <section id="produtos">
   <div class="wrap">
     <div class="section-header">
-      <div class="section-tag">Módulos do Sistema</div>
+      <div class="section-tag">モジュール — Módulos do Sistema</div>
       <h2 class="section-title">Escolha o<br><em>Seu Nível</em></h2>
     </div>
     <div class="produtos-grid">
 
-      <div class="produto-card">
+      <div class="produto-card" data-jp="クロームETL">
         <div class="produto-num">01 // ETL</div>
         <div class="produto-icon">⬡</div>
         <div class="produto-nome">Chrome ETL</div>
@@ -484,7 +654,7 @@
         </div>
       </div>
 
-      <div class="produto-card">
+      <div class="produto-card" data-jp="AIクリエイティブ">
         <div class="produto-num">02 // IA</div>
         <div class="produto-icon">◈</div>
         <div class="produto-nome">Desdobramento de Peças</div>
@@ -498,7 +668,7 @@
         </div>
       </div>
 
-      <div class="produto-card">
+      <div class="produto-card" data-jp="実装モジュール">
         <div class="produto-num">03 // AUTOMAÇÃO</div>
         <div class="produto-icon">⬡</div>
         <div class="produto-nome">Módulo de Implementação</div>
@@ -511,7 +681,7 @@
         </div>
       </div>
 
-      <div class="produto-card">
+      <div class="produto-card" data-jp="フルスタック">
         <div class="produto-num">04 // FULL STACK</div>
         <div class="produto-icon">◈</div>
         <div class="produto-nome">Módulo Completo</div>
@@ -533,11 +703,8 @@
 <section id="plataformas" class="plataformas">
   <div class="wrap">
     <div class="plataformas-header">
-      <div>
-        <div class="section-tag">Cobertura</div>
-        <h2 class="section-title">9 Plataformas.<br><em>Uma Operação.</em></h2>
-      </div>
-      <div class="plataformas-count">09</div>
+      <div class="section-tag">カバレッジ — Cobertura</div>
+      <h2 class="section-title">9 Plataformas.<br><em>Uma Operação.</em></h2>
     </div>
     <div class="plataformas-grid">
 
@@ -594,7 +761,7 @@
 <section id="como-funciona">
   <div class="wrap">
     <div class="section-header">
-      <div class="section-tag">Processo</div>
+      <div class="section-tag">プロセス — Processo</div>
       <h2 class="section-title">Do Plano ao<br><em>Ar em Horas.</em></h2>
     </div>
     <div class="steps-grid">
@@ -624,10 +791,10 @@
 
 <!-- CTA -->
 <section id="contato" class="cta-section">
-  <div class="wrap">
-    <div class="cta-glitch">
-      <span class="line1">Pronto para</span>
-      <span class="line2">Escalar?</span>
+  <div class="wrap" style="position:relative;z-index:1">
+    <div class="cta-main">
+      <span class="l1">Pronto para</span>
+      <span class="l2">Escalar?</span>
     </div>
     <p class="cta-sub">Fale com a equipe e descubra qual módulo faz mais sentido para a operação da sua agência.</p>
     <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
@@ -640,7 +807,10 @@
 <!-- FOOTER -->
 <footer>
   <div class="footer-inner">
-    <div class="footer-logo">RISE UP_MTECH</div>
+    <div class="footer-logo">
+      <span class="jp">ライズアップ_エムテック</span>
+      <span class="en">RISE UP_MTECH</span>
+    </div>
     <ul class="footer-links">
       <li><a href="#">Produtos</a></li>
       <li><a href="#">Plataformas</a></li>
@@ -650,5 +820,38 @@
   </div>
 </footer>
 
+<script>
+// ── KATAKANA RAIN ──
+(function(){
+  const canvas = document.getElementById('kataCanvas');
+  const ctx = canvas.getContext('2d');
+  const kata = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+  let cols, drops;
+
+  function resize(){
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    cols  = Math.floor(canvas.width / 20);
+    drops = Array(cols).fill(1);
+  }
+
+  function draw(){
+    ctx.fillStyle = 'rgba(2,2,10,0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00e5ff';
+    ctx.font = '14px Share Tech Mono';
+    drops.forEach((y, i) => {
+      const char = kata[Math.floor(Math.random() * kata.length)];
+      ctx.fillText(char, i * 20, y * 20);
+      if(y * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    });
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  setInterval(draw, 60);
+})();
+</script>
 </body>
 </html>
