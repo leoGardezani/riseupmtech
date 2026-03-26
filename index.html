@@ -448,23 +448,19 @@
 
   /* ── CTA ── */
   .cta-section {
-    background: var(--surface);
+    background: transparent;
     border-top: 1px solid var(--border-m);
     text-align: center;
     padding: 160px 0;
     position: relative;
     overflow: hidden;
   }
-  .cta-section::before {
-    content: 'スケールアップ';
+  #ctaCanvas {
     position: absolute;
-    top: 50%; left: 50%; transform: translate(-50%, -50%);
-    font-size: clamp(60px, 12vw, 160px);
-    color: rgba(255,45,120,0.04);
-    font-family: 'Share Tech Mono', monospace;
+    inset: 0;
+    width: 100%; height: 100%;
     pointer-events: none;
-    white-space: nowrap;
-    letter-spacing: 0.1em;
+    z-index: 0;
   }
   .cta-main {
     font-family: 'Rajdhani', sans-serif;
@@ -790,6 +786,7 @@
 
 <!-- CTA -->
 <section id="contato" class="cta-section">
+  <canvas id="ctaCanvas"></canvas>
   <div class="wrap" style="position:relative;z-index:1">
     <div class="cta-main">
       <span class="l1">Pronto para</span>
@@ -934,6 +931,92 @@
 
   function loop(){ draw(); requestAnimationFrame(loop); }
   loop();
+})();
+
+// ── CTA LOCAL STREAM ──
+(function(){
+  const canvas = document.getElementById('ctaCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const KATA = 'アイウエオカキクケコサシスセソ01アβ∑ΔΩ10FF00A3B2';
+  let W, H, streams;
+
+  function randChar(){
+    return KATA[Math.floor(Math.random() * KATA.length)];
+  }
+
+  function initStream(){
+    return {
+      x3d: (Math.random() - 0.5) * 2000,
+      y: -(Math.random() * 600),
+      z: 300 + Math.random() * 700,
+      speed: 0.5 + Math.random() * 1.4,
+      chars: Array.from({length: 6 + Math.floor(Math.random() * 12)}, () => ({
+        char: randChar(), timer: Math.floor(Math.random() * 30)
+      })),
+      opacity: 0.1 + Math.random() * 0.22,
+      color: Math.random() < 0.2 ? '#ff2d78' : '#00e5ff',
+      spacing: 18 + Math.random() * 8,
+    };
+  }
+
+  function resize(){
+    const rect = canvas.parentElement.getBoundingClientRect();
+    W = canvas.width  = rect.width;
+    H = canvas.height = rect.height;
+    streams = Array.from({length: 50}, initStream);
+  }
+
+  function project(x3d, y3d, z){
+    const fov = 600, scale = fov / (fov + z);
+    return { x: W/2 + x3d * scale, y: H/2 + y3d * scale, scale };
+  }
+
+  function draw(){
+    ctx.clearRect(0, 0, W, H);
+
+    // dark background
+    ctx.fillStyle = 'rgba(7,7,26,0.92)';
+    ctx.fillRect(0, 0, W, H);
+
+    // vignette
+    const vg = ctx.createRadialGradient(W/2, H/2, H*0.05, W/2, H/2, H*0.8);
+    vg.addColorStop(0, 'rgba(7,7,26,0)');
+    vg.addColorStop(1, 'rgba(2,2,10,0.75)');
+    ctx.fillStyle = vg;
+    ctx.fillRect(0, 0, W, H);
+
+    streams.forEach((s, si) => {
+      s.y += s.speed * (600 / (600 + s.z)) * 2.2;
+
+      s.chars.forEach((ch, i) => {
+        ch.timer--;
+        if(ch.timer <= 0){ ch.char = randChar(); ch.timer = 15 + Math.floor(Math.random() * 40); }
+        const proj = project(s.x3d, s.y + i * s.spacing - H/2, s.z);
+        if(proj.x < -60 || proj.x > W+60 || proj.y < -40 || proj.y > H+40) return;
+        const isHead = i === s.chars.length - 1;
+        const alpha = isHead ? Math.min(1, s.opacity*4) : s.opacity*(1 - i/s.chars.length*0.6);
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.font = `${Math.max(8, 13*proj.scale)}px 'Share Tech Mono', monospace`;
+        ctx.fillStyle = isHead ? '#ffffff' : s.color;
+        if(isHead){ ctx.shadowColor = s.color; ctx.shadowBlur = 8*proj.scale; }
+        ctx.fillText(ch.char, proj.x, proj.y);
+        ctx.restore();
+      });
+
+      const headProj = project(s.x3d, s.y - H/2, s.z);
+      if(headProj.y > H + 200){ streams[si] = initStream(); streams[si].y = -100 - Math.random()*300; }
+    });
+  }
+
+  // wait for layout then init
+  setTimeout(() => {
+    resize();
+    window.addEventListener('resize', resize);
+    function loop(){ draw(); requestAnimationFrame(loop); }
+    loop();
+  }, 100);
 })();
 </script>
 </body>
