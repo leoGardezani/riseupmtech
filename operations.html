@@ -49,7 +49,7 @@
   /* ── MAIN ── */
   .main{position:fixed;top:calc(var(--topbar-h) + var(--filter-h));left:0;right:0;bottom:0;overflow-y:auto;transition:right .3s ease;}
   .main.panel-open{right:var(--panel-w);}
-  .tab-page{display:none;padding:28px;min-height:0;} .tab-page.active{display:block;}
+  .tab-page{display:none;padding:28px 28px 80px;min-height:0;} .tab-page.active{display:block;}
 
   /* ── SHARED COMPONENTS ── */
   .section-title{font-family:var(--fh);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);margin-bottom:2px;}
@@ -943,24 +943,7 @@ const USERS=[
 ];
 
 // ── TABS ──
-let chartsInited = new Set(['dashboard']); // dashboard inited on load
-function switchTabById(id){
-  const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b=>b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+id+"'"));
-  if(btn) btn.click();
-}
-function switchTab(id,el){
-  document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
-  el.classList.add('on');
-  // init charts for this tab on first visit
-  if(!chartsInited.has(id)){
-    chartsInited.add(id);
-    setTimeout(()=>{ initChartsForTab(id); },50);
-  }
-}
 
-// ── PANEL ──
 function togglePanel(){
   const p=document.getElementById('rPanel'),o=document.getElementById('overlay'),m=document.getElementById('main');
   if(p.classList.contains('open')){closePanel();}
@@ -1670,6 +1653,124 @@ function btDownload(type){
 }
 
 function refreshAll(){toast('Filtros aplicados','ok');}
+
+
+// ── CHARTS ──
+let chartsInited = new Set(['dashboard']);
+
+function switchTab(id, el){
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  if(!chartsInited.has(id)){
+    chartsInited.add(id);
+    setTimeout(() => initChartsForTab(id), 60);
+  }
+}
+
+function switchTabById(id){
+  const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => {
+    const oc = b.getAttribute('onclick') || '';
+    return oc.includes("'"+id+"'");
+  });
+  if(btn) btn.click();
+}
+
+function initChartsForTab(tab){
+  if(tab === 'dashboard') initChartsDash();
+  if(tab === 'campanhas') initChartsCamp();
+}
+
+function initCharts(){
+  initChartsDash();
+}
+
+const MONO_FONT = {family:'Share Tech Mono', size:9};
+const GRID_COLOR = '#f0f0ec';
+const labels30 = Array.from({length:30}, (_,i) => (i+1)+' Mar');
+const inv30  = [7.2,8.1,6.8,9.4,10.2,9.8,11.1,8.4,10.8,12.1,11.4,9.2,13.2,11.8,10.4,14.2,12.8,11.2,15.4,13.8,12.4,16.2,14.8,13.2,17.4,15.8,14.2,18.6,16.8,15.2];
+const clk30  = [5.1,5.8,4.9,6.8,7.4,7.0,8.0,6.1,7.8,8.8,8.2,6.6,9.5,8.5,7.5,10.2,9.2,8.1,11.0,9.9,8.9,11.6,10.6,9.5,12.4,11.3,10.2,13.2,12.0,10.9];
+const imp30  = [0.4,0.5,0.4,0.6,0.6,0.6,0.7,0.5,0.7,0.8,0.7,0.6,0.9,0.8,0.7,1.0,0.9,0.8,1.1,1.0,0.9,1.1,1.1,1.0,1.2,1.1,1.0,1.3,1.2,1.1];
+const leads30= [84,98,76,120,134,128,148,110,138,160,150,118,172,156,140,188,170,152,204,184,164,218,198,178,232,212,190,248,226,204];
+
+function chartBaseOpts(){
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: {duration:800, easing:'easeInOutQuart'},
+    plugins: {legend:{labels:{font:{family:'Share Tech Mono',size:10}, boxWidth:10, padding:14}}}
+  };
+}
+function chartScales(yLbl, y1Lbl){
+  return {scales:{
+    y:  {position:'left',  title:{display:true, text:yLbl,  font:MONO_FONT, color:'#bbb'}, grid:{color:GRID_COLOR}, ticks:{font:MONO_FONT, color:'#bbb'}},
+    y1: {position:'right', title:{display:true, text:y1Lbl, font:MONO_FONT, color:'#bbb'}, grid:{display:false},    ticks:{font:MONO_FONT, color:'#bbb'}}
+  }};
+}
+
+function initChartsDash(){
+  const dashEl = document.getElementById('chartDash');
+  const barEl  = document.getElementById('chartBar');
+  if(!dashEl || !barEl || dashEl._inited) return;
+  dashEl._inited = true;
+
+  new Chart(dashEl, {
+    type: 'line',
+    data: {labels: labels30, datasets: [
+      {label:'Investimento (R$k)', data:inv30,  borderColor:'#0d0d0d', backgroundColor:'rgba(13,13,13,.06)', tension:.4, pointRadius:0, pointHoverRadius:4, fill:true, yAxisID:'y'},
+      {label:'Impressões (M)',     data:imp30,  borderColor:'#888', backgroundColor:'transparent', tension:.4, pointRadius:0, pointHoverRadius:4, borderDash:[5,3], yAxisID:'y1'},
+      {label:'Leads (÷10)',        data:leads30.map(v => +(v/10).toFixed(1)), borderColor:'#bbb', backgroundColor:'transparent', tension:.4, pointRadius:0, pointHoverRadius:4, borderDash:[2,4], yAxisID:'y1'},
+    ]},
+    options: Object.assign({}, chartBaseOpts(), chartScales('R$k', 'M / x10'))
+  });
+
+  new Chart(barEl, {
+    type: 'bar',
+    data: {
+      labels: ['Google','Meta','TikTok','YouTube','LinkedIn','DV360'],
+      datasets: [
+        {label:'Realizado (R$k)', data:[82,84,28,15,18,0],  backgroundColor:'#0d0d0d', borderRadius:0},
+        {label:'Meta (R$k)',      data:[90,94,30,18,22,36], backgroundColor:'#e8e8e4', borderRadius:0},
+      ]
+    },
+    options: Object.assign({}, chartBaseOpts(), {
+      plugins: {legend:{labels:{font:{family:'Share Tech Mono',size:10}, boxWidth:10}}},
+      scales: {
+        x: {grid:{display:false}, ticks:{font:MONO_FONT, color:'#888'}},
+        y: {grid:{color:GRID_COLOR}, ticks:{font:MONO_FONT, color:'#bbb'}, title:{display:true, text:'R$k', font:MONO_FONT, color:'#bbb'}}
+      }
+    })
+  });
+}
+
+function initChartsCamp(){
+  const lineEl  = document.getElementById('chartLine');
+  const doughEl = document.getElementById('chartDough');
+  if(!lineEl || !doughEl || lineEl._inited) return;
+  lineEl._inited = true;
+
+  new Chart(lineEl, {
+    type: 'line',
+    data: {labels: labels30, datasets: [
+      {label:'Investimento (R$k)', data:inv30, borderColor:'#0d0d0d', backgroundColor:'rgba(13,13,13,.06)', tension:.4, pointRadius:0, pointHoverRadius:4, fill:true, yAxisID:'y'},
+      {label:'Cliques (k)',        data:clk30, borderColor:'#888', backgroundColor:'transparent', tension:.4, pointRadius:0, pointHoverRadius:4, borderDash:[4,3], yAxisID:'y1'},
+    ]},
+    options: Object.assign({}, chartBaseOpts(), chartScales('R$k', 'Cliques k'))
+  });
+
+  new Chart(doughEl, {
+    type: 'doughnut',
+    data: {
+      labels: ['Google Ads','Meta Ads','TikTok Ads','YouTube','LinkedIn'],
+      datasets: [{data:[82,84,28,15,18], backgroundColor:['#0d0d0d','#333','#666','#999','#ccc'], borderWidth:2, borderColor:'#fff', hoverOffset:6}]
+    },
+    options: Object.assign({}, chartBaseOpts(), {
+      cutout: '60%',
+      plugins: {legend:{position:'right', labels:{font:{family:'Share Tech Mono',size:9}, boxWidth:10, padding:10}}}
+    })
+  });
+}
 
 // ── CHART RESIZE ──
 function setupChartResize(){
