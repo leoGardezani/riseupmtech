@@ -257,7 +257,62 @@
   .to.ok span:first-child{color:#4ade80;} .to.er span:first-child{color:#f87171;}
   @keyframes tIn{from{transform:translateY(8px);opacity:0;}to{transform:none;opacity:1;}}
 
-  @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr);}.creative-grid{grid-template-columns:repeat(2,1fr);}.charts-row{grid-template-columns:1fr;}.pacing-grid{grid-template-columns:repeat(2,1fr);}.chart-canvas-wrap{min-height:220px;}}
+  /* ── CRIATIVOS REPO ── */
+  .repo-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:center;}
+  .repo-filter-sel{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink);background:var(--bg2);border:1px solid var(--border);padding:6px 28px 6px 10px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;}
+  .repo-filter-sel:focus{border-color:var(--ink);}
+  .repo-filter-sel.active{border-color:var(--ink);background:var(--ink);color:#fff;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23fff'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;}
+  .repo-type-pill{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border:1px solid var(--border);background:var(--bg);cursor:pointer;transition:all .2s;white-space:nowrap;}
+  .repo-type-pill:hover{border-color:var(--ink);}
+  .repo-type-pill.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  .repo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1px;background:var(--border);margin-top:16px;}
+  .repo-card{background:var(--bg);overflow:hidden;position:relative;transition:background .2s;}
+  .repo-card:hover{background:var(--bg2);}
+  .repo-card:hover .repo-actions{opacity:1;}
+
+  .repo-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--bg3);display:block;position:relative;}
+  .repo-thumb-wrap{position:relative;overflow:hidden;}
+  .repo-thumb-wrap .type-tag{position:absolute;top:8px;left:8px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;background:rgba(13,13,13,.85);color:#fff;}
+  .repo-thumb-wrap .approved-tag{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;padding:3px 8px;background:#16a34a;color:#fff;}
+
+  .repo-actions{position:absolute;bottom:0;left:0;right:0;background:rgba(13,13,13,.9);display:flex;gap:0;opacity:0;transition:opacity .2s;}
+  .repo-action{flex:1;padding:10px 6px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:none;border:none;border-right:1px solid rgba(255,255,255,.1);cursor:pointer;text-align:center;transition:background .15s;}
+  .repo-action:last-child{border-right:none;}
+  .repo-action:hover{background:rgba(255,255,255,.12);}
+
+  .repo-info{padding:14px 16px;}
+  .repo-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .repo-meta{font-family:var(--mono);font-size:9px;color:var(--ink-muted);letter-spacing:.06em;margin-bottom:10px;}
+  .repo-tags{display:flex;flex-wrap:wrap;gap:4px;}
+  .repo-tag{font-family:var(--mono);font-size:9px;letter-spacing:.06em;padding:2px 8px;background:var(--bg3);color:var(--ink-mid);}
+
+  /* detail modal */
+  .detail-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+  .detail-modal.open{display:flex;}
+  .detail-box{background:var(--bg);width:680px;max-width:92vw;max-height:90vh;overflow-y:auto;position:relative;}
+  .detail-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ink);}
+  .detail-header{padding:24px 28px 0;display:flex;justify-content:space-between;align-items:flex-start;}
+  .detail-title{font-family:var(--fh);font-weight:700;font-size:22px;text-transform:uppercase;letter-spacing:.04em;}
+  .detail-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--ink-mid);line-height:1;padding:4px;transition:color .2s;}
+  .detail-close:hover{color:var(--ink);}
+  .detail-body{padding:20px 28px 28px;display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .detail-preview{grid-column:1/-1;}
+  .detail-preview img{width:100%;max-height:280px;object-fit:contain;background:var(--bg3);}
+  .detail-spec-group{display:flex;flex-direction:column;gap:10px;}
+  .detail-spec{background:var(--bg2);padding:12px 14px;}
+  .detail-spec-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:4px;}
+  .detail-spec-val{font-family:var(--fh);font-weight:700;font-size:16px;color:var(--ink);}
+  .detail-actions{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;}
+  .detail-btn{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:10px 20px;background:var(--ink);color:#fff;border:none;cursor:pointer;transition:background .2s;}
+  .detail-btn:hover{background:#333;}
+  .detail-btn.ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--border);}
+  .detail-btn.ghost:hover{border-color:var(--ink);color:var(--ink);}
+
+  /* role badge */
+  .r-ap{background:#f0fdf4;color:#15803d;}
+
+  @media(max-width:1100px){  @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr);}.creative-grid{grid-template-columns:repeat(2,1fr);}.charts-row{grid-template-columns:1fr;}.pacing-grid{grid-template-columns:repeat(2,1fr);}.chart-canvas-wrap{min-height:220px;}}
   @media(max-width:700px){:root{--panel-w:100vw;}.topbar-center{display:none;}.kpi-grid{grid-template-columns:repeat(2,1fr);}.pacing-grid{grid-template-columns:1fr;}.creative-grid{grid-template-columns:1fr;}.main.panel-open{right:0;}.tab-page{padding:16px;}}
 </style>
 </head>
@@ -275,6 +330,7 @@
     <button class="tab-btn on" onclick="switchTab('dashboard',this)">Overview</button>
     <button class="tab-btn" onclick="switchTab('campanhas',this)">Campanhas</button>
     <button class="tab-btn" onclick="switchTab('status',this)">Status</button>
+    <button class="tab-btn" onclick="switchTab('criativos',this)">Criativos</button>
   </div>
   <div class="topbar-right">
     <span class="topbar-user" id="topUser">// Leonardo G.</span>
@@ -559,6 +615,70 @@
 
 </div>
 
+  <!-- ── CRIATIVOS ── -->
+  <div class="tab-page" id="tab-criativos">
+
+    <div class="section-title">Repositório de Criativos</div>
+    <div class="section-sub">Assets aprovados — gerados a partir do KV por campanha e plataforma</div>
+
+    <!-- Filters -->
+    <div class="repo-filters">
+      <div class="fg-" style="margin:0"><span class="flbl" style="margin-right:8px">Campanha</span>
+        <select class="repo-filter-sel" id="rf-camp" onchange="filterRepo()">
+          <option value="">Todas as campanhas</option>
+          <option>Awareness Q1</option>
+          <option>Performance — Leads</option>
+          <option>Retargeting</option>
+          <option>Brand Search</option>
+          <option>TikTok — Gen Z</option>
+        </select>
+      </div>
+      <div class="fg-" style="margin:0"><span class="flbl" style="margin-right:8px">Plataforma</span>
+        <select class="repo-filter-sel" id="rf-plat" onchange="filterRepo()">
+          <option value="">Todas</option>
+          <option>Google Ads</option>
+          <option>Meta Ads</option>
+          <option>TikTok Ads</option>
+          <option>YouTube</option>
+          <option>LinkedIn</option>
+          <option>OOH</option>
+          <option>Rádio</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:4px;margin-left:8px" id="typePills">
+        <button class="repo-type-pill on" onclick="setType('',this)">Todos</button>
+        <button class="repo-type-pill" onclick="setType('image',this)">🖼 Imagem</button>
+        <button class="repo-type-pill" onclick="setType('video',this)">▶ Vídeo</button>
+        <button class="repo-type-pill" onclick="setType('html5',this)">⟨/⟩ HTML5</button>
+        <button class="repo-type-pill" onclick="setType('audio',this)">♪ Áudio</button>
+      </div>
+      <div style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink-muted)" id="repo-count"></div>
+    </div>
+
+    <!-- Grid -->
+    <div class="repo-grid" id="repoGrid"></div>
+
+  </div>
+
+<!-- DETAIL MODAL -->
+<div class="detail-modal" id="detailModal" onclick="closeDetail(event)">
+  <div class="detail-box" id="detailBox">
+    <div class="detail-header">
+      <div>
+        <div class="detail-title" id="dm-title">—</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.08em;margin-top:4px" id="dm-meta">—</div>
+      </div>
+      <button class="detail-close" onclick="closeDetailBtn()">×</button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-preview"><img id="dm-img" src="" alt=""></div>
+      <div class="detail-spec-group" id="dm-specs"></div>
+      <div class="detail-spec-group" id="dm-specs2"></div>
+      <div class="detail-actions" id="dm-actions"></div>
+    </div>
+  </div>
+</div>
+
 <!-- RIGHT PANEL -->
 <div class="r-panel" id="rPanel">
   <div class="rp-head">
@@ -685,7 +805,7 @@ const PLATS=[
 ];
 const USERS=[
   {name:'Leonardo Gardezani',email:'leo@riseupmtech.com',role:'Admin'},
-  {name:'Ana Souza',email:'ana@riseupmtech.com',role:'Editor'},
+  {name:'Ana Souza',email:'ana@riseupmtech.com',role:'Aprovador'},
   {name:'Carlos Lima',email:'carlos@riseupmtech.com',role:'Leitura'},
 ];
 
@@ -1248,6 +1368,181 @@ function renderOverviewStatus(){
   document.getElementById('ov-stS').textContent = STATUS_DATA.filter(s=>s.status==='stand_by').length;
 }
 
+// ── REPO DATA ──
+const REPO_ASSETS = [
+  // Google Ads
+  {id:1,name:'Banner_300x250_V1',camp:'Awareness Q1',plat:'Google Ads',type:'image',
+   img:'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&h=338&fit=crop',
+   dims:'300×250px',size:'48KB',fmt:'JPG',version:'v1',kv:'KV_Awareness_Q1',
+   tags:['IAB','Display','300x250'],approved:true},
+  {id:2,name:'Banner_728x90_V1',camp:'Awareness Q1',plat:'Google Ads',type:'image',
+   img:'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=728&h=90&fit=crop',
+   dims:'728×90px',size:'32KB',fmt:'JPG',version:'v1',kv:'KV_Awareness_Q1',
+   tags:['IAB','Leaderboard','728x90'],approved:true},
+  {id:3,name:'Banner_160x600_V1',camp:'Awareness Q1',plat:'Google Ads',type:'image',
+   img:'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=160&h=600&fit=crop',
+   dims:'160×600px',size:'38KB',fmt:'JPG',version:'v1',kv:'KV_Awareness_Q1',
+   tags:['IAB','Skyscraper','160x600'],approved:true},
+  {id:4,name:'Responsive_HTML5_V1',camp:'Awareness Q1',plat:'Google Ads',type:'html5',
+   img:'https://images.unsplash.com/photo-1558655146-d09347e92766?w=600&h=338&fit=crop',
+   dims:'Responsivo',size:'120KB',fmt:'HTML5 ZIP',version:'v1',kv:'KV_Awareness_Q1',
+   tags:['HTML5','Animado','Responsivo'],approved:true},
+  // Meta Ads
+  {id:5,name:'Feed_1080x1080_V1',camp:'Performance — Leads',plat:'Meta Ads',type:'image',
+   img:'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=600&h=600&fit=crop',
+   dims:'1080×1080px',size:'210KB',fmt:'JPG',version:'v1',kv:'KV_Leads_V1',
+   tags:['Meta','Feed','1:1'],approved:true},
+  {id:6,name:'Stories_1080x1920_V1',camp:'Performance — Leads',plat:'Meta Ads',type:'image',
+   img:'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=338&h=600&fit=crop',
+   dims:'1080×1920px',size:'284KB',fmt:'JPG',version:'v2',kv:'KV_Leads_V1',
+   tags:['Meta','Stories','9:16'],approved:true},
+  {id:7,name:'Carrossel_1080x1080_V2',camp:'Retargeting',plat:'Meta Ads',type:'image',
+   img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=600&fit=crop',
+   dims:'1080×1080px',size:'196KB',fmt:'JPG',version:'v2',kv:'KV_Retargeting',
+   tags:['Meta','Carrossel','1:1'],approved:true},
+  {id:8,name:'Reels_1080x1920_V1',camp:'Retargeting',plat:'Meta Ads',type:'video',
+   img:'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=338&h=600&fit=crop',
+   dims:'1080×1920px',size:'8,4MB',fmt:'MP4 · 15s',version:'v1',kv:'KV_Retargeting',
+   tags:['Meta','Reels','9:16','Vídeo'],approved:true},
+  // TikTok
+  {id:9,name:'TopView_1080x1920_V1',camp:'TikTok — Gen Z',plat:'TikTok Ads',type:'video',
+   img:'https://images.unsplash.com/photo-1558655146-d09347e92766?w=338&h=600&fit=crop',
+   dims:'1080×1920px',size:'12,2MB',fmt:'MP4 · 30s',version:'v1',kv:'KV_GenZ',
+   tags:['TikTok','TopView','9:16','Vídeo'],approved:true},
+  {id:10,name:'InFeed_1080x1920_V1',camp:'TikTok — Gen Z',plat:'TikTok Ads',type:'video',
+   img:'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=338&h=600&fit=crop',
+   dims:'1080×1920px',size:'9,8MB',fmt:'MP4 · 15s',version:'v1',kv:'KV_GenZ',
+   tags:['TikTok','InFeed','9:16','Vídeo'],approved:true},
+  // YouTube
+  {id:11,name:'PreRoll_1920x1080_V1',camp:'Performance — Leads',plat:'YouTube',type:'video',
+   img:'https://images.unsplash.com/photo-1551817958-11e40576f80e?w=600&h=338&fit=crop',
+   dims:'1920×1080px',size:'18,4MB',fmt:'MP4 · 15s',version:'v1',kv:'KV_Leads_V1',
+   tags:['YouTube','PreRoll','16:9','Vídeo'],approved:true},
+  {id:12,name:'Bumper_1920x1080_V1',camp:'Awareness Q1',plat:'YouTube',type:'video',
+   img:'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&h=338&fit=crop',
+   dims:'1920×1080px',size:'6,2MB',fmt:'MP4 · 6s',version:'v1',kv:'KV_Awareness_Q1',
+   tags:['YouTube','Bumper','16:9','Vídeo'],approved:true},
+  // OOH
+  {id:13,name:'OOH_Outdoor_6x3m',camp:'Awareness Q1',plat:'OOH',type:'image',
+   img:'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&h=300&fit=crop',
+   dims:'6000×3000px',size:'14MB',fmt:'TIFF 300dpi',version:'v1',kv:'KV_Awareness_Q1',
+   tags:['OOH','Outdoor','2:1'],approved:true},
+  {id:14,name:'OOH_MídiaMóvel_V1',camp:'Awareness Q1',plat:'OOH',type:'image',
+   img:'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop',
+   dims:'3000×2000px',size:'8,4MB',fmt:'TIFF 300dpi',version:'v1',kv:'KV_Awareness_Q1',
+   tags:['OOH','Mídia Móvel','3:2'],approved:true},
+  // Rádio/Audio
+  {id:15,name:'Radio_30s_V1',camp:'Awareness Q1',plat:'Rádio',type:'audio',
+   img:'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&h=338&fit=crop',
+   dims:'—',size:'2,8MB',fmt:'MP3 · 30s · 320kbps',version:'v1',kv:'KV_Awareness_Q1',
+   tags:['Rádio','30s','Audio'],approved:true},
+  {id:16,name:'Radio_15s_V1',camp:'Performance — Leads',plat:'Rádio',type:'audio',
+   img:'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&h=338&fit=crop',
+   dims:'—',size:'1,4MB',fmt:'MP3 · 15s · 320kbps',version:'v1',kv:'KV_Leads_V1',
+   tags:['Rádio','15s','Audio'],approved:true},
+];
+
+let repoTypeFilter = '';
+
+function setType(type, el){
+  repoTypeFilter = type;
+  document.querySelectorAll('.repo-type-pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  filterRepo();
+}
+
+function filterRepo(){
+  const camp = document.getElementById('rf-camp').value;
+  const plat = document.getElementById('rf-plat').value;
+  const type = repoTypeFilter;
+  const filtered = REPO_ASSETS.filter(a =>
+    (!camp || a.camp === camp) &&
+    (!plat || a.plat === plat) &&
+    (!type || a.type === type)
+  );
+  renderRepo(filtered);
+}
+
+function typeIcon(t){
+  return {image:'🖼',video:'▶',html5:'⟨/⟩',audio:'♪'}[t]||'📄';
+}
+function typeLabel(t){
+  return {image:'Imagem',video:'Vídeo',html5:'HTML5',audio:'Áudio'}[t]||t;
+}
+
+function renderRepo(assets){
+  const grid = document.getElementById('repoGrid');
+  document.getElementById('repo-count').textContent = assets.length + ' asset' + (assets.length!==1?'s':'');
+  if(!assets.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:60px;text-align:center;background:var(--bg)"><div style="font-family:var(--fh);font-size:18px;text-transform:uppercase;color:var(--ink-muted);font-weight:700">Nenhum criativo encontrado</div><div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);margin-top:8px;letter-spacing:.1em">// ajuste os filtros</div></div>';
+    return;
+  }
+  grid.innerHTML = assets.map(a => `
+    <div class="repo-card">
+      <div class="repo-thumb-wrap">
+        <img class="repo-thumb ${a.type==='audio'?'':''}${a.dims.includes('1920')||a.dims.includes('1080x1920')?'':''}"
+          src="${a.img}" alt="${a.name}" loading="lazy"
+          style="${a.type==='audio'?'filter:grayscale(1);opacity:.5;':''}${a.dims.includes('1080x1920')||a.dims.includes('1080×1920')?'aspect-ratio:9/16;max-height:180px;':''}"
+          onerror="this.style.background='var(--bg3)';this.removeAttribute('src')">
+        <div class="type-tag">${typeIcon(a.type)} ${typeLabel(a.type)}</div>
+        <div class="approved-tag">✓ Aprovado</div>
+        <div class="repo-actions">
+          <button class="repo-action" onclick="downloadAsset(${a.id})">↓ Download</button>
+          <button class="repo-action" onclick="openDetail(${a.id})">⊕ Detalhes</button>
+          <button class="repo-action" onclick="copyLink(${a.id})">⎘ Link</button>
+          <button class="repo-action" onclick="sendToPlatform(${a.id})">↑ Enviar</button>
+        </div>
+      </div>
+      <div class="repo-info">
+        <div class="repo-name">${a.name}</div>
+        <div class="repo-meta">${a.plat} · ${a.fmt} · ${a.size}</div>
+        <div class="repo-tags">${a.tags.map(t=>`<span class="repo-tag">${t}</span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+}
+
+function openDetail(id){
+  const a = REPO_ASSETS.find(x=>x.id===id);
+  if(!a) return;
+  document.getElementById('dm-title').textContent = a.name;
+  document.getElementById('dm-meta').textContent = a.plat + ' · ' + a.camp + ' · ' + a.version.toUpperCase();
+  document.getElementById('dm-img').src = a.img;
+  document.getElementById('dm-img').alt = a.name;
+  if(a.type==='audio') document.getElementById('dm-img').style.filter='grayscale(1)';
+
+  const specs1 = [
+    {l:'Dimensões',v:a.dims},{l:'Formato',v:a.fmt},{l:'Tamanho',v:a.size},
+  ];
+  const specs2 = [
+    {l:'KV Origem',v:a.kv},{l:'Versão',v:a.version.toUpperCase()},{l:'Status',v:'✓ Aprovado'},
+  ];
+  document.getElementById('dm-specs').innerHTML = specs1.map(s=>`
+    <div class="detail-spec"><div class="detail-spec-lbl">${s.l}</div><div class="detail-spec-val">${s.v}</div></div>`).join('');
+  document.getElementById('dm-specs2').innerHTML = specs2.map(s=>`
+    <div class="detail-spec"><div class="detail-spec-lbl">${s.l}</div><div class="detail-spec-val">${s.v}</div></div>`).join('');
+  document.getElementById('dm-actions').innerHTML = `
+    <button class="detail-btn" onclick="downloadAsset(${id})">↓ Download</button>
+    <button class="detail-btn ghost" onclick="copyLink(${id})">⎘ Copiar link</button>
+    <button class="detail-btn ghost" onclick="sendToPlatform(${id})">↑ Enviar para ${a.plat}</button>`;
+
+  document.getElementById('detailModal').classList.add('open');
+}
+function closeDetail(e){ if(e.target===document.getElementById('detailModal')) closeDetailBtn(); }
+function closeDetailBtn(){ document.getElementById('detailModal').classList.remove('open'); }
+
+function downloadAsset(id){
+  const a=REPO_ASSETS.find(x=>x.id===id);
+  toast('Iniciando download de '+a.name,'ok');
+}
+function copyLink(id){
+  const a=REPO_ASSETS.find(x=>x.id===id);
+  toast('Link copiado: '+a.name,'ok');
+}
+function sendToPlatform(id){
+  const a=REPO_ASSETS.find(x=>x.id===id);
+  toast('Enviando para '+a.plat+'...','ok');
+}
+
 // ── CHART RESIZE ──
 function setupChartResize(){
   if(!window.ResizeObserver) return;
@@ -1266,6 +1561,8 @@ window.addEventListener('load',()=>{
   renderSocialPyramid();
   renderStatus();
   renderGantt();
+  renderRepo(REPO_ASSETS);
+  document.getElementById('repo-count').textContent=REPO_ASSETS.length+' assets';
   renderAudHeatmap();
   renderAudCards();
   renderOverviewTop3();
