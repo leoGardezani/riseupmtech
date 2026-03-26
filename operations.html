@@ -274,7 +274,7 @@
   <div class="topbar-center">
     <button class="tab-btn on" onclick="switchTab('campanhas',this)">Campanhas</button>
     <button class="tab-btn" onclick="switchTab('status',this)">Status</button>
-    <button class="tab-btn" onclick="switchTab('dashboard',this)">Dashboard</button>
+    <button class="tab-btn" onclick="switchTab('dashboard',this)">Overview</button>
   </div>
   <div class="topbar-right">
     <span class="topbar-user" id="topUser">// Leonardo G.</span>
@@ -504,30 +504,57 @@
     </div>
   </div>
 
-  <!-- ── DASHBOARD ── -->
+  <!-- ── OVERVIEW ── -->
   <div class="tab-page" id="tab-dashboard">
-    <div class="section-title">Dashboard</div>
-    <div class="section-sub">Visão consolidada</div>
-    <div class="kpi-grid">
-      <div class="kpi feat"><div class="kpi-lbl">Investimento</div><div class="kpi-val">R$284k</div><div class="kpi-delta up">↑ 12%</div></div>
-      <div class="kpi"><div class="kpi-lbl">Impressões</div><div class="kpi-val">18,4M</div><div class="kpi-delta up">↑ 8%</div></div>
-      <div class="kpi"><div class="kpi-lbl">Cliques</div><div class="kpi-val">342k</div><div class="kpi-delta dn">↓ 3%</div></div>
-      <div class="kpi"><div class="kpi-lbl">CTR</div><div class="kpi-val">1,86%</div><div class="kpi-delta dn">↓ 0,2pp</div></div>
-      <div class="kpi"><div class="kpi-lbl">Leads</div><div class="kpi-val">4.820</div><div class="kpi-delta up">↑ 18%</div></div>
-      <div class="kpi"><div class="kpi-lbl">ROAS</div><div class="kpi-val">3,4x</div><div class="kpi-delta up">↑ 0,4x</div></div>
+
+    <!-- KPIs summary -->
+    <div class="section-title">Overview Geral</div>
+    <div class="section-sub">Resumo consolidado do período selecionado</div>
+    <div class="kpi-grid" style="margin-bottom:24px">
+      <div class="kpi feat"><div class="kpi-lbl">Investimento</div><div class="kpi-val">R$284k</div><div class="kpi-delta up">↑ 12%</div><div class="kpi-target">Meta R$310k · 91,6%</div></div>
+      <div class="kpi"><div class="kpi-lbl">Impressões</div><div class="kpi-val">18,4M</div><div class="kpi-delta up">↑ 8%</div><div class="kpi-target">Meta 20M · 92%</div></div>
+      <div class="kpi"><div class="kpi-lbl">Cliques</div><div class="kpi-val">342k</div><div class="kpi-delta dn">↓ 3%</div><div class="kpi-target">Meta 380k · 90%</div></div>
+      <div class="kpi"><div class="kpi-lbl">Leads</div><div class="kpi-val">4.820</div><div class="kpi-delta up">↑ 18%</div><div class="kpi-target">Meta 5.000 · 96,4%</div></div>
+      <div class="kpi"><div class="kpi-lbl">CPL</div><div class="kpi-val">R$58,9</div><div class="kpi-delta up">↑ eficiência</div><div class="kpi-target">Meta R$65</div></div>
+      <div class="kpi"><div class="kpi-lbl">ROAS</div><div class="kpi-val">3,4x</div><div class="kpi-delta up">↑ 0,4x</div><div class="kpi-target">Meta 3,0x ✓</div></div>
     </div>
-    <div class="charts-row">
+
+    <!-- two col: charts left, gantt summary right -->
+    <div class="charts-row" style="margin-bottom:24px">
       <div class="chart-box">
-        <div class="chart-title">Investimento × Impressões</div>
-        <div class="chart-sub">30 dias</div>
-        <div class="chart-canvas-wrap"><canvas id="chartDash" style="max-height:200px"></canvas></div>
+        <div class="chart-title">Investimento × Cliques</div>
+        <div class="chart-sub">Evolução diária — 30 dias</div>
+        <div class="chart-canvas-wrap"><canvas id="chartDash"></canvas></div>
       </div>
       <div class="chart-box">
-        <div class="chart-title">Investimento por Plataforma</div>
-        <div class="chart-sub">Período selecionado</div>
-        <div class="chart-canvas-wrap"><canvas id="chartBar" style="max-height:200px"></canvas></div>
+        <div class="chart-title">Distribuição por Plataforma</div>
+        <div class="chart-sub">% investimento total</div>
+        <div class="chart-canvas-wrap"><canvas id="chartBar"></canvas></div>
       </div>
     </div>
+
+    <!-- Gantt summary -->
+    <div class="section-title">Resumo de Implementação</div>
+    <div class="section-sub">Status do pipeline de criativos</div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+      <div class="kpi feat"><div class="kpi-lbl">Implementados</div><div class="kpi-val" id="ov-stI">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Na fila</div><div class="kpi-val" id="ov-stP">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Com erro</div><div class="kpi-val" id="ov-stE">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Stand by</div><div class="kpi-val" id="ov-stS">—</div></div>
+    </div>
+    <div class="tbox" style="margin-bottom:24px">
+      <div class="tbox-head"><div class="tbox-title">Status por Criativo</div><span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// últimas atualizações</span></div>
+      <table><thead><tr><th>Criativo</th><th>Plataforma</th><th>Campanha</th><th>Status</th><th>Atualizado</th></tr></thead>
+      <tbody id="ov-statusTable"></tbody></table>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Top 3 criativos x audiência -->
+    <div class="section-title">Top 3 Criativos × Audiência</div>
+    <div class="section-sub">Combinações com melhor performance no período</div>
+    <div id="ov-top3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:24px"></div>
+
   </div>
 
 </div>
@@ -966,6 +993,223 @@ function toast(msg,type=''){
   document.getElementById('tc').appendChild(t);setTimeout(()=>t.remove(),3000);
 }
 
+// ── AUDIENCE DATA ──
+const AUD_DATA = [
+  {
+    name: 'Interesse — Tecnologia',
+    plat: 'Meta Ads', size: '2,4M pessoas',
+    criativos: [
+      {name:'Feed_1080x1080', ctr:'4,2%', cpm:'R$11', leads:'420', score:95},
+      {name:'Stories_1080x1920', ctr:'3,8%', cpm:'R$10', leads:'380', score:88},
+      {name:'Carrossel_V2', ctr:'5,1%', cpm:'R$10', leads:'510', score:99},
+    ]
+  },
+  {
+    name: 'Remarketing — Site',
+    plat: 'Meta Ads', size: '180k pessoas',
+    criativos: [
+      {name:'Feed_1080x1080', ctr:'6,8%', cpm:'R$19', leads:'840', score:99},
+      {name:'Carrossel_V2', ctr:'7,2%', cpm:'R$18', leads:'920', score:99},
+      {name:'Stories_1080x1920', ctr:'4,9%', cpm:'R$20', leads:'340', score:80},
+    ]
+  },
+  {
+    name: 'Lookalike 1% — Leads',
+    plat: 'Meta Ads', size: '480k pessoas',
+    criativos: [
+      {name:'Stories_1080x1920', ctr:'2,8%', cpm:'R$12', leads:'280', score:72},
+      {name:'Feed_1080x1080', ctr:'2,1%', cpm:'R$13', leads:'210', score:58},
+      {name:'Carrossel_V2', ctr:'3,4%', cpm:'R$11', leads:'340', score:80},
+    ]
+  },
+  {
+    name: 'In-Market — Software B2B',
+    plat: 'Google Ads', size: '820k pessoas',
+    criativos: [
+      {name:'Banner_300x250_V1', ctr:'2,4%', cpm:'R$15', leads:'240', score:68},
+      {name:'Banner_728x90', ctr:'1,8%', cpm:'R$14', leads:'180', score:52},
+    ]
+  },
+  {
+    name: 'Gen Z — 18-24',
+    plat: 'TikTok Ads', size: '3,2M pessoas',
+    criativos: [
+      {name:'TopView_TK', ctr:'1,8%', cpm:'R$7', leads:'88', score:62},
+      {name:'InFeed_TK_V1', ctr:'1,4%', cpm:'R$8', leads:'66', score:48},
+    ]
+  },
+];
+
+// heatmap CTR data: rows=audiences, cols=top creatives
+const HEATMAP_CREATIVES = ['Feed_1080','Stories','Carrossel','Banner_300','TopView_TK'];
+const HEATMAP_DATA = [
+  [4.2, 3.8, 5.1, null, null],
+  [6.8, 4.9, 7.2, null, null],
+  [2.1, 2.8, 3.4, null, null],
+  [null, null, null, 2.4, null],
+  [null, null, null, null, 1.8],
+];
+const HEATMAP_AUDS = ['Interesse — Tec.','Remarketing','Lookalike 1%','In-Market B2B','Gen Z 18-24'];
+
+// TOP 3 criativos x audiência (para Overview)
+const TOP3_AUD = [
+  {
+    name: 'Carrossel_V2',
+    plat: 'Meta Ads',
+    img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=400&fit=crop',
+    audience: 'Remarketing — Site',
+    aud_size: '180k pessoas',
+    ctr: '7,2%', cpm: 'R$18', leads: '920', score: 99,
+    insight: 'Melhor combinação do período. Alta intenção + formato carrossel geram CTR 3× acima da média.',
+  },
+  {
+    name: 'Feed_1080x1080',
+    plat: 'Meta Ads',
+    img: 'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=400&h=400&fit=crop',
+    audience: 'Remarketing — Site',
+    aud_size: '180k pessoas',
+    ctr: '6,8%', cpm: 'R$19', leads: '840', score: 99,
+    insight: 'Segunda melhor. Feed estático performa bem em audiências quentes de remarketing.',
+  },
+  {
+    name: 'Carrossel_V2',
+    plat: 'Meta Ads',
+    img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=400&fit=crop',
+    audience: 'Interesse — Tecnologia',
+    aud_size: '2,4M pessoas',
+    ctr: '5,1%', cpm: 'R$10', leads: '510', score: 95,
+    insight: 'Melhor custo-benefício: audiência grande + CPM baixo + CTR alto. Alto potencial de escala.',
+  },
+];
+
+// ── RENDER AUDIENCE HEATMAP ──
+function renderAudHeatmap(){
+  const maxVal = 7.5;
+  function cellColor(v){
+    if(v===null) return 'background:var(--bg3);color:var(--ink-muted)';
+    const intensity = v/maxVal;
+    const r = Math.round(13 + (220-13)*(1-intensity));
+    const g = Math.round(13 + (220-13)*(1-intensity));
+    const b = Math.round(13 + (220-13)*(1-intensity));
+    const textColor = intensity > 0.5 ? '#ffffff' : '#0d0d0d';
+    return `background:rgb(${r},${g},${b});color:${textColor}`;
+  }
+
+  let html = `<thead><tr>
+    <th style="min-width:160px">Audiência</th>
+    ${HEATMAP_CREATIVES.map(h=>`<th>${h}</th>`).join('')}
+    <th>Melhor criativo</th>
+  </tr></thead><tbody>`;
+
+  HEATMAP_DATA.forEach((row, i) => {
+    const vals = row.filter(v=>v!==null);
+    const best = vals.length ? Math.max(...vals) : null;
+    const bestIdx = row.indexOf(best);
+    html += `<tr>
+      <td class="td-bold" style="white-space:nowrap">${HEATMAP_AUDS[i]}</td>
+      ${row.map((v,j)=>`<td style="${cellColor(v)};text-align:center;font-family:var(--mono);font-size:11px;padding:10px 8px">
+        ${v!==null ? (j===bestIdx?`<strong>${v}%</strong>`:v+'%') : '—'}
+      </td>`).join('')}
+      <td style="font-family:var(--mono);font-size:10px;color:var(--ink-soft)">
+        ${bestIdx>=0?HEATMAP_CREATIVES[bestIdx]:'—'}
+        ${best?`<div style="color:var(--ink-muted);font-size:9px">CTR ${best}%</div>`:''}
+      </td>
+    </tr>`;
+  });
+  html += '</tbody>';
+  document.getElementById('audHeatmap').innerHTML = html;
+}
+
+// ── RENDER AUDIENCE CARDS ──
+function renderAudCards(){
+  document.getElementById('audCards').innerHTML = AUD_DATA.map(a => {
+    const best = [...a.criativos].sort((x,y)=>y.score-x.score)[0];
+    return `<div style="background:var(--bg);padding:20px 22px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="font-family:var(--fh);font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:.04em">${a.name}</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);letter-spacing:.08em;margin-top:3px">${a.plat} · ${a.size}</div>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;padding:3px 10px;background:var(--bg3);color:var(--ink-mid)">${a.criativos.length} criativos</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${a.criativos.map(cr => {
+          const barW = cr.score;
+          const cls = cr.score>=90?'ok':cr.score>=65?'warn':'';
+          return `<div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+              <span style="font-size:12px;font-weight:500">${cr.name}</span>
+              <span style="font-family:var(--mono);font-size:10px;color:var(--ink-mid)">CTR ${cr.ctr}</span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div style="flex:1;height:3px;background:var(--bg3);position:relative">
+                <div class="pacing-fill ${cls}" style="width:${barW}%;height:100%;position:absolute;top:0;left:0"></div>
+              </div>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);width:60px;text-align:right">${cr.leads} leads</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border-d)">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:4px">// melhor combinação</div>
+        <div style="font-size:12px;font-weight:600">${best.name}</div>
+        <div style="display:flex;gap:12px;margin-top:6px">
+          <div><div style="font-family:var(--mono);font-size:8px;color:var(--ink-muted);letter-spacing:.1em">CTR</div><div style="font-family:var(--fh);font-weight:700;font-size:16px">${best.ctr}</div></div>
+          <div><div style="font-family:var(--mono);font-size:8px;color:var(--ink-muted);letter-spacing:.1em">LEADS</div><div style="font-family:var(--fh);font-weight:700;font-size:16px">${best.leads}</div></div>
+          <div><div style="font-family:var(--mono);font-size:8px;color:var(--ink-muted);letter-spacing:.1em">CPM</div><div style="font-family:var(--fh);font-weight:700;font-size:16px">${best.cpm}</div></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── RENDER OVERVIEW TOP3 ──
+function renderOverviewTop3(){
+  document.getElementById('ov-top3').innerHTML = TOP3_AUD.map((t,i) => `
+    <div style="background:var(--bg);padding:0;overflow:hidden">
+      <div style="position:relative">
+        <img src="${t.img}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block" loading="lazy" onerror="this.style.background='var(--bg3)';this.src=''">
+        <div style="position:absolute;top:10px;left:10px;background:var(--ink);color:#fff;font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:3px 10px">#${i+1}</div>
+        <div style="position:absolute;top:10px;right:10px;background:var(--bg);font-family:var(--mono);font-size:9px;color:var(--ink);padding:3px 8px;border:1px solid var(--border)">Score ${t.score}</div>
+      </div>
+      <div style="padding:18px 20px">
+        <div style="font-family:var(--fh);font-weight:700;font-size:16px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">${t.name}</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);letter-spacing:.08em;margin-bottom:12px">${t.plat}</div>
+
+        <div style="background:var(--bg2);padding:10px 12px;margin-bottom:12px;border-left:2px solid var(--ink)">
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:4px">// audiência</div>
+          <div style="font-size:12px;font-weight:600">${t.audience}</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:2px">${t.aud_size}</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px">
+          <div style="background:var(--bg2);padding:8px 10px"><div style="font-family:var(--mono);font-size:8px;color:var(--ink-muted);letter-spacing:.12em">CTR</div><div style="font-family:var(--fh);font-weight:700;font-size:18px">${t.ctr}</div></div>
+          <div style="background:var(--bg2);padding:8px 10px"><div style="font-family:var(--mono);font-size:8px;color:var(--ink-muted);letter-spacing:.12em">LEADS</div><div style="font-family:var(--fh);font-weight:700;font-size:18px">${t.leads}</div></div>
+          <div style="background:var(--bg2);padding:8px 10px"><div style="font-family:var(--mono);font-size:8px;color:var(--ink-muted);letter-spacing:.12em">CPM</div><div style="font-family:var(--fh);font-weight:700;font-size:18px">${t.cpm}</div></div>
+        </div>
+
+        <div style="font-size:12px;color:var(--ink-soft);line-height:1.6;border-top:1px solid var(--border-d);padding-top:10px">${t.insight}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── RENDER OVERVIEW STATUS ──
+function renderOverviewStatus(){
+  const recent = STATUS_DATA.slice(0,6);
+  document.getElementById('ov-statusTable').innerHTML = recent.map(s=>`
+    <tr>
+      <td class="td-bold">${s.criativo}</td>
+      <td class="td-mono">${s.plat}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.camp}</td>
+      <td>${badgeH(s.status)}</td>
+      <td class="td-mono" style="color:var(--ink-muted)">${s.upd}</td>
+    </tr>`).join('');
+  document.getElementById('ov-stI').textContent = STATUS_DATA.filter(s=>s.status==='implemented').length;
+  document.getElementById('ov-stP').textContent = STATUS_DATA.filter(s=>s.status==='pending').length;
+  document.getElementById('ov-stE').textContent = STATUS_DATA.filter(s=>s.status==='error').length;
+  document.getElementById('ov-stS').textContent = STATUS_DATA.filter(s=>s.status==='stand_by').length;
+}
+
 // ── CHART RESIZE ──
 function setupChartResize(){
   if(!window.ResizeObserver) return;
@@ -984,6 +1228,10 @@ window.addEventListener('load',()=>{
   renderSocialPyramid();
   renderStatus();
   renderGantt();
+  renderAudHeatmap();
+  renderAudCards();
+  renderOverviewTop3();
+  renderOverviewStatus();
   initCharts();
   setupChartResize();
 });
