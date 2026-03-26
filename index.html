@@ -1,888 +1,654 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rise Up MTech — Automação de Mídia Digital</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rise Up MTech — Infraestrutura de Mídia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050508;
+    --bg2: #080810;
+    --surface: #0d0d1a;
+    --surface2: #111120;
+    --orange: #c45e00;
+    --orange-bright: #ff7a1a;
+    --orange-glow: rgba(196,94,0,0.15);
+    --text: #e8e8f0;
+    --text-dim: #e8e8f0;
+    --text-dimmer: #3a3a5a;
+    --border: rgba(196,94,0,0.2);
+    --border-dim: rgba(255,255,255,0.04);
+    --grid: rgba(196,94,0,0.04);
+  }
 
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
 
-    :root {
-      --ink:       #0d0d0d;
-      --ink-soft:  #4a4a4a;
-      --ink-muted: #9a9a9a;
-      --bg:        #fafaf7;
-      --bg-2:      #f2f1ec;
-      --bg-3:      #e8e6de;
-      --accent:    #c45e00;
-      --accent-2:  #e07010;
-      --accent-lt: #fde8cc;
-      --white:     #ffffff;
-      --border:    #e2e0d8;
-      --ff-display: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      --ff-body: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
 
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--ink); overflow-x: hidden; }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-    /* ── NAV ── */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 0 60px; height: 68px;
-      background: rgba(250,250,247,0.94); backdrop-filter: blur(16px);
-      border-bottom: 1px solid transparent;
-      transition: border-color 0.3s, background 0.3s;
-    }
-    nav.scrolled { border-color: var(--border); }
-    .nav-logo { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 19px; font-weight: 600; color: var(--ink); text-decoration: none; letter-spacing: -0.4px; }
-    .nav-logo em { font-style: normal; font-weight: 300; color: var(--accent); }
-    .nav-links { display: flex; gap: 32px; list-style: none; align-items: center; }
-    .nav-links a { font-size: 14px; font-weight: 400; color: var(--ink-soft); text-decoration: none; letter-spacing: 0.1px; transition: color 0.2s; }
-    .nav-links a:hover { color: var(--ink); }
-    .nav-cta { background: var(--ink) !important; color: var(--white) !important; padding: 9px 20px !important; border-radius: 6px !important; font-weight: 500 !important; transition: background 0.2s !important; }
-    .nav-cta:hover { background: var(--accent) !important; }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+    pointer-events: none;
+    z-index: 0;
+  }
 
-    .nav-toggle { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; z-index: 202; position: relative; }
-    .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--ink); border-radius: 2px; transition: all 0.3s; }
-    .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .nav-toggle.open span:nth-child(2) { opacity: 0; }
-    .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-    .nav-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; opacity: 0; transition: opacity 0.3s; }
-    .nav-overlay.open { display: block; opacity: 1; }
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 48px;
+    width: 100%;
+  }
 
-    /* ── HERO ── */
-    .hero {
-      min-height: 100vh;
-      display: flex; flex-direction: column; justify-content: center;
-      padding: 120px 60px 80px;
-      position: relative; overflow: hidden;
-    }
-    .hero::before {
-      content: '';
-      position: absolute; top: 0; right: -10%; bottom: 0;
-      width: 55%; background: var(--bg-2);
-      clip-path: polygon(12% 0, 100% 0, 100% 100%, 0% 100%);
-      pointer-events: none;
-    }
-    .hero-inner { position: relative; z-index: 1; max-width: 780px; }
-    .hero-tag {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--accent-lt); color: var(--accent);
-      padding: 5px 14px; border-radius: 100px;
-      font-size: 12px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase;
-      margin-bottom: 32px;
-      opacity: 0; animation: up 0.7s 0.1s forwards;
-    }
-    .hero-tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(5,5,8,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    height: 64px;
+    display: flex;
+    align-items: center;
+  }
 
-    .hero h1 {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      font-size: clamp(44px, 6.5vw, 88px);
-      font-weight: 700; line-height: 1.0; letter-spacing: -3px;
-      color: var(--ink); margin-bottom: 28px;
-      opacity: 0; animation: up 0.8s 0.25s forwards;
-    }
-    .hero h1 em { font-style: normal; color: var(--accent); font-weight: 300; }
+  .nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 48px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 
-    .hero-sub {
-      font-size: 18px; font-weight: 300; color: var(--ink-soft);
-      line-height: 1.7; max-width: 540px; margin-bottom: 48px;
-      opacity: 0; animation: up 0.8s 0.4s forwards;
-    }
+  .nav-logo {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    color: var(--orange-bright);
+    text-transform: uppercase;
+  }
+  .nav-logo span { color: var(--text-dim); }
 
-    .hero-actions {
-      display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
-      opacity: 0; animation: up 0.8s 0.55s forwards;
-    }
-    .btn-dark { background: var(--ink); color: var(--white); padding: 14px 28px; border-radius: 8px; font-size: 15px; font-weight: 500; text-decoration: none; transition: all 0.2s; border: 1.5px solid var(--ink); white-space: nowrap; }
-    .btn-dark:hover { background: var(--accent); border-color: var(--accent); }
-    .btn-ghost { color: var(--ink); padding: 14px 28px; border-radius: 8px; font-size: 15px; font-weight: 400; text-decoration: none; transition: all 0.2s; border: 1.5px solid var(--border); white-space: nowrap; background: transparent; }
-    .btn-ghost:hover { border-color: var(--ink); }
+  .nav-links { display: flex; gap: 40px; list-style: none; }
+  .nav-links a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--orange-bright); }
 
-    .hero-metrics {
-      display: flex; gap: 48px; margin-top: 72px; padding-top: 48px;
-      border-top: 1px solid var(--border);
-      opacity: 0; animation: up 0.8s 0.7s forwards;
-      flex-wrap: wrap;
-    }
-    .metric-item {}
-    .metric-value { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 42px; font-weight: 700; letter-spacing: -1.5px; color: var(--ink); line-height: 1; margin-bottom: 6px; }
-    .metric-value span { color: var(--accent); }
-    .metric-label { font-size: 13px; font-weight: 400; color: var(--ink-muted); }
+  .nav-cta {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--orange-bright);
+    text-decoration: none;
+    text-transform: uppercase;
+    border: 1px solid var(--orange);
+    padding: 8px 20px;
+    transition: all 0.2s;
+  }
+  .nav-cta:hover { background: var(--orange-glow); box-shadow: 0 0 20px rgba(196,94,0,0.3); }
 
-    /* ── LOGOS ── */
-    .logos { padding: 40px 60px; background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-    .logos-inner { display: flex; align-items: center; gap: 48px; overflow-x: auto; }
-    .logos-label { font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-muted); white-space: nowrap; }
-    .logos-divider { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
-    .logo-pill { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1px solid var(--border); border-radius: 8px; white-space: nowrap; flex-shrink: 0; transition: border-color 0.2s; }
-    .logo-pill img { display: block; object-fit: contain;  }
-    .platform-card img {  }
-    .logo-pill:hover { border-color: var(--ink-muted); }
-    .logo-pill-name { font-size: 13px; font-weight: 500; color: var(--ink-soft); }
+  /* ─── HERO ─── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 120px 48px 80px;
+    overflow: hidden;
+    z-index: 1;
+  }
 
-    /* ── SECTION BASE ── */
-    .section-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
-    .section-h { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: clamp(28px, 3.5vw, 48px); font-weight: 600; letter-spacing: -1px; line-height: 1.1; margin-bottom: 20px; }
-    .section-h em { font-style: normal; font-weight: 300; color: var(--accent); }
-    .section-p { font-size: 16px; font-weight: 300; color: var(--ink-soft); line-height: 1.75; max-width: 520px; }
+  .hero-orb {
+    position: absolute;
+    width: 800px; height: 800px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,94,0,0.12) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    animation: pulse 6s ease-in-out infinite;
+  }
 
-    /* ── PROBLEM ── */
-    .problem { padding: 120px 60px; background: var(--ink); color: var(--white); }
-    .problem .section-eyebrow { color: var(--accent-lt); }
-    .problem .section-h { color: var(--white); }
-    .problem .section-h em { color: #f5b06e; }
-    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; margin-top: 64px; }
-    .problem-list { display: flex; flex-direction: column; gap: 0; }
-    .problem-item { display: flex; gap: 20px; padding: 28px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .problem-item:first-child { padding-top: 0; }
-    .problem-item:last-child { border-bottom: none; }
-    .problem-num { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; color: rgba(255,255,255,0.3); min-width: 28px; padding-top: 3px; }
-    .problem-text h3 { font-size: 16px; font-weight: 500; color: var(--white); margin-bottom: 8px; }
-    .problem-text p { font-size: 14px; font-weight: 300; color: rgba(255,255,255,0.55); line-height: 1.7; }
-    .problem-after { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 40px; }
-    .problem-after-label { font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 24px; }
-    .flow-step { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
-    .flow-step:last-child { border-bottom: none; }
-    .flow-step-dot { width: 8px; height: 8px; border-radius: 50%; background: #f5b06e; flex-shrink: 0; }
-    .flow-step-dot.dim { background: rgba(255,255,255,0.2); }
-    .flow-step-text { font-size: 14px; color: rgba(255,255,255,0.75); font-weight: 400; }
-    .flow-step-badge { margin-left: auto; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 100px; white-space: nowrap; }
-    .badge-green { background: rgba(245,176,110,0.15); color: #f5b06e; }
-    .badge-yellow { background: rgba(255,200,80,0.12); color: #ffc850; }
-    .badge-dim { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.35); }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+  }
 
-    /* ── HOW ── */
-    .how { padding: 120px 60px; background: var(--bg); }
-    .how-intro { max-width: 600px; margin-bottom: 80px; }
-    .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--border); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
-    .how-card { background: var(--white); padding: 40px 36px; position: relative; overflow: hidden; transition: background 0.2s; }
-    .how-card:hover { background: var(--bg-2); }
-    .how-card-num { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 64px; font-weight: 700; color: var(--bg-3); line-height: 1; margin-bottom: 24px; letter-spacing: -3px; }
-    .how-card h3 { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 17px; font-weight: 600; margin-bottom: 12px; letter-spacing: -0.2px; }
-    .how-card p { font-size: 14px; font-weight: 300; color: var(--ink-soft); line-height: 1.7; }
-    .how-card-tag { display: inline-block; background: var(--accent-lt); color: var(--accent); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 100px; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 20px; }
+  .hero-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--orange);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+  .hero-tag::before { content: '// '; color: var(--text-dimmer); }
 
-    /* ── FEATURES ── */
-    .features { padding: 120px 60px; background: var(--bg-2); }
-    .features-intro { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 80px; gap: 40px; }
-    .features-intro .section-p { margin: 0; }
-    .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
-    .feature-card { background: var(--white); border-radius: 16px; padding: 40px; border: 1px solid var(--border); display: flex; gap: 24px; align-items: flex-start; transition: all 0.25s; }
-    .feature-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.07); }
-    .feature-icon { width: 44px; height: 44px; border-radius: 10px; background: var(--accent-lt); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-    .feature-body h3 { font-size: 16px; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.2px; }
-    .feature-body p { font-size: 14px; font-weight: 300; color: var(--ink-soft); line-height: 1.7; }
+  .hero h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(64px, 10vw, 140px);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+  .hero h1 .line-dim { color: var(--text-dimmer); display: block; }
+  .hero h1 .line-orange { color: var(--orange-bright); display: block; text-shadow: 0 0 60px rgba(255,122,26,0.4); }
+  .hero h1 .line-main { display: block; }
 
-    /* ── PLATFORMS ── */
-    .platforms { padding: 120px 60px; background: var(--white); }
-    .platforms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 64px; }
-    .platform-card { border: 1.5px solid var(--border); border-radius: 14px; padding: 32px; transition: all 0.25s; position: relative; overflow: hidden; }
-    .platform-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--accent); transform: scaleX(0); transition: transform 0.3s; transform-origin: left; }
-    .platform-card:hover { border-color: var(--accent); box-shadow: 0 8px 32px rgba(196,94,0,0.08); }
-    .platform-card:hover::after { transform: scaleX(1); }
-    .platform-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
-    .platform-card p { font-size: 14px; font-weight: 300; color: var(--ink-soft); line-height: 1.65; }
-    .platform-status { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; font-size: 12px; font-weight: 500; }
-    .platform-status.live { color: var(--accent); }
-    .platform-status.soon { color: var(--ink-muted); }
-    .platform-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .hero-sub {
+    max-width: 520px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-dim);
+    margin-bottom: 56px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
 
-    /* ── PRICING ── */
-    .pricing { padding: 120px 60px; background: var(--bg-2); }
-    .pricing-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 64px; }
-    .pricing-card { background: var(--white); border-radius: 16px; padding: 40px; border: 1.5px solid var(--border); position: relative; transition: all 0.25s; display: flex; flex-direction: column; }
-    .pricing-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.08); }
-    .pricing-card.featured { background: var(--ink); border-color: var(--ink); color: var(--white); }
-    .pricing-featured-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: var(--white); font-size: 11px; font-weight: 600; padding: 4px 16px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
-    .pricing-tier { font-size: 12px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 12px; }
-    .pricing-card.featured .pricing-tier { color: rgba(255,255,255,0.45); }
-    .pricing-tag { display: inline-block; background: var(--accent-lt); color: var(--accent); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 100px; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 20px; }
-    .pricing-card.featured .pricing-tag { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
-    .pricing-name { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
-    .pricing-desc { font-size: 14px; font-weight: 300; color: var(--ink-soft); line-height: 1.6; margin-bottom: 28px; min-height: 60px; }
-    .pricing-card.featured .pricing-desc { color: rgba(255,255,255,0.6); }
-    .pricing-amount-wrap { margin-bottom: 8px; }
-    .pricing-amount { font-size: 42px; font-weight: 700; letter-spacing: -2px; line-height: 1; }
-    .pricing-amount small { font-size: 18px; font-weight: 400; letter-spacing: 0; }
-    .pricing-period { font-size: 13px; color: var(--ink-muted); margin-bottom: 28px; }
-    .pricing-card.featured .pricing-period { color: rgba(255,255,255,0.4); }
-    .pricing-divider { height: 1px; background: var(--border); margin-bottom: 24px; }
-    .pricing-card.featured .pricing-divider { background: rgba(255,255,255,0.1); }
-    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 11px; margin-bottom: 32px; flex: 1; }
-    .pricing-features li { font-size: 14px; font-weight: 300; display: flex; gap: 10px; align-items: flex-start; }
-    .pricing-features li::before { content: '✓'; font-size: 12px; font-weight: 700; color: var(--accent); margin-top: 2px; flex-shrink: 0; }
-    .pricing-card.featured .pricing-features li { color: rgba(255,255,255,0.8); }
-    .pricing-card.featured .pricing-features li::before { color: #f5b06e; }
-    .pricing-tiers { display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px; }
-    .pricing-tier-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-2); border-radius: 8px; font-size: 13px; }
-    .pricing-card.featured .pricing-tier-row { background: rgba(255,255,255,0.08); }
-    .pricing-tier-row span:first-child { color: var(--ink-soft); font-weight: 400; }
-    .pricing-card.featured .pricing-tier-row span:first-child { color: rgba(255,255,255,0.6); }
-    .pricing-tier-row span:last-child { font-weight: 600; color: var(--ink); }
-    .pricing-card.featured .pricing-tier-row span:last-child { color: var(--white); }
-    .pricing-btn { display: block; width: 100%; padding: 13px; border-radius: 8px; font-size: 15px; font-weight: 500; text-align: center; text-decoration: none; cursor: pointer; font-family: var(--ff-body); transition: all 0.2s; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); margin-top: auto; }
-    .pricing-btn:hover { background: var(--ink); color: var(--white); }
-    .pricing-card.featured .pricing-btn { background: var(--white); color: var(--ink); border-color: var(--white); }
-    .pricing-card.featured .pricing-btn:hover { background: var(--accent-lt); border-color: var(--accent-lt); }
-    @media (max-width: 768px) { .pricing-grid { grid-template-columns: 1fr; } .pricing { padding: 72px 24px; } }
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
 
-    /* ── CONTACT ── */
-    .contact { padding: 120px 60px; background: var(--white); }
-    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 100px; align-items: start; }
-    .contact-info .section-h { margin-bottom: 20px; }
-    .contact-info .section-p { margin-bottom: 40px; }
-    .contact-detail { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 14px; color: var(--ink-soft); }
-    .contact-detail strong { color: var(--ink); font-weight: 500; }
-    .contact-form { display: flex; flex-direction: column; gap: 16px; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group label { font-size: 13px; font-weight: 500; color: var(--ink); }
-    .form-group input, .form-group select, .form-group textarea { padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 15px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 300; color: var(--ink); background: var(--bg); transition: border-color 0.2s; outline: none; resize: none; }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); background: var(--white); }
-    .form-submit { background: var(--ink); color: var(--white); padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 500; border: none; cursor: pointer; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; transition: background 0.2s; margin-top: 4px; }
-    .form-submit:hover { background: var(--accent); }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-    /* ── FOOTER ── */
-    footer { padding: 40px 60px; border-top: 1px solid var(--border); background: var(--bg); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
-    .footer-logo { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 17px; font-weight: 600; color: var(--ink); text-decoration: none; }
-    .footer-logo em { font-style: normal; font-weight: 300; color: var(--accent); }
-    .footer-links { display: flex; gap: 28px; list-style: none; flex-wrap: wrap; }
-    .footer-links a { font-size: 13px; color: var(--ink-muted); text-decoration: none; transition: color 0.2s; }
-    .footer-links a:hover { color: var(--ink); }
-    .footer-copy { font-size: 13px; color: var(--ink-muted); }
+  /* BUTTONS */
+  .btn-primary {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--orange-bright);
+    padding: 14px 32px;
+    text-decoration: none;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.15); transform: translateX(-100%); transition: transform 0.3s; }
+  .btn-primary:hover::after { transform: translateX(0); }
+  .btn-primary:hover { box-shadow: 0 0 40px rgba(255,122,26,0.5); }
 
-    /* ── LEGAL PAGES ── */
-    .legal-wrap { display: none; min-height: 100vh; padding: 120px 60px 80px; background: var(--bg); }
-    .legal-wrap.active { display: block; }
-    .main-wrap.hidden { display: none; }
-    .legal-container { max-width: 760px; margin: 0 auto; }
-    .legal-back { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-muted); font-size: 14px; text-decoration: none; margin-bottom: 40px; cursor: pointer; background: none; border: none; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; transition: color 0.2s; }
-    .legal-back:hover { color: var(--ink); }
-    .legal-back::before { content: '←'; }
-    .legal-wrap h1 { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: clamp(32px, 4vw, 48px); font-weight: 600; letter-spacing: -1px; margin-bottom: 10px; }
-    .legal-date { font-size: 13px; color: var(--ink-muted); margin-bottom: 48px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
-    .legal-wrap h2 { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 22px; font-weight: 600; margin-top: 40px; margin-bottom: 12px; }
-    .legal-wrap p { font-size: 15px; font-weight: 300; color: var(--ink-soft); line-height: 1.8; margin-bottom: 16px; }
-    .legal-wrap ul { margin: 12px 0 16px 24px; }
-    .legal-wrap ul li { font-size: 15px; font-weight: 300; color: var(--ink-soft); line-height: 1.8; margin-bottom: 8px; }
-    .legal-wrap a { color: var(--accent); }
+  .btn-ghost {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 14px 32px;
+    border: 1px solid var(--border-dim);
+    transition: all 0.2s;
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--border); }
 
-    /* ── ANIMATIONS ── */
-    @keyframes up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .reveal { opacity: 1; transform: translateY(0); }
+  /* ─── TICKER ─── */
+  .ticker {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    border-top: 1px solid var(--border-dim);
+    border-bottom: 1px solid var(--border-dim);
+    background: var(--surface);
+    padding: 16px 0;
+  }
+  .ticker-inner { display: flex; gap: 80px; animation: ticker 30s linear infinite; white-space: nowrap; }
+  .ticker-item { font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 0.15em; color: var(--text-dimmer); text-transform: uppercase; flex-shrink: 0; }
+  .ticker-item span { color: var(--orange); margin: 0 8px; }
+  @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 1024px) {
-      nav { padding: 0 32px; }
-      .hero, .logos, .problem, .how, .features, .platforms,
-      footer { padding: 36px 32px; }
-      .problem-grid { grid-template-columns: 1fr; gap: 48px; }
-      .how-grid { grid-template-columns: 1fr 1fr; }
-      .features-intro { flex-direction: column; align-items: flex-start; }
-      .contact-grid { grid-template-columns: 1fr; gap: 60px; }
-      .legal-wrap { padding: 100px 32px 60px; }
-    }
-    @media (max-width: 768px) {
-      nav { padding: 0 24px; }
-      .nav-toggle { display: flex; }
-      .nav-links {
-        position: fixed; top: 0; right: 0; bottom: 0; width: min(300px, 82vw);
-        background: var(--white); flex-direction: column; align-items: flex-start;
-        justify-content: center; gap: 6px; padding: 80px 32px 48px;
-        transform: translateX(100%); transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
-        z-index: 201; box-shadow: -12px 0 48px rgba(0,0,0,0.12);
-      }
-      .nav-links.open { transform: translateX(0); }
-      .nav-links li { width: 100%; }
-      .nav-links a { font-size: 17px; padding: 12px 0; border-bottom: 1px solid var(--border); display: block; width: 100%; }
-      .nav-links li:last-child a { border-bottom: none; }
-      .nav-cta { border-radius: 8px !important; text-align: center; border-bottom: none !important; margin-top: 8px; }
-      .hero { padding: 100px 24px 64px; }
-      .hero::before { display: none; }
-      .hero-metrics { gap: 32px; }
-      .logos { padding: 32px 24px; }
-      .problem, .how, .features, .platforms,
-      .how-grid { grid-template-columns: 1fr; }
-      .features-grid { grid-template-columns: 1fr; }
-      .platforms-grid { grid-template-columns: 1fr; }
-      footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
-      .form-row { grid-template-columns: 1fr; }
-      .hero-actions { flex-direction: column; align-items: stretch; }
-      .btn-dark, .btn-ghost { text-align: center; }
-      .legal-wrap { padding: 90px 24px 60px; }
-    }
-  </style>
+  /* ─── SECTION BASE ─── */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 120px 0;
+  }
+
+  .section-header { margin-bottom: 80px; text-align: center; }
+
+  .section-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--orange);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .section-tag::before { content: '// '; color: var(--text-dimmer); }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(40px, 6vw, 80px);
+    text-transform: uppercase;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+  }
+  .section-title em { font-style: normal; color: var(--orange-bright); }
+
+  /* ─── MANIFESTO ─── */
+  .manifesto {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 120px 0;
+  }
+  .manifesto-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 300;
+    font-size: clamp(22px, 3vw, 38px);
+    line-height: 1.3;
+    color: var(--text);
+    letter-spacing: 0.01em;
+    text-align: center;
+  }
+  .manifesto-text strong { font-weight: 700; color: var(--orange-bright); }
+  .manifesto-text .dim { color: var(--text-dim); }
+
+  /* ─── PRODUTOS ─── */
+  .produtos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    background: var(--border-dim);
+  }
+
+  .produto-card {
+    background: var(--bg);
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+    text-align: left;
+  }
+  .produto-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--orange); transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
+  .produto-card:hover::before { transform: scaleX(1); }
+  .produto-card:hover { background: var(--surface); }
+
+  .produto-num { font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: var(--text-dimmer); margin-bottom: 32px; }
+  .produto-icon { font-size: 32px; margin-bottom: 20px; filter: grayscale(1) opacity(0.6); transition: filter 0.3s; }
+  .produto-card:hover .produto-icon { filter: none; opacity: 1; }
+  .produto-nome { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; letter-spacing: 0.02em; margin-bottom: 16px; color: var(--text); }
+  .produto-desc { font-size: 14px; line-height: 1.7; color: var(--text-dim); margin-bottom: 32px; }
+  .produto-preco { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--orange-bright); letter-spacing: 0.05em; }
+  .produto-tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+  .produto-tag { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: var(--text-dimmer); border: 1px solid var(--border-dim); padding: 4px 10px; text-transform: uppercase; }
+
+  /* ─── PLATAFORMAS ─── */
+  .plataformas { background: var(--surface); border-top: 1px solid var(--border-dim); padding: 120px 0; }
+
+  .plataformas-header { text-align: center; margin-bottom: 80px; }
+  .plataformas-count { display: none; }
+
+  .plataformas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--border-dim); }
+
+  .plat-item {
+    background: var(--bg2);
+    padding: 36px 32px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .plat-item::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--orange); transform: scaleY(0); transition: transform 0.3s; }
+  .plat-item:hover { background: var(--surface2); }
+  .plat-item:hover::after { transform: scaleY(1); }
+
+  .plat-logo { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; filter: brightness(0) invert(1) opacity(0.3); transition: filter 0.3s; }
+  .plat-item:hover .plat-logo { filter: brightness(0) saturate(100%) invert(48%) sepia(79%) saturate(600%) hue-rotate(5deg) brightness(103%) contrast(101%) opacity(1); }
+  .plat-logo svg { width: 100%; height: 100%; }
+
+  .plat-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .plat-type { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-dimmer); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+
+  /* ─── COMO FUNCIONA ─── */
+  .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: var(--border-dim); margin-top: 80px; }
+
+  .step-card { background: var(--bg); padding: 40px 32px; text-align: left; }
+  .step-num { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 64px; color: var(--border); line-height: 1; margin-bottom: 24px; }
+  .step-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+  .step-desc { font-size: 13px; line-height: 1.7; color: var(--text-dim); }
+
+  /* ─── CTA ─── */
+  .cta-section { background: var(--surface); border-top: 1px solid var(--border); text-align: center; padding: 160px 0; }
+  .cta-glitch { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: clamp(48px, 8vw, 100px); text-transform: uppercase; line-height: 0.95; margin-bottom: 40px; display: inline-block; }
+  .cta-glitch .line1 { color: var(--text-dimmer); display: block; }
+  .cta-glitch .line2 { color: var(--orange-bright); display: block; text-shadow: 0 0 80px rgba(255,122,26,0.5); }
+  .cta-sub { font-size: 15px; color: var(--text-dim); max-width: 460px; margin: 0 auto 48px; line-height: 1.7; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border-dim);
+    padding: 48px 0;
+  }
+  .footer-inner { max-width: 1100px; margin: 0 auto; padding: 0 48px; display: flex; justify-content: space-between; align-items: center; }
+  .footer-logo { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--orange-bright); letter-spacing: 0.1em; }
+  .footer-copy { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-dimmer); letter-spacing: 0.1em; text-transform: uppercase; }
+  .footer-links { display: flex; gap: 32px; list-style: none; }
+  .footer-links a { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.15em; color: var(--text-dimmer); text-decoration: none; text-transform: uppercase; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--orange-bright); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .wrap, .nav-inner, .footer-inner { padding: 0 24px; }
+    .nav-links { display: none; }
+    section { padding: 80px 0; }
+    .hero { padding: 100px 24px 60px; }
+    .produtos-grid { grid-template-columns: 1fr; }
+    .plataformas-grid { grid-template-columns: repeat(2, 1fr); }
+    .steps-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer-inner { flex-direction: column; gap: 24px; text-align: center; }
+    .footer-links { display: none; }
+    .plataformas-header { flex-direction: column; gap: 16px; }
+  }
+</style>
 </head>
 <body>
 
-  <!-- NAV -->
-  <nav id="navbar">
-    <a href="#" class="nav-logo" onclick="return showMain()">Rise Up <em>MTech</em></a>
-    <button class="nav-toggle" id="navToggle" onclick="toggleMenu()" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="#how" onclick="closeMenu()">Como funciona</a></li>
-      <li><a href="#features" onclick="closeMenu()">Funcionalidades</a></li>
-      <li><a href="#platforms" onclick="closeMenu()">Plataformas</a></li>
-      
-      <li><a href="#pricing" onclick="closeMenu()">Produtos</a></li>
-      <li><a href="#contact" class="nav-cta" onclick="closeMenu()">Fale conosco</a></li>
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">Rise Up<span>_MTech</span></div>
+    <ul class="nav-links">
+      <li><a href="#produtos">Produtos</a></li>
+      <li><a href="#plataformas">Plataformas</a></li>
+      <li><a href="#como-funciona">Como Funciona</a></li>
     </ul>
-  </nav>
-  <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+    <a href="#contato" class="nav-cta">Acesso</a>
+  </div>
+</nav>
 
-  <!-- MAIN CONTENT -->
-  <div class="main-wrap" id="mainWrap">
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="hero-orb"></div>
+  <div class="hero-tag">Infraestrutura de Mídia Digital</div>
+  <h1>
+    <span class="line-dim">Controle</span>
+    <span class="line-orange">Total</span>
+    <span class="line-main">da Mídia.</span>
+  </h1>
+  <p class="hero-sub">
+    Um sistema integrado que extrai, organiza e dispara campanhas em 9 plataformas — sem atrito, sem planilha manual, sem margem para erro humano.
+  </p>
+  <div class="hero-actions">
+    <a href="#produtos" class="btn-primary">Ver o Sistema</a>
+    <a href="#como-funciona" class="btn-ghost">Como Funciona →</a>
+  </div>
+</section>
 
-    <!-- HERO -->
-    <section class="hero">
-      <div class="hero-inner">
-        <div class="hero-tag">Media Automation Platform</div>
-        <h1>Do briefing<br>ao ar em<br><em>minutos.</em></h1>
-        <p class="hero-sub">Transforme um plano de mídia em campanhas ativas no Google, Meta e TikTok — sem trabalho manual, sem erros, sem duplicatas.</p>
-        <div class="hero-actions">
-          <a href="#contact" class="btn-dark">Começar agora</a>
-          <a href="#how" class="btn-ghost">Ver como funciona →</a>
-        </div>
-        <div class="hero-metrics">
-          <div class="metric-item">
-            <div class="metric-value">3<span>+</span></div>
-            <div class="metric-label">Plataformas integradas</div>
-          </div>
-          <div class="metric-item">
-            <div class="metric-value">100<span>%</span></div>
-            <div class="metric-label">Automação end-to-end</div>
-          </div>
-          <div class="metric-item">
-            <div class="metric-value">0</div>
-            <div class="metric-label">Erros de implementação</div>
-          </div>
-          <div class="metric-item">
-            <div class="metric-value">↓<span>80</span><span style="font-size:28px">%</span></div>
-            <div class="metric-label">Tempo de operação</div>
-          </div>
-        </div>
-      </div>
-    </section>
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <div class="ticker-item">Google Ads<span>▸</span></div>
+    <div class="ticker-item">Meta Ads<span>▸</span></div>
+    <div class="ticker-item">TikTok Ads<span>▸</span></div>
+    <div class="ticker-item">DV360<span>▸</span></div>
+    <div class="ticker-item">Pinterest<span>▸</span></div>
+    <div class="ticker-item">Amazon Ads<span>▸</span></div>
+    <div class="ticker-item">LinkedIn<span>▸</span></div>
+    <div class="ticker-item">GA4<span>▸</span></div>
+    <div class="ticker-item">YouTube<span>▸</span></div>
+    <div class="ticker-item">Google Ads<span>▸</span></div>
+    <div class="ticker-item">Meta Ads<span>▸</span></div>
+    <div class="ticker-item">TikTok Ads<span>▸</span></div>
+    <div class="ticker-item">DV360<span>▸</span></div>
+    <div class="ticker-item">Pinterest<span>▸</span></div>
+    <div class="ticker-item">Amazon Ads<span>▸</span></div>
+    <div class="ticker-item">LinkedIn<span>▸</span></div>
+    <div class="ticker-item">GA4<span>▸</span></div>
+    <div class="ticker-item">YouTube<span>▸</span></div>
+  </div>
+</div>
 
-    <!-- LOGOS -->
-    <div class="logos">
-      <div class="logos-inner">
-        <span class="logos-label">Integra com</span>
-        <div class="logos-divider"></div>
-        <div class="logo-pill"><svg height="18" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg"><path d="M155.3 108.3l-37.1-64.2a21.4 21.4 0 00-36.9 0L44.2 108.3a21.4 21.4 0 0018.5 32.1h74.2a21.4 21.4 0 0018.4-32.1z" fill="#4285F4"/><path d="M155.3 108.3l-37.1-64.2a21.4 21.4 0 00-36.9 0l18.5 32 37.1 64.2h18.4a21.4 21.4 0 0018.4-32.1h-18.4z" fill="#2563EB" opacity=".5"/></svg><span class="logo-pill-name">Google Ads</span></div>
-        <div class="logo-pill"><svg height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z" fill="#1877F2"/></svg><span class="logo-pill-name">Meta Ads</span></div>
-        <div class="logo-pill"><svg height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.2 8.2 0 004.79 1.53V6.78a4.85 4.85 0 01-1.02-.09z" fill="#010101"/></svg><span class="logo-pill-name">TikTok Ads</span></div>
-        <div class="logo-pill"><svg height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14.4 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.6L14.4 2z" fill="#0F9D58"/><path d="M14 2v6h6" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M8 12h8M8 15h8M8 18h5" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg><span class="logo-pill-name">Google Sheets</span></div>
-        <div class="logo-pill"><svg height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22 12a10 10 0 11-20 0 10 10 0 0120 0z" fill="#F57C00"/><path d="M11 7h2v10h-2zM7 11h2v6H7zM15 9h2v8h-2z" fill="#fff"/></svg><span class="logo-pill-name">Google Analytics</span></div>
-        <div class="logo-pill"><svg height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z" fill="#4285F4"/><path d="M12 2l9 5-9 5-9-5 9-5z" fill="#2196F3"/><path d="M3 7l9 5v10L3 17V7z" fill="#1565C0"/></svg><span class="logo-pill-name">BigQuery</span></div>
-        <div class="logo-pill"><svg height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" fill="#0A66C2"/></svg><span class="logo-pill-name">LinkedIn Ads</span></div>
-      </div>
+<!-- MANIFESTO -->
+<section class="manifesto">
+  <div class="wrap">
+    <p class="manifesto-text">
+      <span class="dim">Agências gastam semanas em</span> planilhas manuais, uploads repetidos e conciliação de dados entre plataformas. <strong>Isso acabou.</strong> <span class="dim">Rise Up MTech é o sistema que lê seu planejamento, monta as campanhas e entrega performance — tudo em uma arquitetura conectada,</span> <strong>do briefing ao relatório.</strong>
+    </p>
+  </div>
+</section>
+
+<!-- PRODUTOS -->
+<section id="produtos">
+  <div class="wrap">
+    <div class="section-header">
+      <div class="section-tag">Módulos do Sistema</div>
+      <h2 class="section-title">Escolha o<br><em>Seu Nível</em></h2>
     </div>
-    </div>
+    <div class="produtos-grid">
 
-    <!-- PROBLEM / SOLUTION -->
-    <section class="problem">
-      <div class="section-eyebrow reveal">O problema</div>
-      <h2 class="section-h reveal">Implementar mídia é <em>lento,<br>manual e cheio de erros.</em></h2>
-      <div class="problem-grid">
-        <div class="problem-list">
-          <div class="problem-item reveal">
-            <span class="problem-num">01</span>
-            <div class="problem-text">
-              <h3>Horas de trabalho repetitivo</h3>
-              <p>Cada campanha criada manualmente plataforma por plataforma consome horas de um profissional qualificado em tarefas que não agregam valor estratégico.</p>
-            </div>
-          </div>
-          <div class="problem-item reveal">
-            <span class="problem-num">02</span>
-            <div class="problem-text">
-              <h3>Erros de implementação caros</h3>
-              <p>UTMs errados, verbas trocadas, criativos no ad group errado — pequenos erros manuais comprometem resultados e criam problemas de mensuração irreversíveis.</p>
-            </div>
-          </div>
-          <div class="problem-item reveal">
-            <span class="problem-num">03</span>
-            <div class="problem-text">
-              <h3>Dados fragmentados entre plataformas</h3>
-              <p>Status de cada campanha espalhado em múltiplas plataformas, sem visão unificada do que está implementado, pendente ou com erro.</p>
-            </div>
-          </div>
-        </div>
-        <div class="problem-after reveal">
-          <div class="problem-after-label">Com a Rise Up MTech</div>
-          <div class="flow-step">
-            <div class="flow-step-dot"></div>
-            <span class="flow-step-text">Plano de mídia preenchido</span>
-            <span class="flow-step-badge badge-green">Sincronizado</span>
-          </div>
-          <div class="flow-step">
-            <div class="flow-step-dot"></div>
-            <span class="flow-step-text">Criativos aprovados</span>
-            <span class="flow-step-badge badge-green">Prontos</span>
-          </div>
-          <div class="flow-step">
-            <div class="flow-step-dot"></div>
-            <span class="flow-step-text">Google Display — 5 ads</span>
-            <span class="flow-step-badge badge-green">Implementado</span>
-          </div>
-          <div class="flow-step">
-            <div class="flow-step-dot"></div>
-            <span class="flow-step-text">Meta Instagram — 6 ads</span>
-            <span class="flow-step-badge badge-green">Implementado</span>
-          </div>
-          <div class="flow-step">
-            <div class="flow-step-dot dim"></div>
-            <span class="flow-step-text">YouTube — 2 ads</span>
-            <span class="flow-step-badge badge-yellow">Pendente</span>
-          </div>
-          <div class="flow-step">
-            <div class="flow-step-dot dim"></div>
-            <span class="flow-step-text">TikTok — 4 ads</span>
-            <span class="flow-step-badge badge-dim">Em breve</span>
-          </div>
+      <div class="produto-card">
+        <div class="produto-num">01 // ETL</div>
+        <div class="produto-icon">⬡</div>
+        <div class="produto-nome">Chrome ETL</div>
+        <p class="produto-desc">Extração automatizada de dados de mídia diretamente do browser. Conecte suas contas, defina o intervalo e receba os dados estruturados — sem API key exposta, sem planilha manual.</p>
+        <div class="produto-preco">R$250 / R$500 / R$1.000 — por mês</div>
+        <div class="produto-tag-list">
+          <span class="produto-tag">9 plataformas</span>
+          <span class="produto-tag">BigQuery</span>
+          <span class="produto-tag">Sheets sync</span>
         </div>
       </div>
-    </section>
 
-    <!-- HOW IT WORKS -->
-    <section class="how" id="how">
-      <div class="how-intro reveal">
-        <div class="section-eyebrow">Como funciona</div>
-        <h2 class="section-h">Quatro passos do<br>plano à campanha ativa</h2>
-        <p class="section-p">Um fluxo simples que elimina o trabalho operacional e devolve tempo para o que importa: estratégia e resultado.</p>
-      </div>
-      <div class="how-grid">
-        <div class="how-card reveal">
-          <div class="how-card-num">01</div>
-          <div class="how-card-tag">Planejamento</div>
-          <h3>Preencha o plano de mídia</h3>
-          <p>Insira no Google Sheets as campanhas, períodos, investimentos, plataformas e criativos. A plataforma lê e estrutura tudo automaticamente.</p>
-        </div>
-        <div class="how-card reveal">
-          <div class="how-card-num">02</div>
-          <div class="how-card-tag">Criativo</div>
-          <h3>Envie os criativos</h3>
-          <p>Faça upload das imagens, vídeos ou HTML5 e associe cada peça à sua linha de campanha no material request.</p>
-        </div>
-        <div class="how-card reveal">
-          <div class="how-card-num">03</div>
-          <div class="how-card-tag">Automação</div>
-          <h3>Marque como pronto</h3>
-          <p>Altere o status para "ready to setup" — a plataforma detecta, cria campanhas, ad groups e anúncios em todas as plataformas simultaneamente.</p>
-        </div>
-        <div class="how-card reveal">
-          <div class="how-card-num">04</div>
-          <div class="how-card-tag">Monitoramento</div>
-          <h3>Acompanhe em tempo real</h3>
-          <p>Status de cada ad atualizado automaticamente no Sheets e BigQuery assim que implementado. Visão unificada de toda a operação.</p>
-        </div>
-        <div class="how-card reveal" style="grid-column: span 2; background: var(--accent-lt); border: none;">
-          <div style="display:flex; gap:48px; align-items:center; flex-wrap:wrap;">
-            <div>
-              <div class="how-card-num" style="color: rgba(196,94,0,0.15);">✓</div>
-              <h3 style="color: var(--accent);">Idempotência total</h3>
-              <p style="color: var(--accent); opacity: 0.8;">O sistema verifica o que já existe antes de criar. Re-execuções seguras — nunca duplica campanhas, nunca perde progresso.</p>
-            </div>
-            <div style="flex:1; min-width:200px;">
-              <div style="display:flex; flex-direction:column; gap:10px;">
-                <div style="background:white; border-radius:8px; padding:12px 16px; font-size:13px; color:var(--accent); font-weight:500;">⏭️ Campanha já existe — pulando criação</div>
-                <div style="background:white; border-radius:8px; padding:12px 16px; font-size:13px; color:var(--accent); font-weight:500;">⏭️ Ad Group já existe — pulando criação</div>
-                <div style="background:white; border-radius:8px; padding:12px 16px; font-size:13px; color:var(--accent); font-weight:500;">✅ Ad criado: 194034979629~800731310857</div>
-              </div>
-            </div>
-          </div>
+      <div class="produto-card">
+        <div class="produto-num">02 // IA</div>
+        <div class="produto-icon">◈</div>
+        <div class="produto-nome">Desdobramento de Peças</div>
+        <p class="produto-desc">IA que pega um Key Visual e gera automaticamente todos os formatos — IAB, Meta, TikTok, OOH, rádio. Nenhum designer precisa adaptar manualmente 40 tamanhos de banner.</p>
+        <div class="produto-preco">R$5.000 — contas ilimitadas</div>
+        <div class="produto-tag-list">
+          <span class="produto-tag">Todos os formatos IAB</span>
+          <span class="produto-tag">OOH</span>
+          <span class="produto-tag">Rádio</span>
+          <span class="produto-tag">IA Generativa</span>
         </div>
       </div>
-    </section>
 
-    <!-- FEATURES -->
-    <section class="features" id="features">
-      <div class="features-intro">
-        <div class="reveal">
-          <div class="section-eyebrow">Funcionalidades</div>
-          <h2 class="section-h">Tudo que uma operação<br>de mídia precisa</h2>
-        </div>
-        <p class="section-p reveal">Da criação à mensuração, automatizamos cada etapa do processo de implementação de mídia digital.</p>
-      </div>
-      <div class="features-grid">
-        <div class="feature-card reveal">
-          <div class="feature-icon">⚡</div>
-          <div class="feature-body">
-            <h3>Criação automática de campanhas</h3>
-            <p>Campanhas, ad groups e anúncios criados automaticamente via API a partir das especificações do plano de mídia. Sem acesso manual às plataformas.</p>
-          </div>
-        </div>
-        <div class="feature-card reveal">
-          <div class="feature-icon">🔄</div>
-          <div class="feature-body">
-            <h3>Sincronização em tempo real</h3>
-            <p>Qualquer mudança na planilha — status, criativo, data — reflete instantaneamente no BigQuery. Sem delays, sem dependência de jobs agendados.</p>
-          </div>
-        </div>
-        <div class="feature-card reveal">
-          <div class="feature-icon">🎨</div>
-          <div class="feature-body">
-            <h3>Gestão de criativos multiplataforma</h3>
-            <p>Upload automático de imagens, vídeos e HTML5 para cada plataforma. O sistema detecta o formato correto e faz o upload no lugar certo.</p>
-          </div>
-        </div>
-        <div class="feature-card reveal">
-          <div class="feature-icon">🔑</div>
-          <div class="feature-body">
-            <h3>Row ID — rastreabilidade total</h3>
-            <p>Cada linha de campanha tem um ID único imutável. MERGEs no BigQuery sempre encontram a linha certa — sem duplicatas, sem dados perdidos.</p>
-          </div>
-        </div>
-        <div class="feature-card reveal">
-          <div class="feature-icon">📊</div>
-          <div class="feature-body">
-            <h3>BigQuery como fonte única de verdade</h3>
-            <p>Todo o histórico de campanhas, status e IDs de plataforma centralizado no BigQuery. Base pronta para relatórios, dashboards e análises avançadas.</p>
-          </div>
-        </div>
-        <div class="feature-card reveal">
-          <div class="feature-icon">🛡️</div>
-          <div class="feature-body">
-            <h3>Operações seguras e auditáveis</h3>
-            <p>Campanhas sobem sempre pausadas. Cada operação é registrada com status detalhado. Re-execuções são seguras e previsíveis em qualquer cenário.</p>
-          </div>
+      <div class="produto-card">
+        <div class="produto-num">03 // AUTOMAÇÃO</div>
+        <div class="produto-icon">⬡</div>
+        <div class="produto-nome">Módulo de Implementação</div>
+        <p class="produto-desc">ETL + disparo automático de campanhas em 9 plataformas. O sistema lê o media plan na planilha e monta toda a estrutura — campanhas, ad sets, ads, criativos — sem intervenção humana.</p>
+        <div class="produto-preco">R$5.000 / R$10.000 / custom</div>
+        <div class="produto-tag-list">
+          <span class="produto-tag">Automação total</span>
+          <span class="produto-tag">9 plataformas</span>
+          <span class="produto-tag">Status em tempo real</span>
         </div>
       </div>
-    </section>
 
-    <!-- PLATFORMS -->
-    <section class="platforms" id="platforms">
-      <div class="reveal">
-        <div class="section-eyebrow">Plataformas</div>
-        <h2 class="section-h">Uma operação,<br>todas as plataformas</h2>
-        <p class="section-p">Cobertura completa das principais plataformas de mídia digital do mercado brasileiro.</p>
-      </div>
-      <div class="platforms-grid">
-        <div class="platform-card reveal">
-          <div style="margin-bottom:16px"><svg height="32" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M2.677 20.098l7.533-13.044 3.767 6.522-3.767 6.522H2.677zm8.37 0h10.276l-3.767-6.522-3.767 6.522H11.047zM16.09 5.902L12.323 12.42 8.557 5.902 12.323-.617l3.767 6.52z" fill="#4285F4"/></svg></div>
-          <h3>Google Ads</h3>
-          <p>Display, Search e YouTube. Criação de campanhas, ad groups, upload de imagens e vídeos via Google Ads API v23.</p>
-          <div class="platform-status live">Disponível</div>
-        </div>
-        <div class="platform-card reveal">
-          <div style="margin-bottom:16px"><svg height="32" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z" fill="#1877F2"/></svg></div>
-          <h3>Meta Ads</h3>
-          <p>Facebook e Instagram. Suporte a awareness, consideration e conversion com mapeamento automático de objetivos e placements.</p>
-          <div class="platform-status live">Disponível</div>
-        </div>
-        <div class="platform-card reveal">
-          <div style="margin-bottom:16px"><svg height="30" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.2 8.2 0 004.79 1.53V6.78a4.85 4.85 0 01-1.02-.09z" fill="#000"/></svg></div>
-          <h3>TikTok Ads</h3>
-          <p>In-feed e TopView. Integração com TikTok Marketing API para campanhas de vídeo e imagem no maior app de entretenimento mobile.</p>
-          <div class="platform-status soon">Em breve</div>
-        </div>
-        <div class="platform-card reveal">
-          <div style="margin-bottom:16px"><svg height="32" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#4285F4" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <h3>BigQuery</h3>
-          <p>Toda a operação sincronizada em tempo real. Tabelas estruturadas prontas para Looker Studio, Data Studio ou qualquer ferramenta de BI.</p>
-          <div class="platform-status live">Disponível</div>
-        </div>
-        <div class="platform-card reveal">
-          <div style="margin-bottom:16px"><svg height="32" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.318 12.545H7.91v-1.909h3.41v1.91zm0 3.273H7.91v-1.91h3.41v1.91zm4.772-3.273h-3.41v-1.909h3.41v1.91zm0 3.273h-3.41v-1.91h3.41v1.91zM6.545 8.727h10.91v9.819H6.545z" fill="#0F9D58"/><path d="M14.727 2L19.09 6.364V22H4.91V2h9.818z" fill="#0F9D58" opacity=".3"/><path d="M14.727 2v4.364h4.364L14.727 2z" fill="#0F9D58"/></svg></div>
-          <h3>Google Sheets</h3>
-          <p>Interface familiar para planejadores de mídia. Apps Script nativo com triggers automáticos — nenhuma instalação necessária.</p>
-          <div class="platform-status live">Disponível</div>
-        </div>
-        <div class="platform-card reveal" style="border-style: dashed;">
-          <span style="font-size:28px;display:block;margin-bottom:16px;">➕</span>
-          <h3>Mais plataformas</h3>
-          <p>DV360, Amazon Ads, LinkedIn Ads e Programático. Roadmap definido com base nas necessidades dos nossos clientes.</p>
-          <div class="platform-status soon">Roadmap</div>
+      <div class="produto-card">
+        <div class="produto-num">04 // FULL STACK</div>
+        <div class="produto-icon">◈</div>
+        <div class="produto-nome">Módulo Completo</div>
+        <p class="produto-desc">A stack inteira: ETL + Implementação + Reports automáticos + BigQuery + Taxonomia estruturada. Para quem quer escalar sem aumentar o time.</p>
+        <div class="produto-preco">A partir de R$25.000 — por conta</div>
+        <div class="produto-tag-list">
+          <span class="produto-tag">Reports automáticos</span>
+          <span class="produto-tag">BigQuery</span>
+          <span class="produto-tag">Taxonomia</span>
+          <span class="produto-tag">Tudo incluso</span>
         </div>
       </div>
-    </section>
 
-    <!-- PRICING -->
-    <section class="pricing" id="pricing">
-      <div class="reveal">
-        <div class="section-eyebrow">Produtos & Preços</div>
-        <h2 class="section-h">Escolha o módulo<br>certo para sua operação</h2>
-        <p class="section-p">Do ETL à implementação completa — produtos modulares que crescem com a sua agência.</p>
-      </div>
-      <div class="pricing-grid">
-
-        <!-- Chrome ETL -->
-        <div class="pricing-card reveal">
-          <div class="pricing-tier">Extração de dados</div>
-          <div class="pricing-tag">Chrome Extension</div>
-          <div class="pricing-name">Rise Up Chrome ETL</div>
-          <div class="pricing-desc">Extração de dados de mídia direto no seu navegador. 9 plataformas integradas, sem precisar de engenharia.</div>
-          <div class="pricing-tiers">
-            <div class="pricing-tier-row"><span>1 conta</span><span>R$250/mês</span></div>
-            <div class="pricing-tier-row"><span>5 contas</span><span>R$500/mês</span></div>
-            <div class="pricing-tier-row"><span>10+ contas</span><span>R$1.000/mês</span></div>
-          </div>
-          <div class="pricing-divider"></div>
-          <ul class="pricing-features">
-            <li>Google Ads, Meta, DV360, TikTok</li>
-            <li>Pinterest, Amazon Ads, LinkedIn Ads</li>
-            <li>Google Analytics, Mercado Livre Ads</li>
-            <li>Export direto para Sheets e Excel</li>
-          </ul>
-          <a href="#contact" class="pricing-btn">Começar</a>
-        </div>
-
-        <!-- Desdobramento de Peças -->
-        <div class="pricing-card reveal">
-          <div class="pricing-tier">Criativo</div>
-          <div class="pricing-tag">IA Generativa</div>
-          <div class="pricing-name">Desdobramento de Peças</div>
-          <div class="pricing-desc">Upload de um KV — a IA desdobra automaticamente em todos os formatos: IAB, Meta, TikTok, OOH e rádio.</div>
-          <div class="pricing-amount-wrap">
-            <div class="pricing-amount"><small>R$</small>5.000</div>
-          </div>
-          <div class="pricing-period">por mês · contas ilimitadas</div>
-          <div class="pricing-divider"></div>
-          <ul class="pricing-features">
-            <li>Todos os formatos IAB (display)</li>
-            <li>Formatos Meta (feed, stories, reels)</li>
-            <li>Formatos TikTok (in-feed, topview)</li>
-            <li>OOH e rádio</li>
-            <li>Contas ilimitadas</li>
-          </ul>
-          <a href="#contact" class="pricing-btn">Começar</a>
-        </div>
-
-        <!-- Implementação -->
-        <div class="pricing-card featured reveal">
-          <div class="pricing-featured-badge">Mais popular</div>
-          <div class="pricing-tier">Automação</div>
-          <div class="pricing-tag">ETL + Implementação</div>
-          <div class="pricing-name">Módulo de Implementação</div>
-          <div class="pricing-desc">Tudo do ETL mais automação completa de campanhas em todas as plataformas de mídia.</div>
-          <div class="pricing-tiers">
-            <div class="pricing-tier-row"><span>1 conta</span><span>R$5.000/mês</span></div>
-            <div class="pricing-tier-row"><span>3 contas</span><span>R$10.000/mês</span></div>
-            <div class="pricing-tier-row"><span>5+ contas</span><span>Custom</span></div>
-          </div>
-          <div class="pricing-divider"></div>
-          <ul class="pricing-features">
-            <li>Tudo do Chrome ETL incluso</li>
-            <li>Criação automática de campanhas</li>
-            <li>Google, Meta, TikTok, DV360</li>
-            <li>Pinterest, Amazon, LinkedIn, ML Ads</li>
-            <li>Sincronização BQ em tempo real</li>
-            <li>Dashboard de operação</li>
-          </ul>
-          <a href="#contact" class="pricing-btn">Falar com o time</a>
-        </div>
-
-        <!-- Módulo Completo -->
-        <div class="pricing-card reveal">
-          <div class="pricing-tier">Solução completa</div>
-          <div class="pricing-tag">Enterprise</div>
-          <div class="pricing-name">Módulo Completo</div>
-          <div class="pricing-desc">Implementação + Reports automatizados + Desdobramento de peças + BQ + Taxonomia. Tudo em um só lugar.</div>
-          <div class="pricing-amount-wrap">
-            <div class="pricing-amount" style="font-size:32px;">A partir de</div>
-            <div class="pricing-amount"><small>R$</small>25.000</div>
-          </div>
-          <div class="pricing-period">por conta · negociação direta</div>
-          <div class="pricing-divider"></div>
-          <ul class="pricing-features">
-            <li>Tudo dos módulos anteriores</li>
-            <li>Report engine (PPT → React dinâmico)</li>
-            <li>BigQuery como fonte única de verdade</li>
-            <li>Taxonomia automatizada</li>
-            <li>Gerente de conta dedicado</li>
-            <li>SLA garantido</li>
-          </ul>
-          <a href="#contact" class="pricing-btn">Falar com o time</a>
-        </div>
-
-      </div>
-    </section>
-
-
-    <!-- CONTACT -->
-    <section class="contact" id="contact">
-      <div class="contact-grid">
-        <div class="reveal">
-          <div class="section-eyebrow">Contato</div>
-          <h2 class="section-h">Pronto para automatizar<br>sua operação de <em>mídia</em>?</h2>
-          <p class="section-p">Fale com a gente e descubra como a Rise Up MTech pode transformar a forma como sua equipe implementa campanhas.</p>
-          <div style="margin-top: 36px;">
-            <div class="contact-detail"><span>📧</span><span><strong>Email</strong> — <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ec8f8382988d9883ac9e859f89999c8198898f84c28f8381">[email&#160;protected]</a></span></div>
-            <div class="contact-detail"><span>🌐</span><span><strong>Site</strong> — riseupmtech.com</span></div>
-            <div class="contact-detail"><span>📍</span><span><strong>Localização</strong> — São Paulo, Brasil</span></div>
-          </div>
-        </div>
-        <form class="contact-form reveal" onsubmit="handleSubmit(event)">
-          <div class="form-row">
-            <div class="form-group"><label>Nome</label><input type="text" placeholder="Seu nome" required></div>
-            <div class="form-group"><label>Empresa</label><input type="text" placeholder="Nome da empresa"></div>
-          </div>
-          <div class="form-group"><label>Email</label><input type="email" placeholder="seu@email.com" required></div>
-          <div class="form-group">
-            <label>Plano de interesse</label>
-            <select>
-              <option value="">Selecione um plano</option>
-              <option>Starter — R$499/mês</option>
-              <option>Growth — R$1.299/mês</option>
-              <option>Enterprise — Sob consulta</option>
-            </select>
-          </div>
-          <div class="form-group"><label>Mensagem</label><textarea rows="4" placeholder="Conte sobre sua operação de mídia..."></textarea></div>
-          <button type="submit" class="form-submit">Enviar mensagem →</button>
-        </form>
-      </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer>
-      <a href="#" class="footer-logo" onclick="return showMain()">Rise Up <em>MTech</em></a>
-      <ul class="footer-links">
-        <li><a href="#how">Como funciona</a></li>
-        
-        <li><a href="#" onclick="return showLegal('terms')">Termos de Uso</a></li>
-        <li><a href="#" onclick="return showLegal('privacy')">Privacidade</a></li>
-      </ul>
-      <span class="footer-copy">© 2026 Rise Up MTech</span>
-    </footer>
-
-  </div><!-- /main-wrap -->
-
-  <!-- TERMS OF SERVICE -->
-  <div class="legal-wrap" id="termsWrap">
-    <div class="legal-container">
-      <button class="legal-back" onclick="showMain()">Voltar ao site</button>
-      <h1>Termos de Uso</h1>
-      <p class="legal-date">Última atualização: 17 de março de 2026</p>
-      <h2>1. Aceitação dos Termos</h2>
-      <p>Ao acessar ou utilizar os serviços da Rise Up MTech ("Plataforma"), você concorda com estes Termos de Uso. Se você não concordar com qualquer parte destes termos, não utilize nossos serviços.</p>
-      <h2>2. Descrição dos Serviços</h2>
-      <p>A Rise Up MTech oferece uma plataforma de automação de mídia digital que permite a criação, gestão e sincronização de campanhas publicitárias em plataformas como Google Ads, Meta Ads e TikTok Ads, integrada com Google Sheets e BigQuery.</p>
-      <h2>3. Uso Permitido</h2>
-      <p>Você concorda em utilizar a Plataforma apenas para fins legais e de acordo com estes Termos. É proibido:</p>
-      <ul>
-        <li>Usar a Plataforma para criar campanhas que violem as políticas das plataformas de anúncios integradas</li>
-        <li>Tentar acessar sistemas ou dados de outros usuários sem autorização</li>
-        <li>Realizar engenharia reversa ou decompilação do software</li>
-        <li>Utilizar a Plataforma para fins fraudulentos ou ilegais</li>
-        <li>Compartilhar credenciais de acesso com terceiros não autorizados</li>
-      </ul>
-      <h2>4. Integrações com Terceiros</h2>
-      <p>A Plataforma integra com serviços de terceiros (Google Ads, Meta Ads, TikTok Ads, BigQuery). O uso desses serviços está sujeito aos respectivos termos e políticas de cada provedor. A Rise Up MTech não se responsabiliza por alterações nas APIs ou políticas dessas plataformas.</p>
-      <h2>5. Dados e Credenciais</h2>
-      <p>Você é responsável pela segurança das credenciais de acesso às plataformas integradas. A Rise Up MTech processa esses dados exclusivamente para a prestação dos serviços contratados e não os compartilha com terceiros, exceto quando exigido por lei.</p>
-      <h2>6. Propriedade Intelectual</h2>
-      <p>Todo o conteúdo da Plataforma, incluindo software, design, textos e logotipos, é de propriedade da Rise Up MTech e está protegido por leis de propriedade intelectual. Os criativos e dados de campanhas permanecem de propriedade do cliente.</p>
-      <h2>7. Limitação de Responsabilidade</h2>
-      <p>A Rise Up MTech não se responsabiliza por danos indiretos, incidentais ou consequentes decorrentes do uso da Plataforma, incluindo perda de receita, dados ou oportunidades de negócio resultantes de falhas nas plataformas de anúncios integradas.</p>
-      <h2>8. Disponibilidade do Serviço</h2>
-      <p>Nos esforçamos para manter a Plataforma disponível continuamente, mas não garantimos disponibilidade ininterrupta. Manutenções programadas serão comunicadas com antecedência sempre que possível.</p>
-      <h2>9. Cancelamento</h2>
-      <p>Você pode cancelar sua conta a qualquer momento. Após o cancelamento, seus dados serão mantidos por 30 dias antes da exclusão definitiva, salvo obrigação legal de retenção.</p>
-      <h2>10. Alterações nos Termos</h2>
-      <p>Reservamo-nos o direito de modificar estes Termos a qualquer momento. Notificaremos os usuários sobre mudanças significativas por email. O uso continuado da Plataforma após as alterações constitui aceitação dos novos Termos.</p>
-      <h2>11. Lei Aplicável</h2>
-      <p>Estes Termos são regidos pelas leis brasileiras. Quaisquer disputas serão resolvidas no foro da comarca de São Paulo, SP.</p>
-      <h2>12. Contato</h2>
-      <p>Para dúvidas sobre estes Termos: <a href="/cdn-cgi/l/email-protection#177478796376637857657e647262677a6372747f3974787a"><span class="__cf_email__" data-cfemail="e2818d8c9683968da2908b918797928f9687818acc818d8f">[email&#160;protected]</span></a></p>
     </div>
   </div>
+</section>
 
-  <!-- PRIVACY POLICY -->
-  <div class="legal-wrap" id="privacyWrap">
-    <div class="legal-container">
-      <button class="legal-back" onclick="showMain()">Voltar ao site</button>
-      <h1>Política de Privacidade</h1>
-      <p class="legal-date">Última atualização: 17 de março de 2026</p>
-      <h2>1. Introdução</h2>
-      <p>A Rise Up MTech está comprometida com a proteção da sua privacidade. Esta Política descreve como coletamos, usamos, armazenamos e protegemos suas informações pessoais em conformidade com a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018).</p>
-      <h2>2. Dados que Coletamos</h2>
-      <ul>
-        <li><strong>Dados de cadastro:</strong> nome, email, empresa e telefone</li>
-        <li><strong>Dados de uso:</strong> logs de acesso e ações realizadas na Plataforma</li>
-        <li><strong>Dados de campanhas:</strong> informações sobre campanhas gerenciadas</li>
-        <li><strong>Credenciais de integração:</strong> tokens de acesso (armazenados criptografados)</li>
-        <li><strong>Dados técnicos:</strong> endereço IP, navegador, sistema operacional</li>
-      </ul>
-      <h2>3. Como Usamos seus Dados</h2>
-      <ul>
-        <li>Prestar e aprimorar os serviços contratados</li>
-        <li>Processar e sincronizar campanhas nas plataformas integradas</li>
-        <li>Comunicar atualizações e novidades relevantes</li>
-        <li>Cumprir obrigações legais e regulatórias</li>
-        <li>Prevenir fraudes e garantir a segurança da Plataforma</li>
-      </ul>
-      <h2>4. Base Legal para Tratamento</h2>
-      <p>O tratamento dos seus dados é fundamentado nas seguintes bases legais da LGPD: execução de contrato (Art. 7º, V), legítimo interesse (Art. 7º, IX) e cumprimento de obrigação legal (Art. 7º, II).</p>
-      <h2>5. Compartilhamento de Dados</h2>
-      <p>Seus dados pessoais não são vendidos a terceiros. Compartilhamos dados apenas com plataformas integradas (Google, Meta, TikTok) para execução dos serviços, com prestadores de infraestrutura mediante acordos de confidencialidade, ou quando exigido por lei.</p>
-      <h2>6. Retenção de Dados</h2>
-      <p>Dados de campanhas são retidos por até 5 anos para fins de auditoria. Após cancelamento da conta, os dados são excluídos em até 30 dias.</p>
-      <h2>7. Segurança</h2>
-      <p>Adotamos criptografia em trânsito e em repouso, controle de acesso baseado em funções, monitoramento contínuo e backups regulares.</p>
-      <h2>8. Seus Direitos (LGPD)</h2>
-      <p>Você tem direito a acessar, corrigir, anonimizar, bloquear ou eliminar seus dados, além de portabilidade e revogação de consentimento. Para exercer seus direitos: <a href="/cdn-cgi/l/email-protection#0b6864657f6a7f644b7962786e7e7b667f6e686325686466"><span class="__cf_email__" data-cfemail="294a46475d485d46695b405a4c5c59445d4c4a41074a4644">[email&#160;protected]</span></a></p>
-      <h2>9. Cookies</h2>
-      <p>Utilizamos cookies essenciais para o funcionamento da Plataforma e analíticos para entender o uso do site. Você pode configurar seu navegador para recusá-los.</p>
-      <h2>10. Encarregado de Dados (DPO)</h2>
-      <p>Contato do DPO: <a href="/cdn-cgi/l/email-protection#7b1814150f1a0f143b0912081e0e0b160f1e181355181416"><span class="__cf_email__" data-cfemail="82e1edecf6e3f6edc2f0ebf1e7f7f2eff6e7e1eaace1edef">[email&#160;protected]</span></a></p>
-      <h2>11. Alterações nesta Política</h2>
-      <p>Notificaremos mudanças significativas por email com pelo menos 15 dias de antecedência.</p>
+<!-- PLATAFORMAS -->
+<section id="plataformas" class="plataformas">
+  <div class="wrap">
+    <div class="plataformas-header">
+      <div>
+        <div class="section-tag">Cobertura</div>
+        <h2 class="section-title">9 Plataformas.<br><em>Uma Operação.</em></h2>
+      </div>
+      <div class="plataformas-count">09</div>
+    </div>
+    <div class="plataformas-grid">
+
+      <div class="plat-item">
+        <div class="plat-logo"><svg viewBox="0 0 24 24" fill="white"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg></div>
+        <div class="plat-info"><div class="plat-name">Google Ads</div><div class="plat-type">Search · Display · Video</div></div>
+      </div>
+
+      <div class="plat-item">
+        <div class="plat-logo"><svg viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></div>
+        <div class="plat-info"><div class="plat-name">Meta Ads</div><div class="plat-type">Facebook · Instagram</div></div>
+      </div>
+
+      <div class="plat-item">
+        <div class="plat-logo"><svg viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34l-.02-8.48a8.24 8.24 0 0 0 4.83 1.55V5.02a4.85 4.85 0 0 1-1.04-.33z"/></svg></div>
+        <div class="plat-info"><div class="plat-name">TikTok Ads</div><div class="plat-type">Video · Spark Ads</div></div>
+      </div>
+
+      <div class="plat-item">
+        <div class="plat-logo"><svg viewBox="0 0 24 24" fill="white"><path d="M0 0h24v24H0z" fill="none"/><path d="M21 3L3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z"/></svg></div>
+        <div class="plat-info"><div class="plat-name">DV360</div><div class="plat-type">Display · Programático</div></div>
+      </div>
+
+      <div class="plat-item">
+        <div class="plat-logo"><svg viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.016 7.32h-1.99c-.23 0-.49.303-.49.713V9.36h2.48l-.334 2.43h-2.146V18.6h-2.508v-6.81H10.56V9.36h1.468v-1.44c0-2.108 1.302-3.256 3.172-3.256.904 0 1.816.068 2.718.203v2.454h-.002z"/></svg></div>
+        <div class="plat-info"><div class="plat-name">Pinterest</div><div class="plat-type">Discovery · Shopping</div></div>
+      </div>
+
+      <div class="plat-item">
+        <div class="plat-logo"><svg viewBox="0 0 24 24" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg></div>
+        <div class="plat-info"><div class="plat-name">Amazon Ads</div><div class="plat-type">Sponsored · DSP</div></div>
+      </div>
+
+      <div class="plat-item">
+        <div class="plat-logo"><svg viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></div>
+        <div class="plat-info"><div class="plat-name">LinkedIn Ads</div><div class="plat-type">B2B · Lead Gen</div></div>
+      </div>
+
+      <div class="plat-item">
+        <div class="plat-logo"><svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg></div>
+        <div class="plat-info"><div class="plat-name">YouTube</div><div class="plat-type">Video · Bumper · Skippable</div></div>
+      </div>
+
+      <div class="plat-item">
+        <div class="plat-logo"><svg viewBox="0 0 24 24" fill="white"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/></svg></div>
+        <div class="plat-info"><div class="plat-name">GA4</div><div class="plat-type">Analytics · Conversão</div></div>
+      </div>
+
     </div>
   </div>
+</section>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-    // Navbar scroll
-    const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 20));
+<!-- COMO FUNCIONA -->
+<section id="como-funciona">
+  <div class="wrap">
+    <div class="section-header">
+      <div class="section-tag">Processo</div>
+      <h2 class="section-title">Do Plano ao<br><em>Ar em Horas.</em></h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-title">Media Plan</div>
+        <p class="step-desc">Preencha o planejamento na planilha padrão. Country, BU, brand, plataforma, investimento, criativos. Uma linha por linha de mídia.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-title">Conecte</div>
+        <p class="step-desc">OAuth plug & play. Autorize cada plataforma uma vez — o sistema guarda os tokens e mantém a conexão ativa automaticamente.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-title">Disparo</div>
+        <p class="step-desc">Um clique. O sistema lê o plano, constrói toda a estrutura de campanha nas 9 plataformas e entrega status em tempo real.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <div class="step-title">Dashboard</div>
+        <p class="step-desc">Investimento, pacing, performance, vídeo, social — 37 métricas IAB em dashboards interativos, alimentados pelo BigQuery.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-    // Reveal on scroll — threshold 0 para disparar assim que entra na viewport
-    const revealEls = document.querySelectorAll('.reveal');
+<!-- CTA -->
+<section id="contato" class="cta-section">
+  <div class="wrap">
+    <div class="cta-glitch">
+      <span class="line1">Pronto para</span>
+      <span class="line2">Escalar?</span>
+    </div>
+    <p class="cta-sub">Fale com a equipe e descubra qual módulo faz mais sentido para a operação da sua agência.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <a href="mailto:contato@riseupmtech.com" class="btn-primary">Falar com a Equipe</a>
+      <a href="https://app.riseupmtech.com" class="btn-ghost">Acessar o Sistema →</a>
+    </div>
+  </div>
+</section>
 
-    // Mostra imediatamente os que já estão visíveis no carregamento
-    function checkReveal() {
-      revealEls.forEach((el, i) => {
-        const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight + 100) {
-          setTimeout(() => el.classList.add('visible'), i * 60);
-        }
-      });
-    }
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">RISE UP_MTECH</div>
+    <ul class="footer-links">
+      <li><a href="#">Produtos</a></li>
+      <li><a href="#">Plataformas</a></li>
+      <li><a href="#">Contato</a></li>
+    </ul>
+    <div class="footer-copy">© 2025 Rise Up MTech — São Paulo, BR</div>
+  </div>
+</footer>
 
-    // Roda no load e no scroll
-    checkReveal();
-    window.addEventListener('scroll', checkReveal, { passive: true });
-
-    // Fallback garantido após 800ms
-    setTimeout(() => {
-      revealEls.forEach(el => el.classList.add('visible'));
-    }, 800);
-
-    // Mobile menu
-    function toggleMenu() {
-      const t = document.getElementById('navToggle');
-      const l = document.getElementById('navLinks');
-      const o = document.getElementById('navOverlay');
-      const open = l.classList.contains('open');
-      t.classList.toggle('open'); l.classList.toggle('open'); o.classList.toggle('open');
-      document.body.style.overflow = open ? '' : 'hidden';
-    }
-    function closeMenu() {
-      document.getElementById('navToggle').classList.remove('open');
-      document.getElementById('navLinks').classList.remove('open');
-      document.getElementById('navOverlay').classList.remove('open');
-      document.body.style.overflow = '';
-    }
-
-    // Legal pages
-    function showLegal(page) {
-      document.getElementById('mainWrap').style.display = 'none';
-      document.getElementById('termsWrap').style.display = 'none';
-      document.getElementById('privacyWrap').style.display = 'none';
-      document.getElementById(page === 'terms' ? 'termsWrap' : 'privacyWrap').style.display = 'block';
-      window.scrollTo(0, 0); closeMenu(); return false;
+</body>
+</html>
