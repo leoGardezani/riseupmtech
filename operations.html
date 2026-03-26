@@ -566,14 +566,7 @@
     <!-- KPIs summary -->
     <div class="section-title">Overview Geral</div>
     <div class="section-sub">Resumo consolidado do período selecionado</div>
-    <div class="kpi-grid" style="margin-bottom:24px">
-      <div class="kpi feat"><div class="kpi-lbl">Investimento</div><div class="kpi-val">R$284k</div><div class="kpi-delta up">↑ 12%</div><div class="kpi-target">Meta R$310k · 91,6%</div></div>
-      <div class="kpi"><div class="kpi-lbl">Impressões</div><div class="kpi-val">18,4M</div><div class="kpi-delta up">↑ 8%</div><div class="kpi-target">Meta 20M · 92%</div></div>
-      <div class="kpi"><div class="kpi-lbl">Cliques</div><div class="kpi-val">342k</div><div class="kpi-delta dn">↓ 3%</div><div class="kpi-target">Meta 380k · 90%</div></div>
-      <div class="kpi"><div class="kpi-lbl">Leads</div><div class="kpi-val">4.820</div><div class="kpi-delta up">↑ 18%</div><div class="kpi-target">Meta 5.000 · 96,4%</div></div>
-      <div class="kpi"><div class="kpi-lbl">CPL</div><div class="kpi-val">R$58,9</div><div class="kpi-delta up">↑ eficiência</div><div class="kpi-target">Meta R$65</div></div>
-      <div class="kpi"><div class="kpi-lbl">ROAS</div><div class="kpi-val">3,4x</div><div class="kpi-delta up">↑ 0,4x</div><div class="kpi-target">Meta 3,0x ✓</div></div>
-    </div>
+    <div class="kpi-grid" style="margin-bottom:24px" id="ov-kpis"></div>
 
     <!-- two col: charts left, gantt summary right -->
     <div class="charts-row" style="margin-bottom:24px">
@@ -839,7 +832,7 @@ const USERS=[
 ];
 
 // ── TABS ──
-let chartsInited = new Set();
+let chartsInited = new Set(['dashboard']); // dashboard inited on load
 function switchTabById(id){
   const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b=>b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+id+"'"));
   if(btn) btn.click();
@@ -879,8 +872,15 @@ function toggleColl(id){
   const el=document.getElementById('coll-'+id);
   const hdr=el.querySelector('.coll-header');
   const body=el.querySelector('.coll-body');
-  hdr.classList.toggle('open');
-  body.classList.toggle('open');
+  const isOpen=body.classList.contains('open');
+  // sync both to opposite state
+  if(isOpen){
+    body.classList.remove('open');
+    hdr.classList.remove('open');
+  } else {
+    body.classList.add('open');
+    hdr.classList.add('open');
+  }
 }
 
 // ── BADGE ──
@@ -1395,6 +1395,28 @@ function renderAudCards(){
 }
 
 // ── RENDER OVERVIEW TOP3 ──
+// shared KPI data — single source of truth
+const KPI_DATA = [
+  {lbl:'Investimento',val:'R$284k',delta:'↑ 12%',dir:'up',target:'Meta R$310k · 91,6%',feat:true},
+  {lbl:'Impressões',  val:'18,4M', delta:'↑ 8%', dir:'up',target:'Meta 20M · 92%'},
+  {lbl:'Cliques',     val:'342k',  delta:'↓ 3%', dir:'dn',target:'Meta 380k · 90%'},
+  {lbl:'Leads',       val:'4.820', delta:'↑ 18%',dir:'up',target:'Meta 5.000 · 96,4%'},
+  {lbl:'CPL',         val:'R$58,9',delta:'↑ efic.',dir:'up',target:'Meta R$65'},
+  {lbl:'ROAS',        val:'3,4x',  delta:'↑ 0,4x',dir:'up',target:'Meta 3,0x ✓'},
+];
+
+function renderOverviewKPIs(){
+  const el = document.getElementById('ov-kpis');
+  if(!el) return;
+  el.innerHTML = KPI_DATA.map(k=>`
+    <div class="kpi ${k.feat?'feat':''}">
+      <div class="kpi-lbl">${k.lbl}</div>
+      <div class="kpi-val">${k.val}</div>
+      <div class="kpi-delta ${k.dir}">${k.delta}</div>
+      <div class="kpi-target">${k.target}</div>
+    </div>`).join('');
+}
+
 function renderOverviewTop3(){
   document.getElementById('ov-top3').innerHTML = TOP3_AUD.map((t,i) => `
     <div style="background:var(--bg);padding:0;overflow:hidden">
@@ -1727,9 +1749,13 @@ window.addEventListener('load',()=>{
   document.getElementById('repo-count').textContent=REPO_ASSETS.length+' assets';
   renderAudHeatmap();
   renderAudCards();
-  renderOverviewTop3();
-  renderOverviewStatus();
-  initCharts();
+  // small timeout ensures DOM is painted before Chart.js measures canvas
+  setTimeout(()=>{
+    renderOverviewKPIs();
+    renderOverviewTop3();
+    renderOverviewStatus();
+    initCharts();
+  }, 80);
   setupChartResize();
 });
 </script>
