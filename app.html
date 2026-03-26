@@ -13,10 +13,11 @@
     --surface:      #0d0d1a;
     --surface2:     #111120;
     --surface3:     #16162a;
-    --orange:       #c45e00;
-    --orange-bright:#ff7a1a;
-    --orange-glow:  rgba(196,94,0,0.15);
-    --orange-lt:    rgba(255,122,26,0.08);
+    --orange:       #007a8a;
+    --orange-bright:#00e5ff;
+    --orange-glow:  rgba(0,229,255,0.1);
+    --orange-lt:    rgba(0,229,255,0.06);
+    --magenta:      #ff2d78;
     --text:         #e8e8f0;
     --text-dim:     #9090b0;
     --text-dimmer:  #3a3a5a;
@@ -82,6 +83,14 @@
     pointer-events: none;
     animation: lOrb 6s ease-in-out infinite;
   }
+  #loginCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
   @keyframes lOrb {
     0%,100% { opacity:0.5; transform:translate(-50%,-50%) scale(1); }
     50%      { opacity:1;   transform:translate(-50%,-50%) scale(1.1); }
@@ -97,12 +106,20 @@
     padding: 44px;
     animation: fadeUp 0.5s ease forwards;
   }
+  .lw.reg .l-title { color: var(--text); }
+  .lw.reg .fi:focus { border-color: var(--magenta); }
+  .lw.reg .fsub { background: var(--magenta); color: #fff; }
+  .lw.reg .fsub:hover { box-shadow: 0 0 30px rgba(255,45,120,0.5); }
+  .lw.reg .lw-line { background: linear-gradient(90deg, transparent, var(--magenta), transparent); }
+  .lw.reg .ftgl:hover { color: var(--magenta); }
+  .lw.reg .ferr { border-color: rgba(255,45,120,0.3); background: rgba(255,45,120,0.06); color: var(--magenta); }
+
   .lw::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 2px;
-    background: linear-gradient(90deg, transparent, var(--orange-bright), transparent);
+    background: linear-gradient(90deg, transparent, var(--orange-bright), var(--magenta), transparent);
   }
   @keyframes fadeUp {
     from { opacity:0; transform:translateY(16px); }
@@ -148,6 +165,7 @@
     transition: all 0.2s;
   }
   .l-tab.on { color: var(--orange-bright); border-bottom-color: var(--orange-bright); }
+  .l-tab.on-mag { color: var(--magenta); border-bottom-color: var(--magenta); }
 
   .l-title {
     font-family: 'Barlow Condensed', sans-serif;
@@ -156,8 +174,9 @@
     text-transform: uppercase;
     letter-spacing: 0.02em;
     margin-bottom: 6px;
+    text-align: center;
   }
-  .l-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 28px; }
+  .l-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 28px; text-align: center; }
 
   .fd { margin-bottom: 16px; }
   .fd label {
@@ -168,6 +187,7 @@
     color: var(--text-dim);
     display: block;
     margin-bottom: 7px;
+    text-align: center;
   }
   .fd-wrap { position: relative; }
   .fi {
@@ -262,8 +282,14 @@
     letter-spacing: 0.1em;
     color: var(--orange-bright);
     text-transform: uppercase;
+    position: relative;
+    cursor: default;
   }
-  .sb-logo-t span { color: var(--text-dim); }
+  .sb-logo-t .jp { display: inline; transition: opacity 0.3s; }
+  .sb-logo-t .en { position: absolute; left: 0; top: 0; opacity: 0; white-space: nowrap; transition: opacity 0.3s; }
+  .sb-logo-t .en span { color: var(--text-dim); }
+  .sb-logo-t:hover .jp { opacity: 0; }
+  .sb-logo-t:hover .en { opacity: 1; }
   .sb-logo-s {
     font-family: var(--mono);
     font-size: 9px;
@@ -646,10 +672,14 @@
 
 <!-- ── LOGIN ── -->
 <div class="view active" id="vl">
+  <canvas id="loginCanvas"></canvas>
   <div class="login-orb"></div>
   <div class="lw">
     <div class="l-brand">
-      <div class="l-logo">Rise Up<span>_MTech</span></div>
+      <div class="l-logo" style="position:relative;cursor:default;display:inline-block">
+        <span class="l-jp" style="display:inline;transition:opacity 0.3s">ライズアップ_エムテック</span>
+        <span class="l-en" style="position:absolute;left:0;top:0;opacity:0;white-space:nowrap;transition:opacity 0.3s">Rise Up<span>_MTech</span></span>
+      </div>
       <div class="l-tag">// Media Automation Platform</div>
     </div>
     <div class="l-tabs">
@@ -690,7 +720,10 @@
 <div class="view" id="va">
   <aside class="sb">
     <div class="sb-logo">
-      <div class="sb-logo-t">Rise Up<span>_MTech</span></div>
+      <div class="sb-logo-t">
+        <span class="jp">ライズアップ_エムテック</span>
+        <span class="en">Rise Up<span>_MTech</span></span>
+      </div>
       <div class="sb-logo-s">Plataforma</div>
     </div>
     <nav class="sb-nav">
@@ -862,7 +895,19 @@ async function rq(p,o={}){const h={'Content-Type':'application/json'};if(S.token
 function sv(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function sp(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('p-'+id).classList.add('active');document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));if(el)el.classList.add('on');document.getElementById('pT').textContent={workspace:'Workspace',campaigns:'Campanhas',status:'Status',dashboard:'Dashboard',report:'Reports',platforms:'Plataformas',users:'Usuários',settings:'Configurações'}[id]||id;if(id==='status')ldS();if(id==='campaigns')ldC();}
 
-function swTab(t){const l=t==='l';document.getElementById('fL').style.display=l?'block':'none';document.getElementById('fR').style.display=l?'none':'block';document.getElementById('tL').classList.toggle('on',l);document.getElementById('tR').classList.toggle('on',!l);}
+function swTab(t){
+  const l=t==='l';
+  document.getElementById('fL').style.display=l?'block':'none';
+  document.getElementById('fR').style.display=l?'none':'block';
+  const tL=document.getElementById('tL');
+  const tR=document.getElementById('tR');
+  const lw=document.querySelector('.lw');
+  tL.classList.toggle('on',l);
+  tL.classList.toggle('on-mag',false);
+  tR.classList.toggle('on',false);
+  tR.classList.toggle('on-mag',!l);
+  lw.classList.toggle('reg',!l);
+}
 function tp(id,b){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';b.textContent=i.type==='password'?'◎':'●';}
 
 async function doL(){
@@ -916,6 +961,86 @@ async function testC(){const u=document.getElementById('sApi').value.trim(),el=d
 
 function bH(s){if(!s)return`<span class="bg_ b-gr">—</span>`;if(s==='implemented')return`<span class="bg_ b-g">Implementado</span>`;if(s==='ready to setup'||s==='pending')return`<span class="bg_ b-b">Na fila</span>`;if(s==='stand by')return`<span class="bg_ b-gr">Stand By</span>`;if(s?.includes('error'))return`<span class="bg_ b-r">Erro</span>`;return`<span class="bg_ b-gr">${s}</span>`;}
 function toast(msg,type=''){const t=document.createElement('div');t.className=`to ${type}`;t.innerHTML=`<span>${type==='ok'?'✓':type==='er'?'✕':'·'}</span><span>${msg}</span>`;document.getElementById('tc').appendChild(t);setTimeout(()=>t.remove(),3200);}
+
+// ── LOGIN LOGO HOVER ──
+(function(){
+  const logo = document.querySelector('.l-logo');
+  if(!logo) return;
+  const jp = logo.querySelector('.l-jp');
+  const en = logo.querySelector('.l-en');
+  logo.addEventListener('mouseenter', () => { jp.style.opacity='0'; en.style.opacity='1'; });
+  logo.addEventListener('mouseleave', () => { jp.style.opacity='1'; en.style.opacity='0'; });
+})();
+
+// ── LOGIN DATA STREAM ──
+(function(){
+  const canvas = document.getElementById('loginCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const KATA = 'アイウエオカキクケコサシスセソ01βΩΔFF00A3B2';
+  let W, H, streams;
+
+  function randChar(){ return KATA[Math.floor(Math.random()*KATA.length)]; }
+
+  function initStream(){
+    return {
+      x3d: (Math.random()-0.5)*2000,
+      y: -(Math.random()*800),
+      z: 300+Math.random()*700,
+      speed: 0.5+Math.random()*1.3,
+      chars: Array.from({length:6+Math.floor(Math.random()*12)},()=>({char:randChar(),timer:Math.floor(Math.random()*30)})),
+      opacity: 0.08+Math.random()*0.18,
+      color: Math.random()<0.18?'#ff2d78':'#00e5ff',
+      spacing: 18+Math.random()*8,
+    };
+  }
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    streams = Array.from({length:55},initStream);
+  }
+
+  function project(x3d,y3d,z){
+    const fov=600,scale=fov/(fov+z);
+    return{x:W/2+x3d*scale,y:H/2+y3d*scale,scale};
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const vg=ctx.createRadialGradient(W/2,H/2,H*0.1,W/2,H/2,H*0.85);
+    vg.addColorStop(0,'rgba(5,5,8,0)');
+    vg.addColorStop(1,'rgba(5,5,8,0.75)');
+    ctx.fillStyle=vg;
+    ctx.fillRect(0,0,W,H);
+
+    streams.forEach((s,si)=>{
+      s.y+=s.speed*(600/(600+s.z))*2.2;
+      s.chars.forEach((ch,i)=>{
+        ch.timer--;
+        if(ch.timer<=0){ch.char=randChar();ch.timer=15+Math.floor(Math.random()*40);}
+        const proj=project(s.x3d,s.y+i*s.spacing-H/2,s.z);
+        if(proj.x<-60||proj.x>W+60||proj.y<-40||proj.y>H+40)return;
+        const isHead=i===s.chars.length-1;
+        const alpha=isHead?Math.min(1,s.opacity*4):s.opacity*(1-i/s.chars.length*0.6);
+        ctx.save();
+        ctx.globalAlpha=alpha;
+        ctx.font=`${Math.max(8,13*proj.scale)}px 'Share Tech Mono',monospace`;
+        ctx.fillStyle=isHead?'#ffffff':s.color;
+        if(isHead){ctx.shadowColor=s.color;ctx.shadowBlur=8*proj.scale;}
+        ctx.fillText(ch.char,proj.x,proj.y);
+        ctx.restore();
+      });
+      const hp=project(s.x3d,s.y-H/2,s.z);
+      if(hp.y>H+200){streams[si]=initStream();streams[si].y=-100-Math.random()*300;}
+    });
+  }
+
+  resize();
+  window.addEventListener('resize',resize);
+  function loop(){draw();requestAnimationFrame(loop);}
+  loop();
+})();
 </script>
 </body>
 </html>
