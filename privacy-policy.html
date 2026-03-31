@@ -1,112 +1,163 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Política de Privacidade — Rise Up MTech</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --black: #0a0a0a; --white: #fafaf8;
-      --sage-dark: #4a7550; --gray: #6b6b6b; --gray-light: #e8e6e1;
-      --font-display: 'Playfair Display', serif; --font-body: 'DM Sans', sans-serif;
-    }
-    body { font-family: var(--font-body); background: var(--white); color: var(--black); }
-    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 24px 60px; background: rgba(250,250,248,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--gray-light); }
-    .nav-logo { font-family: var(--font-display); font-size: 20px; font-weight: 500; color: var(--black); text-decoration: none; }
-    .nav-logo span { color: var(--sage-dark); }
-    .nav-back { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--gray); text-decoration: none; transition: color 0.2s; }
-    .nav-back:hover { color: var(--black); }
-    .nav-back::before { content: '←'; }
-    .container { max-width: 800px; margin: 0 auto; padding: 120px 60px 80px; }
-    h1 { font-family: var(--font-display); font-size: clamp(32px, 4vw, 48px); font-weight: 500; letter-spacing: -1px; margin-bottom: 12px; }
-    .legal-date { font-size: 13px; color: var(--gray); margin-bottom: 48px; padding-bottom: 24px; border-bottom: 1px solid var(--gray-light); }
-    h2 { font-family: var(--font-display); font-size: 22px; font-weight: 500; margin-top: 40px; margin-bottom: 12px; }
-    p { font-size: 15px; font-weight: 300; color: var(--gray); line-height: 1.8; margin-bottom: 16px; }
-    ul { margin: 12px 0 16px 24px; }
-    ul li { font-size: 15px; font-weight: 300; color: var(--gray); line-height: 1.8; margin-bottom: 8px; }
-    a { color: var(--sage-dark); }
-    footer { padding: 40px 60px; border-top: 1px solid var(--gray-light); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-    .footer-logo { font-family: var(--font-display); font-size: 16px; font-weight: 500; color: var(--black); text-decoration: none; }
-    .footer-logo span { color: var(--sage-dark); }
-    .footer-links { display: flex; gap: 24px; list-style: none; flex-wrap: wrap; }
-    .footer-links a { font-size: 13px; color: var(--gray); text-decoration: none; transition: color 0.2s; }
-    .footer-links a:hover { color: var(--black); }
-    .footer-copy { font-size: 13px; color: var(--gray); }
-    @media (max-width: 768px) { nav { padding: 18px 24px; } .container { padding: 90px 24px 60px; } footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de Privacidade — Rise Up MTech</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:     #02020a;
+    --ink:    #e8e8e4;
+    --muted:  #888;
+    --cyan:   #00e5ff;
+    --border: rgba(255,255,255,.08);
+    --mono:   'Share Tech Mono', monospace;
+    --fh:     'Rajdhani', sans-serif;
+    --ff:     'Barlow', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--ff); font-weight: 300; line-height: 1.8; -webkit-font-smoothing: antialiased; }
+
+  nav { border-bottom: 1px solid var(--border); padding: 20px 0; }
+  .nav-inner { max-width: 800px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; }
+  .nav-logo { font-family: var(--mono); font-size: 13px; letter-spacing: .12em; color: var(--ink); text-decoration: none; text-transform: uppercase; }
+  .nav-logo span { color: var(--cyan); }
+  .nav-back { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--muted); text-decoration: none; }
+  .nav-back:hover { color: var(--cyan); }
+
+  .wrap { max-width: 800px; margin: 0 auto; padding: 60px 32px 100px; }
+
+  .page-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--cyan); margin-bottom: 16px; }
+  h1 { font-family: var(--fh); font-weight: 700; font-size: 36px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+  .updated { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .08em; margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+
+  h2 { font-family: var(--fh); font-weight: 700; font-size: 18px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink); margin: 40px 0 12px; }
+  p { color: rgba(232,232,228,.75); margin-bottom: 16px; font-size: 15px; }
+  ul { color: rgba(232,232,228,.75); padding-left: 20px; margin-bottom: 16px; font-size: 15px; }
+  ul li { margin-bottom: 6px; }
+  a { color: var(--cyan); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .highlight { background: rgba(0,229,255,.05); border-left: 2px solid var(--cyan); padding: 16px 20px; margin: 24px 0; font-size: 14px; color: rgba(232,232,228,.8); }
+
+  footer { border-top: 1px solid var(--border); padding: 32px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .08em; }
+</style>
 </head>
 <body>
-  <nav>
-    <a href="/" class="nav-logo">Rise Up <span>MTech</span></a>
-    <a href="/" class="nav-back">Voltar ao site</a>
-  </nav>
-  <div class="container">
-    <h1>Política de Privacidade</h1>
-    <p class="legal-date">Última atualização: 17 de março de 2026</p>
-    <h2>1. Introdução</h2>
-    <p>A Rise Up MTech ("nós", "nosso") está comprometida com a proteção da sua privacidade. Esta Política descreve como coletamos, usamos, armazenamos e protegemos suas informações pessoais em conformidade com a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018).</p>
-    <h2>2. Dados que Coletamos</h2>
-    <p>Coletamos as seguintes categorias de dados:</p>
-    <ul>
-      <li><strong>Dados de cadastro:</strong> nome, email, empresa e telefone fornecidos no momento do contato ou criação de conta</li>
-      <li><strong>Dados de uso:</strong> informações sobre como você utiliza a Plataforma, incluindo logs de acesso e ações realizadas</li>
-      <li><strong>Dados de campanhas:</strong> informações sobre campanhas publicitárias gerenciadas através da Plataforma</li>
-      <li><strong>Credenciais de integração:</strong> tokens de acesso às plataformas de anúncios (armazenados de forma criptografada)</li>
-      <li><strong>Dados técnicos:</strong> endereço IP, tipo de navegador, sistema operacional e cookies</li>
-    </ul>
-    <h2>3. Como Usamos seus Dados</h2>
-    <p>Utilizamos seus dados para:</p>
-    <ul>
-      <li>Prestar e aprimorar os serviços contratados</li>
-      <li>Processar e sincronizar campanhas publicitárias nas plataformas integradas</li>
-      <li>Comunicar atualizações, manutenções e novidades relevantes</li>
-      <li>Cumprir obrigações legais e regulatórias</li>
-      <li>Prevenir fraudes e garantir a segurança da Plataforma</li>
-    </ul>
-    <h2>4. Base Legal para Tratamento</h2>
-    <p>O tratamento dos seus dados é fundamentado nas seguintes bases legais da LGPD: execução de contrato (Art. 7º, V), legítimo interesse (Art. 7º, IX) e cumprimento de obrigação legal (Art. 7º, II).</p>
-    <h2>5. Compartilhamento de Dados</h2>
-    <p>Seus dados pessoais não são vendidos a terceiros. Compartilhamos dados apenas nas seguintes situações:</p>
-    <ul>
-      <li>Com plataformas integradas (Google, Meta, TikTok) exclusivamente para a execução dos serviços</li>
-      <li>Com prestadores de serviços de infraestrutura (hospedagem, banco de dados) mediante acordos de confidencialidade</li>
-      <li>Quando exigido por autoridades competentes ou obrigação legal</li>
-    </ul>
-    <h2>6. Retenção de Dados</h2>
-    <p>Mantemos seus dados pelo período necessário à prestação dos serviços e pelo prazo mínimo exigido pela legislação aplicável. Dados de campanhas são retidos por até 5 anos para fins de auditoria. Após o cancelamento da conta, os dados são excluídos em até 30 dias.</p>
-    <h2>7. Segurança</h2>
-    <p>Adotamos medidas técnicas e organizacionais para proteger seus dados, incluindo criptografia em trânsito e em repouso, controle de acesso baseado em funções, monitoramento de segurança contínuo e backups regulares.</p>
-    <h2>8. Seus Direitos (LGPD)</h2>
-    <p>Como titular de dados, você tem direito a:</p>
-    <ul>
-      <li>Confirmar a existência de tratamento dos seus dados</li>
-      <li>Acessar seus dados pessoais</li>
-      <li>Corrigir dados incompletos, inexatos ou desatualizados</li>
-      <li>Solicitar anonimização, bloqueio ou eliminação de dados desnecessários</li>
-      <li>Portabilidade dos dados a outro fornecedor de serviço</li>
-      <li>Revogar o consentimento a qualquer momento</li>
-      <li>Opor-se ao tratamento realizado com fundamento em legítimo interesse</li>
-    </ul>
-    <p>Para exercer seus direitos: <a href="mailto:contato@riseupmtech.com">contato@riseupmtech.com</a></p>
-    <h2>9. Cookies</h2>
-    <p>Utilizamos cookies essenciais para o funcionamento da Plataforma e cookies analíticos para entender como os usuários interagem com nosso site. Você pode configurar seu navegador para recusar cookies, embora isso possa afetar a funcionalidade de alguns recursos.</p>
-    <h2>10. Transferência Internacional</h2>
-    <p>Alguns dos nossos prestadores de serviços podem estar localizados fora do Brasil. Nessas situações, garantimos que o tratamento de dados ocorra com nível de proteção equivalente ao estabelecido pela LGPD.</p>
-    <h2>11. Encarregado de Dados (DPO)</h2>
-    <p>Nosso Encarregado de Proteção de Dados pode ser contatado pelo email: <a href="mailto:contato@riseupmtech.com">contato@riseupmtech.com</a></p>
-    <h2>12. Alterações nesta Política</h2>
-    <p>Esta Política pode ser atualizada periodicamente. Notificaremos mudanças significativas por email com pelo menos 15 dias de antecedência.</p>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="/">ライズアップ<span>_エムテック</span></a>
+    <a class="nav-back" href="/">← Voltar</a>
   </div>
-  <footer>
-    <a href="/" class="footer-logo">Rise Up <span>MTech</span></a>
-    <ul class="footer-links">
-      <li><a href="/">Início</a></li>
-      <li><a href="/terms-of-service.html">Termos de Uso</a></li>
-      <li><a href="/privacy-policy.html">Privacidade</a></li>
-    </ul>
-    <span class="footer-copy">© 2026 Rise Up MTech</span>
-  </footer>
+</nav>
+
+<div class="wrap">
+  <div class="page-tag">// プライバシーポリシー</div>
+  <h1>Política de Privacidade</h1>
+  <div class="updated">Última atualização: 31 de março de 2026</div>
+
+  <p>A Rise Up MTech ("nós", "nosso" ou "empresa") está comprometida com a proteção da sua privacidade. Esta Política de Privacidade descreve como coletamos, usamos e protegemos suas informações ao usar nossos produtos e serviços, incluindo o <strong>Rise Up MTech ETL</strong> (Google Workspace Add-on) e o site <strong>riseupmtech.com</strong>.</p>
+
+  <div class="highlight">
+    Esta política se aplica especificamente ao uso do add-on <strong>Rise Up MTech ETL</strong>, que integra dados de plataformas de mídia ao Google Sheets mediante autorização explícita do usuário.
+  </div>
+
+  <h2>1. Informações que coletamos</h2>
+  <p>Ao usar o Rise Up MTech ETL, podemos coletar as seguintes informações:</p>
+  <ul>
+    <li><strong>Endereço de e-mail</strong> — para identificação do usuário e gerenciamento de licenças</li>
+    <li><strong>Tokens de acesso às plataformas de mídia</strong> — armazenados localmente no Google Apps Script Properties Service (criptografado pelo Google), nunca transmitidos a servidores da Rise Up MTech sem necessidade</li>
+    <li><strong>Dados de uso</strong> — número de extrações realizadas, plataformas utilizadas e período consultado, usados exclusivamente para gerenciamento de licenças e melhoria do produto</li>
+    <li><strong>Dados de mídia extraídos</strong> — métricas das suas campanhas publicitárias. Esses dados são escritos diretamente na sua planilha Google Sheets e <strong>não são armazenados em servidores da Rise Up MTech</strong></li>
+  </ul>
+
+  <h2>2. Como usamos suas informações</h2>
+  <p>Usamos suas informações exclusivamente para:</p>
+  <ul>
+    <li>Autenticar sua identidade e verificar sua licença ativa</li>
+    <li>Executar as extrações de dados das plataformas autorizadas por você</li>
+    <li>Escrever os dados extraídos na sua planilha Google Sheets</li>
+    <li>Enviar comunicações relacionadas ao serviço (renovação de licença, atualizações)</li>
+    <li>Melhorar a qualidade e confiabilidade do produto</li>
+  </ul>
+  <p><strong>Não vendemos, alugamos ou compartilhamos suas informações pessoais com terceiros para fins de marketing.</strong></p>
+
+  <h2>3. Acesso a dados de terceiros</h2>
+  <p>O Rise Up MTech ETL solicita acesso às APIs das seguintes plataformas mediante autorização explícita do usuário:</p>
+  <ul>
+    <li>Google Ads (<code>https://www.googleapis.com/auth/adwords</code>)</li>
+    <li>YouTube Analytics (<code>https://www.googleapis.com/auth/youtube.readonly</code>)</li>
+    <li>Google Analytics / GA4 (<code>https://www.googleapis.com/auth/analytics.readonly</code>)</li>
+    <li>Google Sheets (<code>https://www.googleapis.com/auth/spreadsheets</code>)</li>
+    <li>Meta Ads API — mediante token fornecido pelo usuário</li>
+    <li>TikTok Ads API — mediante token fornecido pelo usuário</li>
+    <li>LinkedIn Ads API — mediante token fornecido pelo usuário</li>
+    <li>Pinterest Ads API — mediante token fornecido pelo usuário</li>
+  </ul>
+  <p>O acesso é utilizado exclusivamente para leitura de dados de desempenho de campanhas e escrita na planilha do usuário. Não realizamos nenhuma operação de criação, modificação ou exclusão de campanhas nas plataformas.</p>
+
+  <div class="highlight">
+    <strong>Uso limitado:</strong> O uso de dados obtidos via APIs do Google se restringe ao propósito declarado do add-on (extração de métricas para Google Sheets) e está em conformidade com a <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank">Política de Dados do Usuário dos Serviços de API do Google</a>, incluindo os requisitos de Uso Limitado.
+  </div>
+
+  <h2>4. Armazenamento e segurança</h2>
+  <ul>
+    <li>Tokens de acesso a plataformas de terceiros (Meta, TikTok, LinkedIn, Pinterest) são armazenados no <strong>Google Apps Script Properties Service</strong>, que é criptografado e gerenciado pelo Google</li>
+    <li>Dados de verificação de licença são transmitidos via HTTPS ao backend da Rise Up MTech hospedado no Google Cloud Run (região southamerica-east1)</li>
+    <li>Dados de campanhas extraídos são escritos diretamente na planilha do usuário e não passam por servidores da Rise Up MTech</li>
+    <li>Não armazenamos dados de campanhas em nossos servidores</li>
+  </ul>
+
+  <h2>5. Retenção de dados</h2>
+  <p>Mantemos apenas os dados necessários para o funcionamento do serviço:</p>
+  <ul>
+    <li>E-mail e status de licença: pelo período da assinatura + 90 dias</li>
+    <li>Logs de uso: até 12 meses</li>
+    <li>Tokens de plataformas: armazenados localmente pelo usuário e removidos ao desinstalar o add-on ou revogar o acesso</li>
+  </ul>
+
+  <h2>6. Seus direitos (LGPD)</h2>
+  <p>Em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você tem direito a:</p>
+  <ul>
+    <li>Confirmar a existência de tratamento de seus dados pessoais</li>
+    <li>Acessar seus dados pessoais</li>
+    <li>Corrigir dados incompletos, inexatos ou desatualizados</li>
+    <li>Solicitar a anonimização, bloqueio ou eliminação de dados desnecessários</li>
+    <li>Revogar o consentimento a qualquer momento</li>
+    <li>Solicitar a exclusão completa dos seus dados</li>
+  </ul>
+  <p>Para exercer esses direitos, entre em contato: <a href="mailto:privacidade@riseupmtech.com">privacidade@riseupmtech.com</a></p>
+
+  <h2>7. Revogação de acesso</h2>
+  <p>Você pode revogar o acesso do add-on a qualquer momento:</p>
+  <ul>
+    <li>Para dados Google: acesse <a href="https://myaccount.google.com/permissions" target="_blank">myaccount.google.com/permissions</a> e remova "Rise Up MTech ETL"</li>
+    <li>Para tokens de plataformas (Meta, TikTok, etc.): desinstale o add-on ou remova os tokens na aba Conexões</li>
+  </ul>
+
+  <h2>8. Cookies e rastreamento</h2>
+  <p>O site riseupmtech.com não utiliza cookies de rastreamento ou analytics de terceiros. O add-on Rise Up MTech ETL não coleta dados de navegação.</p>
+
+  <h2>9. Alterações nesta política</h2>
+  <p>Podemos atualizar esta Política de Privacidade periodicamente. Notificaremos usuários ativos por e-mail sobre mudanças significativas. O uso continuado do serviço após a notificação constitui aceitação da política atualizada.</p>
+
+  <h2>10. Contato</h2>
+  <p>Para dúvidas, solicitações ou exercício de direitos relacionados à privacidade:</p>
+  <ul>
+    <li>E-mail: <a href="mailto:privacidade@riseupmtech.com">privacidade@riseupmtech.com</a></li>
+    <li>Site: <a href="https://riseupmtech.com">riseupmtech.com</a></li>
+    <li>Responsável: Rise Up MTech — São Paulo, Brasil</li>
+  </ul>
+</div>
+
+<footer>
+  © 2026 Rise Up MTech — São Paulo, BR &nbsp;·&nbsp;
+  <a href="/privacy-policy.html">Política de Privacidade</a> &nbsp;·&nbsp;
+  <a href="/terms-of-service.html">Termos de Uso</a>
+</footer>
+
 </body>
 </html>
