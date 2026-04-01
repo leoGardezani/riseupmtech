@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suporte — Rise Up MTech ETL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:     #02020a;
+    --ink:    #e8e8e4;
+    --muted:  #888;
+    --cyan:   #00e5ff;
+    --magenta:#ff2d78;
+    --border: rgba(255,255,255,.08);
+    --mono:   'Share Tech Mono', monospace;
+    --fh:     'Rajdhani', sans-serif;
+    --ff:     'Barlow', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--ff); font-weight: 300; line-height: 1.8; -webkit-font-smoothing: antialiased; }
+
+  nav { border-bottom: 1px solid var(--border); padding: 20px 0; }
+  .nav-inner { max-width: 900px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; }
+  .nav-logo { font-family: var(--mono); font-size: 13px; letter-spacing: .12em; color: var(--ink); text-decoration: none; text-transform: uppercase; }
+  .nav-logo span { color: var(--cyan); }
+  .nav-back { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--muted); text-decoration: none; }
+  .nav-back:hover { color: var(--cyan); }
+
+  .wrap { max-width: 900px; margin: 0 auto; padding: 60px 32px 100px; }
+
+  .page-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--cyan); margin-bottom: 16px; }
+  h1 { font-family: var(--fh); font-weight: 700; font-size: 40px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+  .subtitle { color: var(--muted); font-size: 15px; margin-bottom: 56px; padding-bottom: 40px; border-bottom: 1px solid var(--border); }
+
+  .contact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); margin-bottom: 60px; }
+  .contact-card { background: var(--bg); padding: 32px 28px; }
+  .contact-icon { font-family: var(--mono); font-size: 20px; margin-bottom: 16px; }
+  .contact-title { font-family: var(--fh); font-weight: 700; font-size: 16px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+  .contact-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+  .contact-link {
+    display: inline-block;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+    padding: 10px 18px; background: transparent; color: var(--cyan);
+    border: 1px solid var(--cyan); text-decoration: none; transition: all .2s;
+  }
+  .contact-link:hover { background: var(--cyan); color: var(--bg); }
+  .contact-link.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .contact-link.primary:hover { background: #fff; }
+
+  h2 { font-family: var(--fh); font-weight: 700; font-size: 22px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 24px; }
+  .faq { display: flex; flex-direction: column; gap: 1px; background: var(--border); margin-bottom: 60px; }
+  .faq-item { background: var(--bg); }
+  .faq-q { padding: 20px 24px; cursor: pointer; font-family: var(--fh); font-weight: 600; font-size: 15px; display: flex; justify-content: space-between; align-items: center; transition: background .2s; }
+  .faq-q:hover { background: rgba(255,255,255,.02); }
+  .faq-arrow { font-family: var(--mono); font-size: 11px; color: var(--muted); transition: transform .25s; }
+  .faq-item.open .faq-arrow { transform: rotate(180deg); }
+  .faq-a { display: none; padding: 0 24px 20px; font-size: 14px; color: rgba(232,232,228,.7); line-height: 1.7; }
+  .faq-item.open .faq-a { display: block; }
+  .faq-a code { font-family: var(--mono); font-size: 12px; background: rgba(255,255,255,.05); padding: 2px 6px; color: var(--cyan); }
+  .faq-a a { color: var(--cyan); text-decoration: none; }
+
+  .status-box { border: 1px solid var(--border); padding: 24px 28px; display: flex; align-items: center; gap: 16px; margin-bottom: 60px; }
+  .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #16a34a; flex-shrink: 0; box-shadow: 0 0 8px #16a34a; }
+  .status-text { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--muted); }
+  .status-text strong { color: #16a34a; display: block; margin-bottom: 2px; }
+
+  footer { border-top: 1px solid var(--border); padding: 32px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .08em; }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--cyan); }
+
+  @media(max-width: 768px) { .contact-grid { grid-template-columns: 1fr; } h1 { font-size: 28px; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="/">ライズアップ<span>_エムテック</span></a>
+    <a class="nav-back" href="/">← Voltar</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="page-tag">// サポート — Suporte</div>
+  <h1>Como podemos ajudar?</h1>
+  <p class="subtitle">Suporte para o Rise Up MTech ETL e demais produtos da plataforma.</p>
+
+  <div class="status-box">
+    <div class="status-dot"></div>
+    <div class="status-text">
+      <strong>Todos os sistemas operacionais</strong>
+      API Rise Up MTech · Google Sheets™ Add-on · Backend Cloud Run
+    </div>
+  </div>
+
+  <div class="contact-grid">
+    <div class="contact-card">
+      <div class="contact-icon">✉</div>
+      <div class="contact-title">E-mail</div>
+      <div class="contact-desc">Para dúvidas, problemas técnicos ou solicitações. Respondemos em até 24h úteis.</div>
+      <a class="contact-link primary" href="mailto:suporte@riseupmtech.com">suporte@riseupmtech.com</a>
+    </div>
+    <div class="contact-card">
+      <div class="contact-icon">⊕</div>
+      <div class="contact-title">Reportar problema</div>
+      <div class="contact-desc">Encontrou um bug ou comportamento inesperado no add-on? Nos conte com detalhes.</div>
+      <a class="contact-link" href="mailto:suporte@riseupmtech.com?subject=Bug Report — Rise Up MTech ETL&body=Descreva o problema:">Reportar bug</a>
+    </div>
+    <div class="contact-card">
+      <div class="contact-icon">◎</div>
+      <div class="contact-title">Comercial</div>
+      <div class="contact-desc">Interesse em licenças, planos corporativos ou integração personalizada.</div>
+      <a class="contact-link" href="mailto:contato@riseupmtech.com">contato@riseupmtech.com</a>
+    </div>
+  </div>
+
+  <h2>Perguntas frequentes</h2>
+  <div class="faq">
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Como instalo o Rise Up MTech ETL no Google Sheets™?<span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Acesse o <a href="https://workspace.google.com/marketplace" target="_blank">Google Workspace Marketplace</a>, busque por "Rise Up MTech ETL" e clique em Instalar. Após a instalação, abra qualquer planilha Google Sheets™ e acesse <code>Extensões → Rise Up MTech ETL → Abrir ETL</code>.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Quais plataformas são suportadas?<span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Google Ads™, Meta Ads, TikTok Ads, YouTube™ Analytics, Google Analytics™ (GA4), LinkedIn Ads e Pinterest Ads.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Como configuro a conexão com o Google Ads™?<span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Na sidebar, acesse <code>Conexões → Google / YouTube / GA4</code>. Autorize via OAuth e informe o Customer ID do MCC e o Developer Token. O YouTube™ Analytics e GA4 usam as mesmas credenciais.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Os dados ficam armazenados nos servidores da Rise Up MTech?<span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Não. Os dados são escritos diretamente na sua planilha Google Sheets™. Nenhum dado de campanha passa pelos nossos servidores.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">O add-on é gratuito?<span class="faq-arrow">▼</span></div>
+      <div class="faq-a">O add-on inclui 14 dias de trial gratuito. Após o trial, é necessária uma assinatura ativa. Entre em contato em <a href="mailto:contato@riseupmtech.com">contato@riseupmtech.com</a> para informações sobre planos.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Como revogo o acesso?<span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Acesse <a href="https://myaccount.google.com/permissions" target="_blank">myaccount.google.com/permissions</a> e remova "Rise Up MTech ETL". Para desinstalar: <code>Extensões → Complementos → Gerenciar complementos</code>.</div>
+    </div>
+  </div>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq">
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">How do I install Rise Up MTech ETL?<span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Visit the <a href="https://workspace.google.com/marketplace" target="_blank">Google Workspace Marketplace</a>, search for "Rise Up MTech ETL" and click Install. Then open any Google Sheets™ spreadsheet and go to <code>Extensions → Rise Up MTech ETL → Open ETL</code>.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Is my campaign data stored on your servers?<span class="faq-arrow">▼</span></div>
+      <div class="faq-a">No. Data is extracted directly from the platform APIs and written to your Google Sheets™ spreadsheet. No campaign data passes through Rise Up MTech servers.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">How do I contact support?<span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Email us at <a href="mailto:suporte@riseupmtech.com">suporte@riseupmtech.com</a>. We respond within 24 business hours.</div>
+    </div>
+  </div>
+
+  <p style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;line-height:1.8">
+    Google Sheets™, Google Ads™, YouTube™ and Google Analytics™ are trademarks of Google LLC.<br>
+    Rise Up MTech is not affiliated with, endorsed by, or sponsored by Google LLC.
+  </p>
+</div>
+
+<footer>
+  © 2026 Rise Up MTech — São Paulo, BR &nbsp;·&nbsp;
+  <a href="/privacy-policy.html">Política de Privacidade</a> &nbsp;·&nbsp;
+  <a href="/terms-of-service.html">Termos de Uso</a> &nbsp;·&nbsp;
+  <a href="/support.html">Suporte</a>
+</footer>
+
+<script>
+function toggleFaq(el) {
+  el.parentElement.classList.toggle('open');
+}
+</script>
+</body>
+</html>
