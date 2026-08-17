@@ -21,7 +21,6 @@
   body{font-family:var(--ff);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;}
   button{font-family:var(--ff);cursor:pointer;}
   input,select{font-family:var(--ff);}
-
   /* ── TOPBAR ── */
   .topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar-h);background:var(--ink);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:200;}
   .topbar-logo{font-family:var(--mono);font-size:13px;letter-spacing:.1em;color:#fff;text-transform:uppercase;cursor:default;position:relative;display:inline-block;}
@@ -37,7 +36,6 @@
   .topbar-user{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:rgba(255,255,255,.4);text-transform:uppercase;}
   .btn-menu{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:#fff;border:none;cursor:pointer;padding:7px 16px;transition:all .2s;}
   .btn-menu:hover{background:#e0e0e0;}
-
   /* ── FILTERS ── */
   .filters{position:fixed;top:var(--topbar-h);left:0;right:0;height:var(--filter-h);background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;z-index:100;gap:0;overflow-x:auto;}
   .fg-{display:flex;align-items:center;gap:8px;margin-right:20px;flex-shrink:0;}
@@ -45,24 +43,20 @@
   .fsel{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink);background:var(--bg2);border:1px solid var(--border);padding:4px 24px 4px 10px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;}
   .fsel:focus{border-color:var(--ink);}
   .fdiv{width:1px;height:20px;background:var(--border);margin:0 12px 0 0;flex-shrink:0;}
-
   /* ── MAIN ── */
   .main{position:fixed;top:calc(var(--topbar-h) + var(--filter-h));left:0;right:0;bottom:0;overflow-y:auto;transition:right .3s ease;}
   .main.panel-open{right:var(--panel-w);}
   .tab-page{display:none;padding:28px 28px 80px;min-height:0;} .tab-page.active{display:block;}
-
   /* ── SHARED COMPONENTS ── */
   .section-title{font-family:var(--fh);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);margin-bottom:2px;}
   .section-sub{font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--ink-muted);text-transform:uppercase;margin-bottom:16px;}
   .section-sub::before{content:'// ';}
   .divider{height:1px;background:var(--border);margin:28px 0;}
-
   .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;}
   .badge::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor;flex-shrink:0;}
   .b-g{background:#dcfce7;color:#15803d;} .b-o{background:#fff7ed;color:#c2410c;}
   .b-r{background:#fee2e2;color:var(--danger);} .b-b{background:#dbeafe;color:var(--info);}
   .b-gr{background:var(--bg3);color:var(--ink-muted);} .b-y{background:#fef9c3;color:#854d0e;}
-
   /* KPI CARDS */
   .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);margin-bottom:24px;}
   .kpi{background:var(--bg);padding:18px 20px;transition:background .2s;}
@@ -73,7 +67,6 @@
   .kpi-delta{font-family:var(--mono);font-size:10px;margin-top:5px;letter-spacing:.04em;}
   .kpi-delta.up{color:var(--success);} .kpi-delta.dn{color:var(--danger);}
   .kpi-target{font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:3px;}
-
   /* PACING */
   .pacing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:24px;}
   .pacing-card{background:var(--bg);padding:20px 22px;}
@@ -90,7 +83,6 @@
   .pacing-fill.warn{background:var(--warn);}
   .pacing-mark{position:absolute;top:-4px;width:1px;height:12px;background:var(--ink-mid);}
   .pacing-label{font-family:var(--mono);font-size:9px;color:var(--ink-muted);display:flex;justify-content:space-between;}
-
   /* CHARTS */
   .charts-row{display:grid;grid-template-columns:2fr 1fr;gap:1px;background:var(--border);margin-bottom:24px;}
   .chart-box{min-width:0;} /* prevent overflow */
@@ -99,7 +91,6 @@
   .chart-title{font-family:var(--fh);font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;}
   .chart-sub{font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--ink-muted);text-transform:uppercase;margin-bottom:18px;}
   .chart-sub::before{content:'// ';}
-
   /* TABLE */
   .tbox{background:var(--bg);border:1px solid var(--border);overflow:hidden;margin-bottom:24px;}
   .tbox-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);}
@@ -113,9 +104,7 @@
   tr:hover td{background:var(--bg2);}
   .td-bold{font-weight:600;color:var(--ink);}
   .td-mono{font-family:var(--mono);font-size:10px;}
-
   /* ── CAMPANHAS TAB ── */
-
   /* Campaign row expand */
   .camp-row{cursor:pointer;}
   .camp-row td{transition:background .15s;}
@@ -126,7 +115,6 @@
   .cd-item{}
   .cd-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:4px;}
   .cd-val{font-family:var(--fh);font-weight:700;font-size:18px;}
-
   /* Collapsible section */
   .collapsible{border:1px solid var(--border);margin-bottom:16px;overflow:hidden;}
   .coll-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;cursor:pointer;background:var(--bg);transition:background .2s;user-select:none;}
@@ -138,7 +126,6 @@
   .coll-header.open .coll-arrow{transform:rotate(180deg);}
   .coll-body{display:none;padding:0 20px 20px;}
   .coll-body.open{display:block;}
-
   /* Creative cards */
   .creative-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-top:16px;}
   .creative-card{background:var(--bg);overflow:hidden;transition:background .2s;}
@@ -153,7 +140,6 @@
   .cc-m{background:var(--bg2);padding:7px 10px;}
   .cc-m-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:2px;}
   .cc-m-val{font-family:var(--fh);font-weight:700;font-size:15px;color:var(--ink);}
-
   /* Video funnel */
   .video-funnel{display:flex;flex-direction:column;gap:6px;margin-top:16px;}
   .vf-item{display:grid;grid-template-columns:140px 1fr 80px;align-items:center;gap:12px;}
@@ -162,7 +148,6 @@
   .vf-bar{height:100%;background:var(--ink);transition:width 1s ease;}
   .vf-val{font-family:var(--fh);font-weight:700;font-size:14px;color:var(--ink);}
   .vf-pct{font-family:var(--mono);font-size:9px;color:var(--ink-muted);}
-
   /* Social pyramid */
   .social-pyramid{display:flex;flex-direction:column;gap:5px;margin-top:16px;}
   .sp-row{display:flex;align-items:center;gap:12px;}
@@ -170,7 +155,6 @@
   .sp-bar-wrap{flex:1;height:28px;background:var(--bg3);position:relative;}
   .sp-bar{height:100%;background:var(--ink);transition:width 1s ease;}
   .sp-val{font-family:var(--fh);font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap;}
-
   /* ── STATUS TAB (GANTT) ── */
   .gantt-wrap{overflow-x:auto;background:var(--bg);border:1px solid var(--border);}
   .gantt-header{display:flex;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;}
@@ -178,11 +162,9 @@
   .gantt-timeline{flex:1;display:flex;min-width:600px;}
   .gantt-day{flex:1;padding:10px 0;font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--ink-muted);text-align:center;border-right:1px solid var(--border-d);}
   .gantt-day.today{background:rgba(13,13,13,.04);color:var(--ink);font-weight:700;}
-
   .gantt-group-header{display:flex;align-items:center;padding:10px 16px;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border-d);cursor:pointer;gap:8px;}
   .gg-title{font-family:var(--fh);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em;}
   .gg-badge{font-family:var(--mono);font-size:9px;padding:2px 8px;background:var(--bg3);color:var(--ink-mid);}
-
   .gantt-row{display:flex;border-bottom:1px solid var(--border-d);min-height:44px;align-items:center;}
   .gantt-row:hover{background:var(--bg2);}
   .gantt-row-info{width:280px;flex-shrink:0;padding:10px 16px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:3px;}
@@ -202,7 +184,6 @@
   .gl-dot.pending{background:var(--bg3);border:1px solid var(--border);}
   .gl-dot.stand_by{background:repeating-linear-gradient(45deg,var(--bg3),var(--bg3) 3px,var(--bg4) 3px,var(--bg4) 6px);border:1px solid var(--border);}
   .gl-dot.error{background:#fee2e2;border:1px solid #fecaca;}
-
   /* ── RIGHT PANEL ── */
   .r-panel{position:fixed;top:0;right:0;bottom:0;width:var(--panel-w);background:var(--bg);border-left:1px solid var(--border);transform:translateX(100%);transition:transform .3s ease;z-index:300;display:flex;flex-direction:column;}
   .r-panel.open{transform:translateX(0);}
@@ -249,7 +230,6 @@
   .btn-sm:hover{background:#333;}
   .btn-sm.ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--border);}
   .btn-sm.ghost:hover{border-color:var(--ink);color:var(--ink);}
-
   /* overlay & toast */
   .overlay{position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:299;opacity:0;pointer-events:none;transition:opacity .3s;}
   .overlay.on{opacity:1;pointer-events:all;}
@@ -257,7 +237,6 @@
   .to{background:var(--ink);color:#fff;padding:10px 16px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;display:flex;align-items:center;gap:10px;animation:tIn .2s ease;box-shadow:0 4px 20px rgba(0,0,0,.15);}
   .to.ok span:first-child{color:#4ade80;} .to.er span:first-child{color:#f87171;}
   @keyframes tIn{from{transform:translateY(8px);opacity:0;}to{transform:none;opacity:1;}}
-
   /* ── CRIATIVOS REPO ── */
   .repo-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:center;}
   .repo-filter-sel{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink);background:var(--bg2);border:1px solid var(--border);padding:6px 28px 6px 10px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;}
@@ -266,28 +245,23 @@
   .repo-type-pill{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border:1px solid var(--border);background:var(--bg);cursor:pointer;transition:all .2s;white-space:nowrap;}
   .repo-type-pill:hover{border-color:var(--ink);}
   .repo-type-pill.on{background:var(--ink);color:#fff;border-color:var(--ink);}
-
   .repo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1px;background:var(--border);margin-top:16px;}
   .repo-card{background:var(--bg);overflow:hidden;position:relative;transition:background .2s;}
   .repo-card:hover{background:var(--bg2);}
   .repo-card:hover .repo-actions{opacity:1;}
-
   .repo-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--bg3);display:block;position:relative;}
   .repo-thumb-wrap{position:relative;overflow:hidden;}
   .repo-thumb-wrap .type-tag{position:absolute;top:8px;left:8px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;background:rgba(13,13,13,.85);color:#fff;}
   .repo-thumb-wrap .approved-tag{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;padding:3px 8px;background:#16a34a;color:#fff;}
-
   .repo-actions{position:absolute;bottom:0;left:0;right:0;background:rgba(13,13,13,.9);display:flex;gap:0;opacity:0;transition:opacity .2s;}
   .repo-action{flex:1;padding:10px 6px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:none;border:none;border-right:1px solid rgba(255,255,255,.1);cursor:pointer;text-align:center;transition:background .15s;}
   .repo-action:last-child{border-right:none;}
   .repo-action:hover{background:rgba(255,255,255,.12);}
-
   .repo-info{padding:14px 16px;}
   .repo-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .repo-meta{font-family:var(--mono);font-size:9px;color:var(--ink-muted);letter-spacing:.06em;margin-bottom:10px;}
   .repo-tags{display:flex;flex-wrap:wrap;gap:4px;}
   .repo-tag{font-family:var(--mono);font-size:9px;letter-spacing:.06em;padding:2px 8px;background:var(--bg3);color:var(--ink-mid);}
-
   /* detail modal */
   .detail-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
   .detail-modal.open{display:flex;}
@@ -309,10 +283,8 @@
   .detail-btn:hover{background:#333;}
   .detail-btn.ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--border);}
   .detail-btn.ghost:hover{border-color:var(--ink);color:var(--ink);}
-
   /* role badge */
   .r-ap{background:#f0fdf4;color:#15803d;}
-
   /* ── BIG TABLE ── */
   .bt-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
   .bt-search{font-family:var(--mono);font-size:11px;letter-spacing:.04em;padding:7px 14px;border:1px solid var(--border);background:var(--bg2);color:var(--ink);outline:none;width:240px;transition:border-color .2s;}
@@ -322,7 +294,6 @@
   .bt-btn.ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--border);}
   .bt-btn.ghost:hover{border-color:var(--ink);color:var(--ink);}
   .bt-info{font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.08em;margin-left:auto;}
-
   .bt-wrap{overflow:auto;border:1px solid var(--border);background:var(--bg);position:relative;max-height:calc(100vh - 220px);}
   .bt-table{border-collapse:collapse;white-space:nowrap;font-size:12px;}
   .bt-table thead{position:sticky;top:0;z-index:20;}
@@ -344,7 +315,40 @@
   .bt-col-group-engagement{background:rgba(37,99,235,.04);}
   .bt-col-group-cost{background:rgba(217,119,6,.04);}
   .bt-col-group-conversion{background:rgba(220,38,38,.04);}
-
+  /* ── DESDOBRADOR ── */
+  .desd-layout{display:grid;grid-template-columns:1fr 340px;gap:1px;background:var(--border);margin-bottom:24px;}
+  .desd-col{background:var(--bg);padding:24px;min-width:0;}
+  .desd-queue-row{cursor:pointer;}
+  .desd-queue-row.active td{background:var(--bg3);}
+  .desd-step-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-muted);margin:20px 0 10px;}
+  .desd-step-lbl:first-child{margin-top:0;}
+  .desd-step-lbl::before{content:'// ';}
+  .desd-canvas-wrap{display:flex;justify-content:center;background:var(--bg2);border:1px solid var(--border);padding:20px;margin-bottom:8px;}
+  .desd-canvas{position:relative;overflow:hidden;background:#000;box-shadow:0 4px 24px rgba(0,0,0,.18);cursor:crosshair;user-select:none;}
+  .desd-canvas img.desd-kv-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;}
+  .desd-canvas .desd-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-align:center;padding:20px;}
+  .desd-el{position:absolute;cursor:move;touch-action:none;}
+  .desd-el:hover, .desd-el.dragging{outline:1px dashed rgba(255,255,255,.7);}
+  .desd-el-headline{font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.5);font-family:Arial,Helvetica,sans-serif;line-height:1.2;white-space:pre-wrap;}
+  .desd-el-cta{display:flex;align-items:center;justify-content:center;font-family:Arial,Helvetica,sans-serif;font-weight:700;white-space:nowrap;overflow:hidden;}
+  .desd-format-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;}
+  .desd-format-group-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-muted);width:100%;margin:8px 0 2px;}
+  .desd-format-group-lbl:first-child{margin-top:0;}
+  .desd-motion-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);margin-top:8px;}
+  .desd-motion-card{background:var(--bg);padding:12px 14px;cursor:pointer;border:2px solid transparent;transition:border-color .15s;}
+  .desd-motion-card:hover{background:var(--bg2);}
+  .desd-motion-card.on{border-color:var(--ink);background:var(--bg2);}
+  .desd-motion-name{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:3px;}
+  .desd-motion-desc{font-size:10px;color:var(--ink-mid);line-height:1.4;}
+  .desd-preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1px;background:var(--border);margin-top:16px;}
+  .desd-preview-card{background:var(--bg);padding:12px;}
+  .desd-preview-card canvas{width:100%;height:auto;display:block;background:#000;margin-bottom:8px;}
+  .desd-preview-lbl{font-family:var(--mono);font-size:9px;color:var(--ink-mid);letter-spacing:.04em;}
+  .desd-toggle-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+  .desd-toggle{position:relative;width:34px;height:18px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;flex-shrink:0;}
+  .desd-toggle.on{background:var(--ink);}
+  .desd-toggle::after{content:'';position:absolute;top:1px;left:1px;width:14px;height:14px;background:#fff;transition:transform .15s;}
+  .desd-toggle.on::after{transform:translateX(16px);}
   @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr);}.creative-grid{grid-template-columns:repeat(2,1fr);}.charts-row{grid-template-columns:1fr;}.pacing-grid{grid-template-columns:repeat(2,1fr);}.chart-canvas-wrap{min-height:220px;}}
   @media(max-width:700px){:root{--panel-w:100vw;}.topbar-center{display:none;}.kpi-grid{grid-template-columns:repeat(2,1fr);}.pacing-grid{grid-template-columns:1fr;}.creative-grid{grid-template-columns:1fr;}.main.panel-open{right:0;}.tab-page{padding:16px;}}
 </style>
@@ -352,7 +356,6 @@
 <body>
 <div class="tc" id="tc"></div>
 <div class="overlay" id="overlay" onclick="closePanel()"></div>
-
 <!-- TOPBAR -->
 <div class="topbar">
   <div class="topbar-logo">
@@ -362,6 +365,7 @@
   <div class="topbar-center">
     <button class="tab-btn on" onclick="switchTab('dashboard',this)">Overview</button>
     <button class="tab-btn" onclick="switchTab('campanhas',this)">Campanhas</button>
+    <button class="tab-btn" onclick="switchTab('desdobrador',this)">Desdobrador</button>
     <button class="tab-btn" onclick="switchTab('status',this)">Status</button>
     <button class="tab-btn" onclick="switchTab('criativos',this)">Criativos</button>
     <button class="tab-btn" onclick="switchTab('bigtable',this)">Big Table</button>
@@ -371,7 +375,6 @@
     <button class="btn-menu" onclick="togglePanel()">☰ Menu</button>
   </div>
 </div>
-
 <!-- FILTERS -->
 <div class="filters">
   <div class="fg-"><span class="flbl">Período</span>
@@ -399,13 +402,10 @@
     <select class="fsel"><option>Todas</option><option>Produto A</option><option>Produto B</option></select>
   </div>
 </div>
-
 <!-- MAIN -->
 <div class="main" id="main">
-
   <!-- ── CAMPANHAS ── -->
   <div class="tab-page" id="tab-campanhas">
-
     <!-- KPIs -->
     <div class="section-title">Resultados do Período</div>
     <div class="section-sub">KPIs consolidados vs meta</div>
@@ -447,12 +447,10 @@
         <div class="kpi-target">Meta R$65</div>
       </div>
     </div>
-
     <!-- PACING -->
     <div class="section-title">Pacing de Volumes</div>
     <div class="section-sub">Entrega realizada vs meta esperada para o período</div>
     <div class="pacing-grid" id="pacingGrid"></div>
-
     <!-- PERFORMANCE CHART -->
     <div class="charts-row">
       <div class="chart-box">
@@ -466,7 +464,6 @@
         <div class="chart-canvas-wrap"><canvas id="chartDough" style="max-height:200px"></canvas></div>
       </div>
     </div>
-
     <!-- TABLE -->
     <div class="tbox">
       <div class="tbox-head">
@@ -480,13 +477,10 @@
       </tr></thead>
       <tbody id="campTable"></tbody></table>
     </div>
-
     <div class="divider"></div>
-
     <!-- CRIATIVOS GERAL -->
     <div class="section-title">Performance de Criativos</div>
     <div class="section-sub">Todos os formatos e plataformas</div>
-
     <!-- Collapsible: Geral -->
     <div class="collapsible" id="coll-geral">
       <div class="coll-header open" onclick="toggleColl('geral')">
@@ -500,7 +494,6 @@
         <div class="creative-grid" id="creativeGeneral"></div>
       </div>
     </div>
-
     <!-- Collapsible: Vídeo -->
     <div class="collapsible" id="coll-video">
       <div class="coll-header" onclick="toggleColl('video')">
@@ -532,7 +525,6 @@
         </div>
       </div>
     </div>
-
     <!-- Collapsible: Social -->
     <div class="collapsible" id="coll-social">
       <div class="coll-header" onclick="toggleColl('social')">
@@ -562,16 +554,102 @@
         </div>
       </div>
     </div>
-
   </div>
+  <!-- ── DESDOBRADOR DE PEÇAS ── -->
+  <div class="tab-page" id="tab-desdobrador">
+    <div class="section-title">Desdobrador de Peças</div>
+    <div class="section-sub">Um KV vira todos os formatos — posicione headline e CTA, escolha o motion e envie pra aprovação</div>
 
+    <!-- Fila de material-request aguardando peça -->
+    <div class="tbox">
+      <div class="tbox-head">
+        <div class="tbox-title">Fila — Peças Pendentes</div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// linhas de material-request sem criativo</span>
+      </div>
+      <table><thead><tr>
+        <th>Campanha</th><th>Marca</th><th>Plataforma</th><th>Formatos pedidos</th><th>Entrega</th><th></th>
+      </tr></thead>
+      <tbody id="desdQueueTable"></tbody></table>
+    </div>
+
+    <div class="desd-layout">
+      <!-- COLUNA ESQUERDA: canvas + KV -->
+      <div class="desd-col">
+        <div class="desd-step-lbl">1. KV de origem</div>
+        <div class="uz" id="desdDropzone" style="margin-bottom:16px" onclick="document.getElementById('desdFileInput').click()">
+          <div class="uz-icon">🖼️</div>
+          <div class="uz-text"><strong id="desdUzText">Clique ou arraste o KV</strong></div>
+          <div class="uz-hint">.jpg .png — vira o fundo de todos os formatos</div>
+        </div>
+        <input type="file" id="desdFileInput" accept="image/png,image/jpeg" style="display:none" onchange="desdOnFileSelected(event)">
+
+        <div class="desd-step-lbl">2. Editor de posição — headline e CTA</div>
+        <div class="desd-canvas-wrap">
+          <div class="desd-canvas" id="desdCanvas" style="width:420px;height:420px">
+            <div class="desd-empty" id="desdCanvasEmpty">Envie um KV acima<br>pra começar a posicionar os elementos</div>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);text-align:center;margin-bottom:16px">// arraste os elementos dentro do quadro — a posição em % se aplica a todos os formatos gerados</div>
+
+        <div class="desd-step-lbl">3. Formatos a gerar</div>
+        <div class="desd-format-pills" id="desdFormatPills"></div>
+
+        <div class="desd-step-lbl">4. Motion (opcional)</div>
+        <div class="desd-toggle-row">
+          <div class="desd-toggle" id="desdMotionToggle" onclick="desdToggleMotion()"></div>
+          <span style="font-size:12px;color:var(--ink-soft)">Gerar também uma versão animada (HTML5) além do estático</span>
+        </div>
+        <div class="desd-motion-grid" id="desdMotionGrid" style="display:none"></div>
+
+        <div class="desd-step-lbl">5. Preview por formato</div>
+        <button class="bt-btn ghost" style="margin-bottom:12px" onclick="desdRenderAllPreviews()">↻ Atualizar previews</button>
+        <div class="desd-preview-grid" id="desdPreviewGrid"></div>
+      </div>
+
+      <!-- COLUNA DIREITA: elementos + metadata -->
+      <div class="desd-col">
+        <div class="desd-step-lbl">Headline</div>
+        <div class="fg"><label class="fl">Texto</label><textarea class="fi" id="desdHeadlineText" rows="2" style="resize:vertical" oninput="desdUpdateFromInputs()">Nova coleção chegou — aproveite o lançamento</textarea></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="fg"><label class="fl">Cor do texto</label><input class="fi" type="color" id="desdHeadlineColor" value="#ffffff" oninput="desdUpdateFromInputs()" style="padding:4px;height:36px"></div>
+          <div class="fg"><label class="fl">Tam. fonte (% altura)</label><input class="fi" type="number" id="desdHeadlineSize" value="9" min="3" max="20" oninput="desdUpdateFromInputs()"></div>
+        </div>
+        <div class="fg"><label class="fl">Alinhamento</label>
+          <select class="fs_" id="desdHeadlineAlign" onchange="desdUpdateFromInputs()">
+            <option value="left">Esquerda</option><option value="center">Centro</option><option value="right">Direita</option>
+          </select>
+        </div>
+
+        <div class="divider" style="margin:20px 0"></div>
+
+        <div class="desd-step-lbl" style="margin-top:0">Call to Action</div>
+        <div class="fg"><label class="fl">Texto do botão</label><input class="fi" id="desdCtaText" value="Saiba mais" oninput="desdUpdateFromInputs()"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="fg"><label class="fl">Cor de fundo</label><input class="fi" type="color" id="desdCtaBg" value="#0d0d0d" oninput="desdUpdateFromInputs()" style="padding:4px;height:36px"></div>
+          <div class="fg"><label class="fl">Cor do texto</label><input class="fi" type="color" id="desdCtaColor" value="#ffffff" oninput="desdUpdateFromInputs()" style="padding:4px;height:36px"></div>
+        </div>
+        <div class="fg"><label class="fl">Formato</label>
+          <select class="fs_" id="desdCtaShape" onchange="desdUpdateFromInputs()">
+            <option value="pill">Pílula</option><option value="rect">Retângulo</option>
+          </select>
+        </div>
+
+        <div class="divider" style="margin:20px 0"></div>
+
+        <div class="desd-step-lbl" style="margin-top:0">Vínculo da peça</div>
+        <div class="fg"><label class="fl">Campanha</label><input class="fi" id="desdCampaignName" placeholder="ex: Awareness Q1"></div>
+        <div class="fg"><label class="fl">Marca</label><input class="fi" id="desdBrand" placeholder="ex: Produto A"></div>
+
+        <button class="btn-full" style="margin-top:8px" onclick="desdSubmit()">Enviar para Aprovação →</button>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px;line-height:1.6">// tenta o backend real (/desdobrador/submit); se não responder, cai no modo demo e já alimenta a aba Criativos › Aguardando Aprovação</div>
+      </div>
+    </div>
+  </div>
   <!-- ── STATUS / GANTT ── -->
   <div class="tab-page" id="tab-status">
     <div class="section-title">Linha do Tempo de Implementação</div>
     <div class="section-sub">Visualização estilo Gantt — 30 dias correntes</div>
-
     <div class="gantt-wrap" id="ganttWrap"></div>
-
     <!-- Status summary -->
     <div class="kpi-grid" style="margin-top:24px;grid-template-columns:repeat(4,1fr)">
       <div class="kpi feat"><div class="kpi-lbl">Implementados</div><div class="kpi-val" id="stI">—</div></div>
@@ -579,7 +657,6 @@
       <div class="kpi"><div class="kpi-lbl">Com erro</div><div class="kpi-val" id="stE">—</div></div>
       <div class="kpi"><div class="kpi-lbl">Stand by</div><div class="kpi-val" id="stS">—</div></div>
     </div>
-
     <!-- Detail table -->
     <div class="tbox" style="margin-top:24px">
       <div class="tbox-head">
@@ -593,15 +670,12 @@
       <tbody id="statusTable"></tbody></table>
     </div>
   </div>
-
   <!-- ── OVERVIEW ── -->
   <div class="tab-page active" id="tab-dashboard">
-
     <!-- KPIs summary -->
     <div class="section-title">Overview Geral</div>
     <div class="section-sub">Resumo consolidado do período selecionado</div>
     <div class="kpi-grid" style="margin-bottom:24px" id="ov-kpis"></div>
-
     <!-- two col: charts left, gantt summary right -->
     <div class="charts-row" style="margin-bottom:24px">
       <div class="chart-box">
@@ -615,7 +689,6 @@
         <div class="chart-canvas-wrap"><canvas id="chartBar"></canvas></div>
       </div>
     </div>
-
     <!-- Gantt summary -->
     <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">Resumo de Implementação <button onclick="switchTabById('status')" style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;background:none;border:1px solid var(--border);padding:5px 12px;cursor:pointer;color:var(--ink-mid);transition:all .2s" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-mid)'">Ver Status →</button></div>
     <div class="section-sub">Status do pipeline de criativos</div>
@@ -630,24 +703,17 @@
       <table><thead><tr><th>Criativo</th><th>Plataforma</th><th>Campanha</th><th>Status</th><th>Atualizado</th></tr></thead>
       <tbody id="ov-statusTable"></tbody></table>
     </div>
-
     <div class="divider"></div>
-
     <!-- Top 3 criativos x audiência -->
     <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">Top 3 Criativos × Audiência <button onclick="switchTabById('campanhas')" style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;background:none;border:1px solid var(--border);padding:5px 12px;cursor:pointer;color:var(--ink-mid);transition:all .2s" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-mid)'">Ver Campanhas →</button></div>
     <div class="section-sub">Combinações com melhor performance no período</div>
     <div id="ov-top3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:24px"></div>
-
   </div>
-
 </div>
-
   <!-- ── CRIATIVOS ── -->
   <div class="tab-page" id="tab-criativos">
-
     <div class="section-title">Repositório de Criativos</div>
     <div class="section-sub">Assets aprovados — gerados a partir do KV por campanha e plataforma</div>
-
     <!-- Filters -->
     <div class="repo-filters">
       <div class="fg-" style="margin:0"><span class="flbl" style="margin-right:8px">Campanha</span>
@@ -681,7 +747,6 @@
       </div>
       <div style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink-muted)" id="repo-count"></div>
     </div>
-
     <!-- Pending Approval -->
     <div class="collapsible" id="coll-pending" style="margin-bottom:20px;border-color:#f59e0b">
       <div class="coll-header open" onclick="toggleColl('pending')" style="border-left:3px solid #f59e0b">
@@ -698,7 +763,6 @@
         <div class="repo-grid" id="pendingGrid"></div>
       </div>
     </div>
-
     <!-- Approved Repo -->
     <div class="collapsible" id="coll-approved">
       <div class="coll-header open" onclick="toggleColl('approved')">
@@ -713,9 +777,7 @@
         <div class="repo-grid" id="repoGrid" style="margin-top:16px"></div>
       </div>
     </div>
-
   </div>
-
 <!-- DETAIL MODAL -->
 <div class="detail-modal" id="detailModal" onclick="closeDetail(event)">
   <div class="detail-box" id="detailBox">
@@ -734,13 +796,10 @@
     </div>
   </div>
 </div>
-
   <!-- ── BIG TABLE ── -->
   <div class="tab-page" id="tab-bigtable">
-
     <div class="section-title">Big Table</div>
     <div class="section-sub">Todos os dados do período — taxonomia completa + métricas</div>
-
     <div class="bt-toolbar">
       <input class="bt-search" id="btSearch" placeholder="Buscar campanha, criativo, plataforma..." oninput="btFilter()">
       <select class="repo-filter-sel" id="bt-fplat" onchange="btFilter()">
@@ -757,7 +816,6 @@
       <button class="bt-btn" onclick="btDownload('xlsx')">↓ Excel</button>
       <span class="bt-info" id="bt-info">— linhas</span>
     </div>
-
     <div class="bt-wrap">
       <table class="bt-table" id="btTable">
         <thead>
@@ -809,9 +867,7 @@
         <tbody id="btBody"></tbody>
       </table>
     </div>
-
   </div>
-
 <!-- RIGHT PANEL -->
 <div class="r-panel" id="rPanel">
   <div class="rp-head">
@@ -821,7 +877,7 @@
   <div class="rp-page active" id="rp-nav">
     <div class="rp-section" style="padding-top:16px">
       <div class="rp-section-label">Criação</div>
-      <button class="rp-item" onclick="openRpPage('criativos')"><div class="rp-icon">🎨</div><div><div class="rp-item-title">Desdobramento de Criativos</div><div class="rp-item-sub">IA — KV → todos os formatos</div></div></button>
+      <button class="rp-item" onclick="goToDesdobrador()"><div class="rp-icon">🎨</div><div><div class="rp-item-title">Desdobramento de Criativos</div><div class="rp-item-sub">Aba própria — KV → todos os formatos + editor</div></div></button>
     </div>
     <div class="rp-divider"></div>
     <div class="rp-section">
@@ -839,9 +895,6 @@
     <div class="rp-divider" style="margin-bottom:16px"></div>
     <div style="padding:0 20px 24px"><button class="btn-full" style="background:#dc2626">↩ Sair</button></div>
   </div>
-  <div class="rp-page" id="rp-criativos">
-    <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Desdobramento</div><div class="rp-page-sub">Envie um KV e a IA gera todos os formatos.</div><div class="uz" onclick="toast('Selecione um arquivo','')"><div class="uz-icon">🖼️</div><div class="uz-text"><strong>Clique para enviar o KV</strong></div><div class="uz-hint">.jpg .png — máx. 50MB</div></div><div class="fg"><label class="fl">Formatos</label><select class="fs_"><option>Todos (IAB + Meta + TikTok + OOH)</option><option>Apenas IAB</option><option>Apenas Meta</option><option>Apenas TikTok</option></select></div><div class="fg"><label class="fl">Nome do projeto</label><input class="fi" placeholder="ex: Campanha Verão 2025"></div><button class="btn-full" onclick="toast('Processando KV...','ok')">Gerar formatos</button></div>
-  </div>
   <div class="rp-page" id="rp-upload">
     <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Upload de Planos</div><div class="rp-page-sub">Importe seu media plan.</div><div class="uz" onclick="toast('Selecione um arquivo','')"><div class="uz-icon">📁</div><div class="uz-text"><strong>Clique ou arraste o .xlsx</strong></div><div class="uz-hint">máx. 10MB</div></div><button class="btn-full" onclick="toast('Importando...','ok')">Importar</button><button class="btn-ghost">🔗 Conectar Google Sheets</button></div>
   </div>
@@ -858,7 +911,6 @@
     <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Configurações</div><div class="fg"><label class="fl">Nome da empresa</label><input class="fi" value="Rise Up MTech"></div><div class="fg"><label class="fl">Email</label><input class="fi" type="email" value="contato@riseupmtech.com"></div><div class="fg"><label class="fl">URL da API</label><input class="fi" value="https://riseup-backend-509219529113.southamerica-east1.run.app"></div><button class="btn-full" onclick="toast('Salvo','ok')">Salvar</button></div>
   </div>
 </div>
-
 <script>
 // ── DATA ──
 const PACING=[
@@ -869,7 +921,6 @@ const PACING=[
   {metric:'Video Views',cur:'2,1M',tgt:'2,5M',pct:84,expected:77,unit:''},
   {metric:'Engajamentos',cur:'284k',tgt:'300k',pct:94.7,expected:77,unit:''},
 ];
-
 const CAMPS=[
   {name:'Awareness Q1',plat:'Google Ads',status:'implemented',inv:'R$48.200',pct:'92%',imp:'3,2M',clk:'58k',ctr:'1,81%',cpm:'R$15,0',leads:'820',cpl:'R$58,8',
    detail:[{l:'CPC',v:'R$0,83'},{l:'Alcance',v:'1,8M'},{l:'Freq.',v:'1,8'},{l:'Conv.',v:'820'}]},
@@ -888,7 +939,6 @@ const CAMPS=[
   {name:'Prospecting DV360',plat:'DV360',status:'pending',inv:'—',pct:'—',imp:'—',clk:'—',ctr:'—',cpm:'—',leads:'—',cpl:'—',
    detail:[{l:'Status',v:'Pendente'},{l:'Início',v:'Amanhã'},{l:'Budget',v:'R$36k'},{l:'Formato',v:'Display'}]},
 ];
-
 const STATUS_DATA=[
   {criativo:'Banner_300x250_V1',plat:'Google Ads',camp:'Awareness Q1',status:'implemented',id:'12839401',start:'01 Mar',end:'31 Mar',upd:'há 2h'},
   {criativo:'Banner_728x90_V1',plat:'Google Ads',camp:'Awareness Q1',status:'implemented',id:'12839402',start:'01 Mar',end:'31 Mar',upd:'há 2h'},
@@ -903,7 +953,6 @@ const STATUS_DATA=[
   {criativo:'Prospecting_728x90',plat:'DV360',camp:'Prospecting DV360',status:'pending',id:'—',start:'27 Mar',end:'30 Abr',upd:'—'},
   {criativo:'Prospecting_300x600',plat:'DV360',camp:'Prospecting DV360',status:'pending',id:'—',start:'27 Mar',end:'30 Abr',upd:'—'},
 ];
-
 const CREATIVES_GENERAL=[
   {name:'Banner_300x250_V1',plat:'Google Ads',img:'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=225&fit=crop',m1:{l:'Impressões',v:'1,8M'},m2:{l:'CTR',v:'2,1%'},m3:{l:'CPC',v:'R$0,78'},m4:{l:'Conv.',v:'420'}},
   {name:'Stories_1080x1920',plat:'Meta Ads',img:'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=225&h=400&fit=crop',m1:{l:'Alcance',v:'1,2M'},m2:{l:'CTR',v:'1,4%'},m3:{l:'CPM',v:'R$11,2'},m4:{l:'Leads',v:'840'}},
@@ -914,14 +963,12 @@ const CREATIVES_GENERAL=[
   {name:'InFeed_TK_V1',plat:'TikTok Ads',img:'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=225&fit=crop',m1:{l:'Views',v:'660k'},m2:{l:'VTR',v:'38%'},m3:{l:'Eng.',v:'44k'},m4:{l:'CPV',v:'R$0,34'}},
   {name:'InMail_B2B',plat:'LinkedIn',img:'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=225&fit=crop',m1:{l:'Enviados',v:'48k'},m2:{l:'Abertura',v:'38%'},m3:{l:'CTR',v:'3,1%'},m4:{l:'Status',v:'⚠ Erro'}},
 ];
-
 const CREATIVES_VIDEO=[
   {name:'Video_15s_V2',plat:'YouTube',img:'https://images.unsplash.com/photo-1551817958-11e40576f80e?w=400&h=225&fit=crop',m1:{l:'Views',v:'480k'},m2:{l:'VTR',v:'41%'},m3:{l:'VCR',v:'19%'},m4:{l:'CPV',v:'R$0,20'}},
   {name:'Bumper_6s',plat:'YouTube',img:'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=225&fit=crop',m1:{l:'Views',v:'340k'},m2:{l:'VCR',v:'98%'},m3:{l:'CPM',v:'R$6,4'},m4:{l:'Freq.',v:'2,1'}},
   {name:'TopView_TK',plat:'TikTok Ads',img:'https://images.unsplash.com/photo-1558655146-d09347e92766?w=400&h=225&fit=crop',m1:{l:'Views',v:'620k'},m2:{l:'VTR',v:'42%'},m3:{l:'Eng.',v:'48k'},m4:{l:'CPV',v:'R$0,18'}},
   {name:'InFeed_TK_V1',plat:'TikTok Ads',img:'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=225&fit=crop',m1:{l:'Views',v:'660k'},m2:{l:'VTR',v:'38%'},m3:{l:'Eng.',v:'44k'},m4:{l:'CPV',v:'R$0,34'}},
 ];
-
 const CREATIVES_SOCIAL=[
   {name:'Stories_1080x1920',plat:'Meta Ads',img:'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=225&h=400&fit=crop',m1:{l:'Alcance',v:'1,2M'},m2:{l:'Eng.',v:'48k'},m3:{l:'Taxa Eng.',v:'4,0%'},m4:{l:'Saves',v:'3,2k'}},
   {name:'Feed_1080x1080',plat:'Meta Ads',img:'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=400&h=400&fit=crop',m1:{l:'Alcance',v:'980k'},m2:{l:'Likes',v:'82k'},m3:{l:'Coment.',v:'4,8k'},m4:{l:'Shares',v:'2,1k'}},
@@ -930,7 +977,6 @@ const CREATIVES_SOCIAL=[
   {name:'InFeed_TK_V1',plat:'TikTok Ads',img:'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=225&fit=crop',m1:{l:'Eng.',v:'44k'},m2:{l:'Likes',v:'34k'},m3:{l:'Coment.',v:'1,8k'},m4:{l:'Shares',v:'8,2k'}},
   {name:'InMail_B2B',plat:'LinkedIn',img:'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=225&fit=crop',m1:{l:'Reações',v:'8,2k'},m2:{l:'Coment.',v:'480'},m3:{l:'Shares',v:'920'},m4:{l:'Follows',v:'340'}},
 ];
-
 const PLATS=[
   {name:'Google Ads',on:true},{name:'Meta Ads',on:true},{name:'TikTok Ads',on:true},
   {name:'YouTube',on:true},{name:'DV360',on:false},{name:'LinkedIn',on:false},
@@ -941,9 +987,7 @@ const USERS=[
   {name:'Ana Souza',email:'ana@riseupmtech.com',role:'Aprovador'},
   {name:'Carlos Lima',email:'carlos@riseupmtech.com',role:'Leitura'},
 ];
-
 // ── TABS ──
-
 function togglePanel(){
   const p=document.getElementById('rPanel'),o=document.getElementById('overlay'),m=document.getElementById('main');
   if(p.classList.contains('open')){closePanel();}
@@ -960,7 +1004,6 @@ function openRpPage(id){
   if(id==='conexoes')renderConns();
   if(id==='usuarios')renderUsers();
 }
-
 // ── COLLAPSIBLE ──
 function toggleColl(id){
   const el=document.getElementById('coll-'+id);
@@ -976,13 +1019,30 @@ function toggleColl(id){
     hdr.classList.add('open');
   }
 }
-
+// ── TOAST ──
+// NOTA: essa função era chamada em 17 lugares do arquivo original mas nunca
+// tinha sido definida (nenhum erro visível na tela, só um erro silencioso no
+// console) — corrigido nesta sessão junto com a aba Desdobrador, que também
+// depende dela pra dar feedback de upload/envio.
+function toast(message, type=''){
+  const tc = document.getElementById('tc');
+  if(!tc) return;
+  const el = document.createElement('div');
+  el.className = 'to' + (type ? ' ' + type : '');
+  const icon = type === 'ok' ? '✓' : type === 'er' ? '✕' : '●';
+  el.innerHTML = '<span>' + icon + '</span><span>' + message + '</span>';
+  tc.appendChild(el);
+  setTimeout(() => {
+    el.style.transition = 'opacity .3s';
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 300);
+  }, 2600);
+}
 // ── BADGE ──
 function badgeH(s){
   const m={implemented:'<span class="badge b-g">Implementado</span>',pending:'<span class="badge b-b">Pendente</span>',stand_by:'<span class="badge b-y">Stand By</span>',error:'<span class="badge b-r">Erro</span>'};
   return m[s]||`<span class="badge b-gr">${s}</span>`;
 }
-
 // ── RENDER PACING ──
 function renderPacing(){
   const el = document.getElementById('pacingGrid');
@@ -1000,7 +1060,6 @@ function renderPacing(){
       + '</div>';
   }).join('');
 }
-
 function renderCamps(){
   let rows = '';
   CAMPS.forEach((camp, i) => {
@@ -1027,7 +1086,6 @@ function renderCamps(){
   });
   document.getElementById('campTable').innerHTML = rows;
 }
-
 function toggleRow(i){
   const row=document.getElementById('cr-'+i);
   const exp=document.getElementById('ce-'+i);
@@ -1036,7 +1094,6 @@ function toggleRow(i){
   exp.classList.toggle('show');
   arrow.textContent=row.classList.contains('open')?'▼':'▶';
 }
-
 // ── RENDER CREATIVES ──
 function renderCreativeCard(c,aspect=''){
   return`<div class="creative-card">
@@ -1058,7 +1115,6 @@ function renderCreatives(){
   document.getElementById('creativeVideo').innerHTML=CREATIVES_VIDEO.map(c=>renderCreativeCard(c)).join('');
   document.getElementById('creativeSocial').innerHTML=CREATIVES_SOCIAL.map(c=>renderCreativeCard(c)).join('');
 }
-
 // ── VIDEO FUNNEL ──
 function renderVideoFunnel(){
   const data=[
@@ -1074,7 +1130,6 @@ function renderVideoFunnel(){
     + '</div>'
   ).join('');
 }
-
 function renderSocialPyramid(){
   const data=[
     {label:'Impressões',val:'7,5M',pct:100},{label:'Alcance',val:'4,2M',pct:56},
@@ -1090,7 +1145,6 @@ function renderSocialPyramid(){
     + '</div>'
   ).join('');
 }
-
 function renderStatus(){
   document.getElementById('statusTable').innerHTML = STATUS_DATA.map(s =>
     '<tr>'
@@ -1109,7 +1163,6 @@ function renderStatus(){
   document.getElementById('stE').textContent = STATUS_DATA.filter(s=>s.status==='error').length;
   document.getElementById('stS').textContent = STATUS_DATA.filter(s=>s.status==='stand_by').length;
 }
-
 function renderGantt(){
   const days = [];
   const today = new Date();
@@ -1118,17 +1171,14 @@ function renderGantt(){
   const todayIdx = 14;
   const totalDays = 31;
   const todayPct = (todayIdx/totalDays)*100;
-
   const groups = {};
   STATUS_DATA.forEach(s => { if(!groups[s.camp]) groups[s.camp]=[]; groups[s.camp].push(s); });
-
   let html = '<div class="gantt-header"><div class="gantt-col-info">Criativo</div><div class="gantt-timeline">';
   days.forEach((d,i) => {
     const lbl = i===todayIdx ? 'HOJE' : d.getDate()+'/'+String(d.getMonth()+1).padStart(2,'0');
     html += '<div class="gantt-day' + (i===todayIdx?' today':'') + '">' + lbl + '</div>';
   });
   html += '</div></div>';
-
   Object.entries(groups).forEach(([camp, items]) => {
     html += '<div class="gantt-group-header"><div class="gg-title">' + camp + '</div>'
       + '<div class="gg-badge">' + items.length + ' criativo' + (items.length>1?'s':'') + '</div></div>';
@@ -1150,17 +1200,14 @@ function renderGantt(){
         + '</div></div></div>';
     });
   });
-
   html += '<div class="gantt-legend">'
     + '<div class="gl-item"><div class="gl-dot implemented"></div>Implementado</div>'
     + '<div class="gl-item"><div class="gl-dot pending"></div>Pendente</div>'
     + '<div class="gl-item"><div class="gl-dot stand_by"></div>Stand By</div>'
     + '<div class="gl-item"><div class="gl-dot error"></div>Erro</div>'
     + '</div>';
-
   document.getElementById('ganttWrap').innerHTML = html;
 }
-
 // ── REPO DATA ──
 const REPO_ASSETS = [
   {id:1,name:'Banner_300x250_V1',camp:'Awareness Q1',plat:'Google Ads',type:'image',date:'01 Mar 2025',
@@ -1212,7 +1259,6 @@ const REPO_ASSETS = [
    img:'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&h=338&fit=crop',
    dims:'—',size:'1,4MB',fmt:'MP3 · 15s · 320kbps',version:'v1',kv:'KV_Leads_V1',tags:['Rádio','15s'],approved:true},
 ];
-
 const PENDING_ASSETS = [
   {id:101,name:'Feed_1080x1080_V3',camp:'Performance — Leads',plat:'Meta Ads',type:'image',date:'25 Mar 2025',
    img:'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=600&fit=crop',
@@ -1235,26 +1281,21 @@ const PENDING_ASSETS = [
    dims:'—',size:'2,9MB',fmt:'MP3 · 30s · 320kbps',version:'v2',kv:'KV_Awareness_Q2',
    tags:['Rádio','30s'],submittedBy:'IA Desdobramento',submittedAt:'22 Mar 2025 11:20'},
 ];
-
 let repoTypeFilter = '';
-
 function typeIcon(t){return {image:'🖼',video:'▶',html5:'⟨/⟩',audio:'♪'}[t]||'📄';}
 function typeLabel(t){return {image:'Imagem',video:'Vídeo',html5:'HTML5',audio:'Áudio'}[t]||t;}
-
 function setType(type,el){
   repoTypeFilter=type;
   document.querySelectorAll('.repo-type-pill').forEach(p=>p.classList.remove('on'));
   el.classList.add('on');
   filterRepo();
 }
-
 function filterRepo(){
   const camp=document.getElementById('rf-camp').value;
   const plat=document.getElementById('rf-plat').value;
   const filtered=REPO_ASSETS.filter(a=>(!camp||a.camp===camp)&&(!plat||a.plat===plat)&&(!repoTypeFilter||a.type===repoTypeFilter));
   renderRepo(filtered);
 }
-
 function renderRepo(assets){
   const grid = document.getElementById('repoGrid');
   const cnt = document.getElementById('repo-count');
@@ -1289,7 +1330,6 @@ function renderRepo(assets){
     grid.appendChild(div);
   });
 }
-
 function renderPending(){
   const grid = document.getElementById('pendingGrid');
   const cnt = document.getElementById('pending-count');
@@ -1320,7 +1360,6 @@ function renderPending(){
     grid.appendChild(div);
   });
 }
-
 function approveAsset(id){
   const idx=PENDING_ASSETS.findIndex(a=>a.id===id);
   if(idx<0) return;
@@ -1339,7 +1378,6 @@ function rejectAsset(id){
   renderPending();
   toast('✕ '+name+' reprovado','er');
 }
-
 function openDetail(id){
   const a = REPO_ASSETS.find(x => x.id === id);
   if(!a) return;
@@ -1362,13 +1400,11 @@ function openDetail(id){
     + '<button class="detail-btn ghost" onclick="sendToPlatform(' + id + ')">↑ Enviar para ' + a.plat + '</button>';
   document.getElementById('detailModal').classList.add('open');
 }
-
 function closeDetail(e){if(e.target===document.getElementById('detailModal'))closeDetailBtn();}
 function closeDetailBtn(){document.getElementById('detailModal').classList.remove('open');}
 function downloadAsset(id){const a=REPO_ASSETS.find(x=>x.id===id);toast('Baixando '+a.name,'ok');}
 function copyLink(id){const a=REPO_ASSETS.find(x=>x.id===id);toast('Link copiado: '+a.name,'ok');}
 function sendToPlatform(id){const a=REPO_ASSETS.find(x=>x.id===id);toast('Enviando para '+a.plat+'...','ok');}
-
 // ── AUDIENCE DATA ──
 const AUD_DATA=[
   {name:'Interesse — Tecnologia',plat:'Meta Ads',size:'2,4M pessoas',criativos:[
@@ -1395,17 +1431,14 @@ const AUD_DATA=[
     {name:'InFeed_TK_V1',ctr:'1,4%',cpm:'R$8',leads:'66',score:48},
   ]},
 ];
-
 const HEATMAP_CREATIVES=['Feed_1080','Stories','Carrossel','Banner_300','TopView_TK'];
 const HEATMAP_DATA=[[4.2,3.8,5.1,null,null],[6.8,4.9,7.2,null,null],[2.1,2.8,3.4,null,null],[null,null,null,2.4,null],[null,null,null,null,1.8]];
 const HEATMAP_AUDS=['Interesse — Tec.','Remarketing','Lookalike 1%','In-Market B2B','Gen Z 18-24'];
-
 const TOP3_AUD=[
   {name:'Carrossel_V2',plat:'Meta Ads',img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=400&fit=crop',audience:'Remarketing — Site',aud_size:'180k pessoas',ctr:'7,2%',cpm:'R$18',leads:'920',score:99,insight:'Melhor combinação do período. Alta intenção + formato carrossel geram CTR 3× acima da média.'},
   {name:'Feed_1080x1080',plat:'Meta Ads',img:'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=400&h=400&fit=crop',audience:'Remarketing — Site',aud_size:'180k pessoas',ctr:'6,8%',cpm:'R$19',leads:'840',score:99,insight:'Feed estático performa bem em audiências quentes de remarketing.'},
   {name:'Carrossel_V2',plat:'Meta Ads',img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=400&fit=crop',audience:'Interesse — Tecnologia',aud_size:'2,4M pessoas',ctr:'5,1%',cpm:'R$10',leads:'510',score:95,insight:'Melhor custo-benefício: audiência grande + CPM baixo + CTR alto. Alto potencial de escala.'},
 ];
-
 const KPI_DATA=[
   {lbl:'Investimento',val:'R$284k',delta:'↑ 12%',dir:'up',target:'Meta R$310k · 91,6%',feat:true},
   {lbl:'Impressões',  val:'18,4M', delta:'↑ 8%', dir:'up',target:'Meta 20M · 92%'},
@@ -1414,13 +1447,11 @@ const KPI_DATA=[
   {lbl:'CPL',         val:'R$58,9',delta:'↑ efic.',dir:'up',target:'Meta R$65'},
   {lbl:'ROAS',        val:'3,4x',  delta:'↑ 0,4x',dir:'up',target:'Meta 3,0x ✓'},
 ];
-
 function renderOverviewKPIs(){
   const el=document.getElementById('ov-kpis');
   if(!el) return;
   el.innerHTML=KPI_DATA.map(k=>`<div class="kpi ${k.feat?'feat':''}"><div class="kpi-lbl">${k.lbl}</div><div class="kpi-val">${k.val}</div><div class="kpi-delta ${k.dir}">${k.delta}</div><div class="kpi-target">${k.target}</div></div>`).join('');
 }
-
 function renderOverviewTop3(){
   const el=document.getElementById('ov-top3');
   if(!el) return;
@@ -1454,7 +1485,6 @@ function renderOverviewTop3(){
   el.innerHTML='';
   cards.forEach(card=>el.appendChild(card));
 }
-
 function renderOverviewStatus(){
   document.getElementById('ov-stI').textContent=STATUS_DATA.filter(s=>s.status==='implemented').length;
   document.getElementById('ov-stP').textContent=STATUS_DATA.filter(s=>s.status==='pending').length;
@@ -1470,7 +1500,6 @@ function renderOverviewStatus(){
       <td class="td-mono" style="color:var(--ink-muted)">${s.upd}</td>
     </tr>`).join('');
 }
-
 function renderAudHeatmap(){
   const el = document.getElementById('audHeatmap');
   if(!el) return;
@@ -1482,11 +1511,9 @@ function renderAudHeatmap(){
     const bg = 'rgb(' + Math.round(13+g) + ',' + Math.round(13+g) + ',' + Math.round(13+g) + ')';
     return 'background:' + bg + ';color:' + (t > 0.5 ? '#fff' : '#0d0d0d');
   }
-
   let html = '<thead><tr><th style="min-width:160px">Audiência</th>';
   HEATMAP_CREATIVES.forEach(h => { html += '<th>' + h + '</th>'; });
   html += '<th>Melhor criativo</th></tr></thead><tbody>';
-
   HEATMAP_DATA.forEach((row, i) => {
     const vals = row.filter(v => v !== null);
     const best = vals.length ? Math.max(...vals) : null;
@@ -1504,7 +1531,6 @@ function renderAudHeatmap(){
   html += '</tbody>';
   el.innerHTML = html;
 }
-
 function renderAudCards(){
   const el = document.getElementById('audCards');
   if(!el) return;
@@ -1513,7 +1539,6 @@ function renderAudCards(){
     const best = [...a.criativos].sort((x,y) => y.score - x.score)[0];
     const div = document.createElement('div');
     div.style.cssText = 'background:var(--bg);padding:20px 22px';
-
     const criRows = a.criativos.map(cr => {
       const clr = cr.score >= 90 ? 'var(--success)' : cr.score >= 65 ? 'var(--warn)' : 'var(--ink-muted)';
       return '<div style="margin-bottom:8px">'
@@ -1528,7 +1553,6 @@ function renderAudCards(){
         + '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);width:60px;text-align:right">' + cr.leads + ' leads</span>'
         + '</div></div>';
     }).join('');
-
     div.innerHTML =
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
       + '<div>'
@@ -1549,11 +1573,9 @@ function renderAudCards(){
     el.appendChild(div);
   });
 }
-
 function rnd(a,b){return+(a+(Math.random()*(b-a))).toFixed(2);}
 function rndInt(a,b){return Math.floor(a+Math.random()*(b-a));}
 function fmt(n){return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'k':n.toFixed(0);}
-
 const BT_COUNTRIES=['BR','AR','MX','CL','CO'];
 const BT_BUS=['Performance','Brand','Digital'];
 const BT_BRANDS=['Produto A','Produto B','Produto C'];
@@ -1563,7 +1585,6 @@ const BT_MEDIUMS=['cpc','cpm','cpv','cpe'];
 const BT_AUDS=['Remarketing — Site','Lookalike 1%','Interesse — Tecnologia','In-Market B2B','Gen Z 18-24','Mulheres 25-34','Homens 35-44','Broad'];
 const BT_CAMPS=['Awareness Q1','Performance — Leads','Retargeting','Brand Search','TikTok — Gen Z','LinkedIn B2B','Video Reach'];
 const BT_CREATIVES=['Banner_300x250_V1','Banner_728x90_V1','Stories_1080x1920_V1','Feed_1080x1080_V1','Carrossel_1080x1080_V2','TopView_1080x1920_V1','InFeed_1080x1920_V1','Reels_1080x1920_V1','PreRoll_1920x1080_V1','Bumper_1920x1080_V1','Banner_160x600_V1','Responsive_HTML5_V1','OOH_Outdoor_6x3m','Radio_30s_V1'];
-
 function genRow(id){
   const source=BT_MEDIA[rndInt(0,BT_MEDIA.length)];
   const imp=rndInt(80000,4000000);
@@ -1584,11 +1605,9 @@ function genRow(id){
   const day=rndInt(1,28);
   return {id,creative_name:BT_CREATIVES[rndInt(0,BT_CREATIVES.length)],country:BT_COUNTRIES[rndInt(0,BT_COUNTRIES.length)],bu:BT_BUS[rndInt(0,BT_BUS.length)],brand:BT_BRANDS[rndInt(0,BT_BRANDS.length)],campaign_name:BT_CAMPS[rndInt(0,BT_CAMPS.length)],campaign_type:BT_CAMP_TYPES[rndInt(0,BT_CAMP_TYPES.length)],source,medium:BT_MEDIUMS[rndInt(0,BT_MEDIUMS.length)],audience:BT_AUDS[rndInt(0,BT_AUDS.length)],impressions:imp,reach,frequency:freq,investment:inv,start_date:`${String(day).padStart(2,'0')}/03/2025`,clicks,ctr,engagements:eng,cpm,cpc,cpv,cpe,leads,cpl,conversions:conv,roas};
 }
-
 const BT_ALL_DATA=Array.from({length:120},(_,i)=>genRow(i+1));
 let btFiltered=[...BT_ALL_DATA];
 let btSortCol=null,btSortDir=1;
-
 function btFilter(){
   const q=document.getElementById('btSearch').value.toLowerCase();
   const plat=document.getElementById('bt-fplat').value;
@@ -1600,7 +1619,6 @@ function btFilter(){
   if(btSortCol) btApplySort();
   btRender();
 }
-
 function btSort(col){
   if(btSortCol===col) btSortDir*=-1; else{btSortCol=col;btSortDir=1;}
   document.querySelectorAll('.bt-table thead th').forEach(th=>th.classList.remove('sort-asc','sort-desc'));
@@ -1610,9 +1628,7 @@ function btSort(col){
 function btApplySort(){
   btFiltered.sort((a,b)=>{const va=a[btSortCol],vb=b[btSortCol];if(va===null&&vb===null)return 0;if(va===null)return 1;if(vb===null)return -1;return typeof va==='string'?va.localeCompare(vb)*btSortDir:(va-vb)*btSortDir;});
 }
-
 function dash(v,pre='',suf=''){return v===null||v===undefined?'<span style="color:var(--ink-muted)">—</span>':pre+v+suf;}
-
 function btRender(){
   const info=document.getElementById('bt-info');
   if(info) info.textContent=btFiltered.length+' / '+BT_ALL_DATA.length+' linhas';
@@ -1636,7 +1652,6 @@ function btRender(){
     <td class="num">${r.conversions}</td><td class="num">${r.roas}x</td>
   </tr>`).join('');
 }
-
 function btDownload(type){
   const cols=['creative_name','country','bu','brand','campaign_name','campaign_type','source','medium','audience','impressions','reach','frequency','investment','start_date','clicks','ctr','engagements','cpm','cpc','cpv','cpe','leads','cpl','conversions','roas'];
   const headers=['Criativo','País','BU','Marca','Campanha','Tipo','Plataforma','Meio','Audiência','Impressões','Alcance','Frequência','Investimento','Início','Cliques','CTR','Engajamentos','CPM','CPC','CPV','CPE','Leads','CPL','Conversões','ROAS'];
@@ -1651,13 +1666,9 @@ function btDownload(type){
     toast('Excel exportado','ok');
   }
 }
-
 function refreshAll(){toast('Filtros aplicados','ok');}
-
-
 // ── CHARTS ──
 let chartsInited = new Set(['dashboard']);
-
 function switchTab(id, el){
   document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
@@ -1668,7 +1679,6 @@ function switchTab(id, el){
     setTimeout(() => initChartsForTab(id), 60);
   }
 }
-
 function switchTabById(id){
   const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => {
     const oc = b.getAttribute('onclick') || '';
@@ -1676,16 +1686,13 @@ function switchTabById(id){
   });
   if(btn) btn.click();
 }
-
 function initChartsForTab(tab){
   if(tab === 'dashboard') initChartsDash();
   if(tab === 'campanhas') initChartsCamp();
 }
-
 function initCharts(){
   initChartsDash();
 }
-
 const MONO_FONT = {family:'Share Tech Mono', size:9};
 const GRID_COLOR = '#f0f0ec';
 const labels30 = Array.from({length:30}, (_,i) => (i+1)+' Mar');
@@ -1693,7 +1700,6 @@ const inv30  = [7.2,8.1,6.8,9.4,10.2,9.8,11.1,8.4,10.8,12.1,11.4,9.2,13.2,11.8,1
 const clk30  = [5.1,5.8,4.9,6.8,7.4,7.0,8.0,6.1,7.8,8.8,8.2,6.6,9.5,8.5,7.5,10.2,9.2,8.1,11.0,9.9,8.9,11.6,10.6,9.5,12.4,11.3,10.2,13.2,12.0,10.9];
 const imp30  = [0.4,0.5,0.4,0.6,0.6,0.6,0.7,0.5,0.7,0.8,0.7,0.6,0.9,0.8,0.7,1.0,0.9,0.8,1.1,1.0,0.9,1.1,1.1,1.0,1.2,1.1,1.0,1.3,1.2,1.1];
 const leads30= [84,98,76,120,134,128,148,110,138,160,150,118,172,156,140,188,170,152,204,184,164,218,198,178,232,212,190,248,226,204];
-
 function chartBaseOpts(){
   return {
     responsive: true,
@@ -1708,13 +1714,11 @@ function chartScales(yLbl, y1Lbl){
     y1: {position:'right', title:{display:true, text:y1Lbl, font:MONO_FONT, color:'#bbb'}, grid:{display:false},    ticks:{font:MONO_FONT, color:'#bbb'}}
   }};
 }
-
 function initChartsDash(){
   const dashEl = document.getElementById('chartDash');
   const barEl  = document.getElementById('chartBar');
   if(!dashEl || !barEl || dashEl._inited) return;
   dashEl._inited = true;
-
   new Chart(dashEl, {
     type: 'line',
     data: {labels: labels30, datasets: [
@@ -1724,7 +1728,6 @@ function initChartsDash(){
     ]},
     options: Object.assign({}, chartBaseOpts(), chartScales('R$k', 'M / x10'))
   });
-
   new Chart(barEl, {
     type: 'bar',
     data: {
@@ -1743,13 +1746,11 @@ function initChartsDash(){
     })
   });
 }
-
 function initChartsCamp(){
   const lineEl  = document.getElementById('chartLine');
   const doughEl = document.getElementById('chartDough');
   if(!lineEl || !doughEl || lineEl._inited) return;
   lineEl._inited = true;
-
   new Chart(lineEl, {
     type: 'line',
     data: {labels: labels30, datasets: [
@@ -1758,7 +1759,6 @@ function initChartsCamp(){
     ]},
     options: Object.assign({}, chartBaseOpts(), chartScales('R$k', 'Cliques k'))
   });
-
   new Chart(doughEl, {
     type: 'doughnut',
     data: {
@@ -1771,7 +1771,6 @@ function initChartsCamp(){
     })
   });
 }
-
 // ── CHART RESIZE ──
 function setupChartResize(){
   if(!window.ResizeObserver) return;
@@ -1779,6 +1778,416 @@ function setupChartResize(){
     Object.values(Chart.instances).forEach(ch=>ch.resize());
   });
   document.querySelectorAll('.chart-canvas-wrap').forEach(el=>obs.observe(el));
+}
+// ── DESDOBRADOR DE PEÇAS ──
+// Espelha services/creative_engine.py (backend) — ver desdobrador-arquitetura.md.
+// Tenta o backend real primeiro; se indisponível (esperado, infra ainda não
+// provisionada), cai no render local via Canvas API, que segue exatamente o
+// mesmo algoritmo do Pillow no backend (cover-fit + wrap de texto + CTA).
+const API_BASE = document.querySelector('#rp-config .fi[value*="southamerica-east1"]')?.value
+  || 'https://riseup-backend-509219529113.southamerica-east1.run.app';
+
+const DESD_FORMATS = [
+  {id:'google_300x250',   label:'300×250 Medium Rectangle', group:'Google Ads', w:300,  h:250},
+  {id:'google_728x90',    label:'728×90 Leaderboard',       group:'Google Ads', w:728,  h:90},
+  {id:'google_160x600',   label:'160×600 Skyscraper',       group:'Google Ads', w:160,  h:600},
+  {id:'google_320x50',    label:'320×50 Mobile',            group:'Google Ads', w:320,  h:50},
+  {id:'meta_feed_1x1',    label:'Feed 1080×1080',           group:'Meta Ads',   w:1080, h:1080},
+  {id:'meta_story_9x16',  label:'Stories/Reels 1080×1920',  group:'Meta Ads',   w:1080, h:1920},
+  {id:'tiktok_9x16',      label:'In-Feed/TopView 1080×1920',group:'TikTok Ads', w:1080, h:1920},
+  {id:'linkedin_1200x627',label:'Single Image 1200×627',    group:'LinkedIn',   w:1200, h:627},
+];
+const DESD_MOTION_TEMPLATES = [
+  {id:'zoom_kv',         name:'Zoom suave no KV',            desc:'Ken Burns leve + CTA com fade-in atrasado.'},
+  {id:'slide_headline',  name:'Headline desliza + CTA pulsa', desc:'Título entra da esquerda, CTA pulsa em loop.'},
+  {id:'fade_cascade',    name:'Cascata de fade',              desc:'KV, headline e CTA entram em sequência.'},
+  {id:'pulse_only',      name:'Estático + CTA pulsando',      desc:'Só o botão anima — bom pra remarketing.'},
+];
+const DESD_QUEUE = [
+  {row_id:'mr001', campaign_name:'Awareness Q1',        brand:'Produto A', source:'Google Ads', formats:'300×250, 728×90', delivery:'20 Mar'},
+  {row_id:'mr002', campaign_name:'Performance — Leads',  brand:'Produto B', source:'Meta Ads',   formats:'1080×1080, 1080×1920', delivery:'22 Mar'},
+  {row_id:'mr003', campaign_name:'TikTok — Gen Z',       brand:'Produto A', source:'TikTok Ads', formats:'1080×1920', delivery:'24 Mar'},
+];
+
+let desdState = {
+  kvDataUrl: null,
+  kvImage: null,
+  blobPath: null,   // preenchido se o upload real pro backend funcionar
+  headline: {text:'Nova coleção chegou — aproveite o lançamento', xPct:8, yPct:10, maxWidthPct:84, fontSizePct:9, color:'#ffffff', align:'left'},
+  cta: {text:'Saiba mais', xPct:8, yPct:78, widthPct:44, heightPct:12, bg:'#0d0d0d', color:'#ffffff', shape:'pill'},
+  selectedFormats: new Set(['meta_feed_1x1', 'meta_story_9x16']),
+  motionEnabled: false,
+  motionTemplateId: 'zoom_kv',
+  activeQueueRowId: null,
+};
+
+function renderDesdQueue(){
+  const tbody = document.getElementById('desdQueueTable');
+  if(!tbody) return;
+  tbody.innerHTML = DESD_QUEUE.map(r => `
+    <tr class="desd-queue-row${desdState.activeQueueRowId===r.row_id?' active':''}" onclick="desdSelectQueueRow('${r.row_id}')">
+      <td class="td-bold">${r.campaign_name}</td>
+      <td class="td-mono">${r.brand}</td>
+      <td class="td-mono">${r.source}</td>
+      <td>${r.formats}</td>
+      <td class="td-mono">${r.delivery}</td>
+      <td><span class="badge b-b">Produzir →</span></td>
+    </tr>`).join('');
+}
+
+function desdSelectQueueRow(rowId){
+  const row = DESD_QUEUE.find(r => r.row_id === rowId);
+  if(!row) return;
+  desdState.activeQueueRowId = rowId;
+  document.getElementById('desdCampaignName').value = row.campaign_name;
+  document.getElementById('desdBrand').value = row.brand;
+  // pré-seleciona os formatos do grupo da plataforma pedida
+  desdState.selectedFormats = new Set(DESD_FORMATS.filter(f => f.group === row.source).map(f => f.id));
+  if(desdState.selectedFormats.size === 0) desdState.selectedFormats.add('meta_feed_1x1');
+  renderDesdQueue();
+  desdRenderFormatPills();
+  desdRenderAllPreviews();
+  toast('Peça vinculada a "' + row.campaign_name + '" — formatos pré-selecionados', 'ok');
+}
+
+function goToDesdobrador(){
+  closePanel();
+  switchTabById('desdobrador');
+}
+
+// ── Upload do KV ──
+function desdOnFileSelected(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    desdState.kvDataUrl = reader.result;
+    const img = new Image();
+    img.onload = () => {
+      desdState.kvImage = img;
+      document.getElementById('desdUzText').textContent = file.name;
+      desdInitCanvas();
+      desdRenderAllPreviews();
+      desdUploadKvToBackend(file); // tentativa best-effort, não bloqueia o fluxo local
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function desdUploadKvToBackend(file){
+  try{
+    const form = new FormData();
+    form.append('file', file);
+    const res = await fetch(API_BASE + '/desdobrador/kv', {method:'POST', body: form});
+    if(!res.ok) throw new Error('backend indisponível');
+    const data = await res.json();
+    desdState.blobPath = data.blob_path;
+  }catch(e){
+    desdState.blobPath = null; // segue só no modo local — ver nota no botão de envio
+  }
+}
+
+// ── Canvas de edição (headline + CTA arrastáveis) ──
+function desdInitCanvas(){
+  const canvas = document.getElementById('desdCanvas');
+  const empty = document.getElementById('desdCanvasEmpty');
+  canvas.style.backgroundImage = `url(${desdState.kvDataUrl})`;
+  canvas.style.backgroundSize = 'cover';
+  canvas.style.backgroundPosition = 'center';
+  if(empty) empty.remove();
+
+  if(!document.getElementById('desdElHeadline')){
+    const h = document.createElement('div');
+    h.className = 'desd-el desd-el-headline';
+    h.id = 'desdElHeadline';
+    canvas.appendChild(h);
+    desdMakeDraggable(h, desdState.headline, canvas);
+
+    const c = document.createElement('div');
+    c.className = 'desd-el desd-el-cta';
+    c.id = 'desdElCta';
+    canvas.appendChild(c);
+    desdMakeDraggable(c, desdState.cta, canvas);
+  }
+  desdSyncCanvasElements();
+}
+
+function desdMakeDraggable(el, stateObj, canvas){
+  let dragging = false;
+  el.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    el.classList.add('dragging');
+    el.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+  el.addEventListener('pointermove', (e) => {
+    if(!dragging) return;
+    const rect = canvas.getBoundingClientRect();
+    let xPct = ((e.clientX - rect.left) / rect.width) * 100;
+    let yPct = ((e.clientY - rect.top) / rect.height) * 100;
+    stateObj.xPct = Math.max(0, Math.min(100, +xPct.toFixed(1)));
+    stateObj.yPct = Math.max(0, Math.min(100, +yPct.toFixed(1)));
+    desdSyncCanvasElements();
+  });
+  el.addEventListener('pointerup', () => { dragging = false; el.classList.remove('dragging'); });
+  el.addEventListener('pointercancel', () => { dragging = false; el.classList.remove('dragging'); });
+}
+
+function desdSyncCanvasElements(){
+  const canvas = document.getElementById('desdCanvas');
+  if(!canvas || !desdState.kvImage) return;
+  const h = document.getElementById('desdElHeadline');
+  const c = document.getElementById('desdElCta');
+  const hl = desdState.headline, cta = desdState.cta;
+
+  if(h){
+    h.textContent = hl.text;
+    h.style.left = hl.xPct + '%';
+    h.style.top = hl.yPct + '%';
+    h.style.maxWidth = hl.maxWidthPct + '%';
+    h.style.fontSize = 'calc(' + hl.fontSizePct + '% * 4.2)'; // aproximação visual no editor (canvas de preview é que segue o % exato)
+    h.style.color = hl.color;
+    h.style.textAlign = hl.align;
+  }
+  if(c){
+    c.textContent = cta.text;
+    c.style.left = cta.xPct + '%';
+    c.style.top = cta.yPct + '%';
+    c.style.width = cta.widthPct + '%';
+    c.style.height = cta.heightPct + '%';
+    c.style.background = cta.bg;
+    c.style.color = cta.color;
+    c.style.borderRadius = cta.shape === 'pill' ? '999px' : '8px';
+  }
+}
+
+function desdUpdateFromInputs(){
+  desdState.headline.text = document.getElementById('desdHeadlineText').value;
+  desdState.headline.color = document.getElementById('desdHeadlineColor').value;
+  desdState.headline.fontSizePct = +document.getElementById('desdHeadlineSize').value || 9;
+  desdState.headline.align = document.getElementById('desdHeadlineAlign').value;
+  desdState.cta.text = document.getElementById('desdCtaText').value;
+  desdState.cta.bg = document.getElementById('desdCtaBg').value;
+  desdState.cta.color = document.getElementById('desdCtaColor').value;
+  desdState.cta.shape = document.getElementById('desdCtaShape').value;
+  desdSyncCanvasElements();
+  desdRenderAllPreviews();
+}
+
+// ── Formatos ──
+function desdRenderFormatPills(){
+  const el = document.getElementById('desdFormatPills');
+  if(!el) return;
+  const groups = [...new Set(DESD_FORMATS.map(f => f.group))];
+  el.innerHTML = groups.map(g => {
+    const pills = DESD_FORMATS.filter(f => f.group === g).map(f => `
+      <button class="repo-type-pill${desdState.selectedFormats.has(f.id) ? ' on' : ''}" onclick="desdToggleFormat('${f.id}')">${f.label}</button>
+    `).join('');
+    return `<div class="desd-format-group-lbl">${g}</div>${pills}`;
+  }).join('');
+}
+
+function desdToggleFormat(formatId){
+  if(desdState.selectedFormats.has(formatId)) desdState.selectedFormats.delete(formatId);
+  else desdState.selectedFormats.add(formatId);
+  desdRenderFormatPills();
+  desdRenderAllPreviews();
+}
+
+// ── Motion ──
+function desdToggleMotion(){
+  desdState.motionEnabled = !desdState.motionEnabled;
+  document.getElementById('desdMotionToggle').classList.toggle('on', desdState.motionEnabled);
+  document.getElementById('desdMotionGrid').style.display = desdState.motionEnabled ? 'grid' : 'none';
+  if(desdState.motionEnabled) desdRenderMotionGrid();
+}
+
+function desdRenderMotionGrid(){
+  const el = document.getElementById('desdMotionGrid');
+  el.innerHTML = DESD_MOTION_TEMPLATES.map(t => `
+    <div class="desd-motion-card${desdState.motionTemplateId===t.id?' on':''}" onclick="desdSelectMotion('${t.id}')">
+      <div class="desd-motion-name">${t.name}</div>
+      <div class="desd-motion-desc">${t.desc}</div>
+    </div>`).join('');
+}
+
+function desdSelectMotion(id){
+  desdState.motionTemplateId = id;
+  desdRenderMotionGrid();
+}
+
+// ── Render de preview (Canvas API — mesmo algoritmo do Pillow no backend) ──
+function desdWrapText(ctx, text, maxWidth){
+  const words = text.split(' ');
+  const lines = [];
+  let current = '';
+  words.forEach(word => {
+    const trial = (current + ' ' + word).trim();
+    if(ctx.measureText(trial).width <= maxWidth || !current) current = trial;
+    else { lines.push(current); current = word; }
+  });
+  if(current) lines.push(current);
+  return lines;
+}
+
+function desdRoundRectPath(ctx, x, y, w, h, r){
+  r = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+
+function desdDrawCoverFit(ctx, img, w, h){
+  const srcAspect = img.width / img.height;
+  const dstAspect = w / h;
+  let sx, sy, sw, sh;
+  if(srcAspect > dstAspect){
+    sh = img.height; sw = sh * dstAspect; sx = (img.width - sw) / 2; sy = 0;
+  } else {
+    sw = img.width; sh = sw / dstAspect; sx = 0; sy = (img.height - sh) / 2;
+  }
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+}
+
+function desdDrawHeadline(ctx, w, h, el){
+  if(!el.text || !el.text.trim()) return;
+  const fontSize = Math.max(8, Math.round(h * el.fontSizePct / 100));
+  ctx.font = `700 ${fontSize}px Arial, Helvetica, sans-serif`;
+  ctx.textBaseline = 'top';
+  const x = w * el.xPct / 100;
+  const y = h * el.yPct / 100;
+  const maxWidth = w * el.maxWidthPct / 100;
+  const lines = desdWrapText(ctx, el.text, maxWidth);
+  const lineHeight = fontSize * 1.2;
+  lines.forEach((line, i) => {
+    const lw = ctx.measureText(line).width;
+    let lx = x;
+    if(el.align === 'center') lx = x + (maxWidth - lw) / 2;
+    else if(el.align === 'right') lx = x + (maxWidth - lw);
+    ctx.fillStyle = 'rgba(0,0,0,.45)';
+    ctx.fillText(line, lx + 1, y + i * lineHeight + 1);
+    ctx.fillStyle = el.color;
+    ctx.fillText(line, lx, y + i * lineHeight);
+  });
+}
+
+function desdDrawCta(ctx, w, h, el){
+  if(!el.text || !el.text.trim()) return;
+  const x0 = w * el.xPct / 100, y0 = h * el.yPct / 100;
+  const bw = w * el.widthPct / 100, bh = h * el.heightPct / 100;
+  const r = el.shape === 'pill' ? bh / 2 : bh * 0.12;
+  ctx.fillStyle = el.bg;
+  desdRoundRectPath(ctx, x0, y0, bw, bh, r);
+  ctx.fill();
+  const fontSize = Math.max(8, Math.round(bh * 0.42));
+  ctx.font = `700 ${fontSize}px Arial, Helvetica, sans-serif`;
+  ctx.fillStyle = el.color;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(el.text, x0 + bw / 2, y0 + bh / 2 + 1);
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+}
+
+function desdRenderFormatToCanvas(canvasEl, fmt){
+  canvasEl.width = fmt.w;
+  canvasEl.height = fmt.h;
+  const ctx = canvasEl.getContext('2d');
+  ctx.clearRect(0, 0, fmt.w, fmt.h);
+  if(desdState.kvImage) desdDrawCoverFit(ctx, desdState.kvImage, fmt.w, fmt.h);
+  else { ctx.fillStyle = '#0d0d0d'; ctx.fillRect(0, 0, fmt.w, fmt.h); }
+  desdDrawHeadline(ctx, fmt.w, fmt.h, desdState.headline);
+  desdDrawCta(ctx, fmt.w, fmt.h, desdState.cta);
+}
+
+function desdRenderAllPreviews(){
+  const grid = document.getElementById('desdPreviewGrid');
+  if(!grid) return;
+  const formats = DESD_FORMATS.filter(f => desdState.selectedFormats.has(f.id));
+  if(!formats.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:24px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-muted)">Selecione ao menos um formato acima</div>';
+    return;
+  }
+  grid.innerHTML = formats.map(f => `
+    <div class="desd-preview-card">
+      <canvas id="desdPrev_${f.id}"></canvas>
+      <div class="desd-preview-lbl">${f.label}</div>
+    </div>`).join('');
+  formats.forEach(f => desdRenderFormatToCanvas(document.getElementById('desdPrev_' + f.id), f));
+}
+
+// ── Envio pra aprovação (tenta backend real, cai pro modo demo) ──
+async function desdSubmit(){
+  if(!desdState.kvImage){ toast('Envie um KV antes de enviar pra aprovação', 'er'); return; }
+  const formats = DESD_FORMATS.filter(f => desdState.selectedFormats.has(f.id));
+  if(!formats.length){ toast('Selecione ao menos um formato', 'er'); return; }
+
+  const campaignName = document.getElementById('desdCampaignName').value.trim() || 'Sem campanha vinculada';
+  const brand = document.getElementById('desdBrand').value.trim();
+
+  if(desdState.blobPath){
+    try{
+      const res = await fetch(API_BASE + '/desdobrador/submit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          blob_path: desdState.blobPath,
+          campaign_name: campaignName,
+          brand,
+          pieces: formats.map(f => ({
+            format_id: f.id,
+            headline: desdState.headline.text ? {text: desdState.headline.text, x_pct: desdState.headline.xPct, y_pct: desdState.headline.yPct, max_width_pct: desdState.headline.maxWidthPct, font_size_pct: desdState.headline.fontSizePct, color: desdState.headline.color, align: desdState.headline.align} : null,
+            cta: desdState.cta.text ? {text: desdState.cta.text, x_pct: desdState.cta.xPct, y_pct: desdState.cta.yPct, width_pct: desdState.cta.widthPct, height_pct: desdState.cta.heightPct, bg_color: desdState.cta.bg, text_color: desdState.cta.color, shape: desdState.cta.shape} : null,
+            motion_template_id: desdState.motionEnabled ? desdState.motionTemplateId : null,
+            row_id: desdState.activeQueueRowId,
+          })),
+        }),
+      });
+      if(!res.ok) throw new Error('backend recusou o submit');
+      toast('✓ Enviado pro backend — ' + formats.length + ' peça(s) na fila de aprovação', 'ok');
+      desdPushToLocalPending(formats); // mantém a demo consistente mesmo com backend real
+      return;
+    }catch(e){
+      // segue pro fallback local abaixo
+    }
+  }
+
+  desdPushToLocalPending(formats);
+  toast('✓ Modo demo — ' + formats.length + ' peça(s) enviada(s) pra Criativos › Aguardando Aprovação', 'ok');
+}
+
+function desdPushToLocalPending(formats){
+  const nextId = Math.max(0, ...PENDING_ASSETS.map(a => a.id)) + 1;
+  const campaignName = document.getElementById('desdCampaignName').value.trim() || 'Sem campanha vinculada';
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('pt-BR', {day:'2-digit', month:'short', year:'numeric'});
+
+  formats.forEach((f, i) => {
+    const canvas = document.createElement('canvas');
+    desdRenderFormatToCanvas(canvas, f);
+    const dataUrl = canvas.toDataURL('image/png');
+    PENDING_ASSETS.push({
+      id: nextId + i,
+      name: `${f.label.replace(/[^\w]+/g,'_')}_desd`,
+      camp: campaignName,
+      plat: f.group,
+      type: desdState.motionEnabled ? 'html5' : 'image',
+      date: dateStr,
+      img: dataUrl,
+      dims: `${f.w}×${f.h}px`,
+      size: '—',
+      fmt: desdState.motionEnabled ? 'HTML5 ZIP (motion)' : 'PNG',
+      version: 'v1',
+      kv: 'Desdobrador',
+      tags: ['Desdobrador', f.group, desdState.motionEnabled ? 'Motion' : 'Estático'],
+      submittedBy: 'Desdobrador de Peças',
+      submittedAt: now.toLocaleString('pt-BR'),
+    });
+  });
+  renderPending();
 }
 
 // ── INIT ──
@@ -1795,6 +2204,10 @@ window.addEventListener('load',()=>{
   document.getElementById('repo-count').textContent=REPO_ASSETS.length+' assets';
   renderAudHeatmap();
   renderAudCards();
+  renderDesdQueue();
+  desdRenderFormatPills();
+  desdRenderAllPreviews();
+  desdSetupDropzone();
   // small timeout ensures DOM is painted before Chart.js measures canvas
   setTimeout(()=>{
     btRender();
@@ -1805,6 +2218,24 @@ window.addEventListener('load',()=>{
   }, 80);
   setupChartResize();
 });
+
+function desdSetupDropzone(){
+  const zone = document.getElementById('desdDropzone');
+  const input = document.getElementById('desdFileInput');
+  if(!zone) return;
+  ['dragenter','dragover'].forEach(evt => zone.addEventListener(evt, e => {
+    e.preventDefault(); e.stopPropagation(); zone.style.borderColor = 'var(--ink)';
+  }));
+  ['dragleave','drop'].forEach(evt => zone.addEventListener(evt, e => {
+    e.preventDefault(); e.stopPropagation(); zone.style.borderColor = '';
+  }));
+  zone.addEventListener('drop', e => {
+    const file = e.dataTransfer.files[0];
+    if(!file || !file.type.startsWith('image/')) return;
+    input.files = e.dataTransfer.files;
+    desdOnFileSelected({target:{files:[file]}});
+  });
+}
 </script>
 </body>
 </html>
