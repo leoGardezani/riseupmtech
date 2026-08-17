@@ -320,6 +320,8 @@
   .desd-col{background:var(--bg);padding:24px;min-width:0;}
   .desd-queue-row{cursor:pointer;}
   .desd-queue-row.active td{background:var(--bg3);}
+  .desd-queue-check{width:16px;height:16px;cursor:pointer;}
+  .desd-selected-pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.06em;padding:4px 10px;background:var(--bg3);color:var(--ink);margin:0 6px 6px 0;}
   .desd-step-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-muted);margin:20px 0 10px;}
   .desd-step-lbl:first-child{margin-top:0;}
   .desd-step-lbl::before{content:'// ';}
@@ -567,7 +569,7 @@
         <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// linhas de material-request sem criativo</span>
       </div>
       <table><thead><tr>
-        <th>Campanha</th><th>Marca</th><th>Plataforma</th><th>Formatos pedidos</th><th>Entrega</th><th></th>
+        <th></th><th>Campanha</th><th>Marca</th><th>Plataforma</th><th>Formato pedido</th><th>Entrega</th>
       </tr></thead>
       <tbody id="desdQueueTable"></tbody></table>
     </div>
@@ -591,17 +593,18 @@
         </div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);text-align:center;margin-bottom:16px">// arraste os elementos dentro do quadro — a posição em % se aplica a todos os formatos gerados</div>
 
-        <div class="desd-step-lbl">3. Formatos a gerar</div>
-        <div class="desd-format-pills" id="desdFormatPills"></div>
+        <div class="desd-step-lbl">3. Peças a gerar</div>
+        <div style="font-size:12px;color:var(--ink-mid);margin-bottom:10px;line-height:1.6">O formato de cada peça vem da própria linha de material-request — marque acima quais linhas da fila este KV vai atender.</div>
+        <div id="desdSelectedRowsSummary" style="margin-bottom:8px"></div>
 
         <div class="desd-step-lbl">4. Motion (opcional)</div>
         <div class="desd-toggle-row">
           <div class="desd-toggle" id="desdMotionToggle" onclick="desdToggleMotion()"></div>
-          <span style="font-size:12px;color:var(--ink-soft)">Gerar também uma versão animada (HTML5) além do estático</span>
+          <span style="font-size:12px;color:var(--ink-soft)">Gerar como versão animada (HTML5) em vez de estático — aplica a todas as linhas marcadas</span>
         </div>
         <div class="desd-motion-grid" id="desdMotionGrid" style="display:none"></div>
 
-        <div class="desd-step-lbl">5. Preview por formato</div>
+        <div class="desd-step-lbl">5. Preview por peça</div>
         <button class="bt-btn ghost" style="margin-bottom:12px" onclick="desdRenderAllPreviews()">↻ Atualizar previews</button>
         <div class="desd-preview-grid" id="desdPreviewGrid"></div>
       </div>
@@ -902,10 +905,24 @@
     <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Relatórios</div><div class="rp-page-sub">Envie um .pptx para gerar report dinâmico.</div><div class="uz" onclick="toast('Selecione um arquivo','')"><div class="uz-icon">📄</div><div class="uz-text"><strong>Selecione o .pptx</strong></div><div class="uz-hint">máx. 50MB</div></div><button class="btn-full" onclick="toast('Processando...','ok')">Processar</button></div>
   </div>
   <div class="rp-page" id="rp-conexoes">
-    <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Conexões</div><div class="rp-page-sub">Gerencie integrações OAuth.</div><div id="connList"></div></div>
+    <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Conexões</div><div class="rp-page-sub">Autorizações de páginas e contas de anúncio — compartilhadas com todo o time do cliente.</div><div id="connList"></div></div>
   </div>
   <div class="rp-page" id="rp-usuarios">
-    <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Usuários</div><div class="rp-page-sub">Gerencie acessos.</div><div id="userList"></div><button class="btn-full" style="margin-top:16px" onclick="toast('Convite enviado','ok')">+ Convidar</button></div>
+    <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Usuários</div><div class="rp-page-sub">Acessos e papéis — analista, editor, admin.</div>
+      <div id="userList"></div>
+      <div class="divider" style="margin:20px 0"></div>
+      <div class="rp-section-label">Convidar</div>
+      <div class="fg"><label class="fl">E-mail</label><input class="fi" id="inviteEmail" type="email" placeholder="nome@cliente.com"></div>
+      <div class="fg"><label class="fl">Papel</label>
+        <select class="fs_" id="inviteRole">
+          <option value="analista">Analista — só leitura</option>
+          <option value="editor">Editor — conecta/gerencia campanhas</option>
+          <option value="admin">Admin — gerencia usuários também</option>
+        </select>
+      </div>
+      <button class="btn-full" onclick="inviteMember()">+ Convidar</button>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px;line-height:1.6">// tenta o backend real (/workspace/members/invite); se não responder, cai no modo demo local</div>
+    </div>
   </div>
   <div class="rp-page" id="rp-config">
     <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Configurações</div><div class="fg"><label class="fl">Nome da empresa</label><input class="fi" value="Rise Up MTech"></div><div class="fg"><label class="fl">Email</label><input class="fi" type="email" value="contato@riseupmtech.com"></div><div class="fg"><label class="fl">URL da API</label><input class="fi" value="https://riseup-backend-509219529113.southamerica-east1.run.app"></div><button class="btn-full" onclick="toast('Salvo','ok')">Salvar</button></div>
@@ -1803,10 +1820,16 @@ const DESD_MOTION_TEMPLATES = [
   {id:'fade_cascade',    name:'Cascata de fade',              desc:'KV, headline e CTA entram em sequência.'},
   {id:'pulse_only',      name:'Estático + CTA pulsando',      desc:'Só o botão anima — bom pra remarketing.'},
 ];
+// Cada linha = UM formato pedido (creative_size tipo "300x250") — confirmado
+// com o Leonardo. Se uma campanha precisa de 4 tamanhos, são 4 linhas na aba
+// material-request, não uma linha com lista. O desdobrador não deixa mais
+// escolher formato livremente: o formato de cada peça vem da própria linha.
 const DESD_QUEUE = [
-  {row_id:'mr001', campaign_name:'Awareness Q1',        brand:'Produto A', source:'Google Ads', formats:'300×250, 728×90', delivery:'20 Mar'},
-  {row_id:'mr002', campaign_name:'Performance — Leads',  brand:'Produto B', source:'Meta Ads',   formats:'1080×1080, 1080×1920', delivery:'22 Mar'},
-  {row_id:'mr003', campaign_name:'TikTok — Gen Z',       brand:'Produto A', source:'TikTok Ads', formats:'1080×1920', delivery:'24 Mar'},
+  {row_id:'mr001', campaign_name:'Awareness Q1',       brand:'Produto A', source:'Google Ads', creative_size:'300x250', creative_type:'Imagem', delivery:'20 Mar'},
+  {row_id:'mr002', campaign_name:'Awareness Q1',       brand:'Produto A', source:'Google Ads', creative_size:'728x90',  creative_type:'Imagem', delivery:'20 Mar'},
+  {row_id:'mr003', campaign_name:'Performance — Leads', brand:'Produto B', source:'Meta Ads',   creative_size:'1080x1080', creative_type:'Imagem', delivery:'22 Mar'},
+  {row_id:'mr004', campaign_name:'Performance — Leads', brand:'Produto B', source:'Meta Ads',   creative_size:'1080x1920', creative_type:'Imagem', delivery:'22 Mar'},
+  {row_id:'mr005', campaign_name:'TikTok — Gen Z',      brand:'Produto A', source:'TikTok Ads', creative_size:'1080x1920', creative_type:'Imagem', delivery:'24 Mar'},
 ];
 
 let desdState = {
@@ -1815,39 +1838,57 @@ let desdState = {
   blobPath: null,   // preenchido se o upload real pro backend funcionar
   headline: {text:'Nova coleção chegou — aproveite o lançamento', xPct:8, yPct:10, maxWidthPct:84, fontSizePct:9, color:'#ffffff', align:'left'},
   cta: {text:'Saiba mais', xPct:8, yPct:78, widthPct:44, heightPct:12, bg:'#0d0d0d', color:'#ffffff', shape:'pill'},
-  selectedFormats: new Set(['meta_feed_1x1', 'meta_story_9x16']),
+  selectedRowIds: new Set(),
   motionEnabled: false,
   motionTemplateId: 'zoom_kv',
-  activeQueueRowId: null,
 };
+
+function desdParseSize(sizeStr){
+  const m = /(\d+)\s*[x×X]\s*(\d+)/.exec(sizeStr || '');
+  return m ? {w: +m[1], h: +m[2]} : {w: 1080, h: 1080};
+}
 
 function renderDesdQueue(){
   const tbody = document.getElementById('desdQueueTable');
   if(!tbody) return;
   tbody.innerHTML = DESD_QUEUE.map(r => `
-    <tr class="desd-queue-row${desdState.activeQueueRowId===r.row_id?' active':''}" onclick="desdSelectQueueRow('${r.row_id}')">
+    <tr class="desd-queue-row${desdState.selectedRowIds.has(r.row_id)?' active':''}" onclick="desdToggleQueueRow('${r.row_id}')">
+      <td><input type="checkbox" class="desd-queue-check" ${desdState.selectedRowIds.has(r.row_id)?'checked':''} onclick="event.stopPropagation();desdToggleQueueRow('${r.row_id}')"></td>
       <td class="td-bold">${r.campaign_name}</td>
       <td class="td-mono">${r.brand}</td>
       <td class="td-mono">${r.source}</td>
-      <td>${r.formats}</td>
+      <td class="td-mono">${r.creative_size}</td>
       <td class="td-mono">${r.delivery}</td>
-      <td><span class="badge b-b">Produzir →</span></td>
     </tr>`).join('');
+  if(!DESD_QUEUE.length){
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-muted);font-family:var(--mono);font-size:11px;padding:20px">Fila vazia — todas as peças pendentes já foram desdobradas</td></tr>';
+  }
 }
 
-function desdSelectQueueRow(rowId){
-  const row = DESD_QUEUE.find(r => r.row_id === rowId);
-  if(!row) return;
-  desdState.activeQueueRowId = rowId;
-  document.getElementById('desdCampaignName').value = row.campaign_name;
-  document.getElementById('desdBrand').value = row.brand;
-  // pré-seleciona os formatos do grupo da plataforma pedida
-  desdState.selectedFormats = new Set(DESD_FORMATS.filter(f => f.group === row.source).map(f => f.id));
-  if(desdState.selectedFormats.size === 0) desdState.selectedFormats.add('meta_feed_1x1');
+function desdToggleQueueRow(rowId){
+  if(desdState.selectedRowIds.has(rowId)) desdState.selectedRowIds.delete(rowId);
+  else desdState.selectedRowIds.add(rowId);
+
+  // preenche campanha/marca com a primeira linha marcada, só de referência
+  const first = DESD_QUEUE.find(r => desdState.selectedRowIds.has(r.row_id));
+  if(first){
+    document.getElementById('desdCampaignName').value = first.campaign_name;
+    document.getElementById('desdBrand').value = first.brand;
+  }
   renderDesdQueue();
-  desdRenderFormatPills();
+  desdRenderSelectedSummary();
   desdRenderAllPreviews();
-  toast('Peça vinculada a "' + row.campaign_name + '" — formatos pré-selecionados', 'ok');
+}
+
+function desdRenderSelectedSummary(){
+  const el = document.getElementById('desdSelectedRowsSummary');
+  if(!el) return;
+  const rows = DESD_QUEUE.filter(r => desdState.selectedRowIds.has(r.row_id));
+  if(!rows.length){
+    el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Nenhuma linha marcada na fila acima ainda</div>';
+    return;
+  }
+  el.innerHTML = rows.map(r => `<span class="desd-selected-pill">${r.campaign_name} · ${r.creative_size} · ${r.source}</span>`).join('');
 }
 
 function goToDesdobrador(){
@@ -1975,26 +2016,6 @@ function desdUpdateFromInputs(){
   desdRenderAllPreviews();
 }
 
-// ── Formatos ──
-function desdRenderFormatPills(){
-  const el = document.getElementById('desdFormatPills');
-  if(!el) return;
-  const groups = [...new Set(DESD_FORMATS.map(f => f.group))];
-  el.innerHTML = groups.map(g => {
-    const pills = DESD_FORMATS.filter(f => f.group === g).map(f => `
-      <button class="repo-type-pill${desdState.selectedFormats.has(f.id) ? ' on' : ''}" onclick="desdToggleFormat('${f.id}')">${f.label}</button>
-    `).join('');
-    return `<div class="desd-format-group-lbl">${g}</div>${pills}`;
-  }).join('');
-}
-
-function desdToggleFormat(formatId){
-  if(desdState.selectedFormats.has(formatId)) desdState.selectedFormats.delete(formatId);
-  else desdState.selectedFormats.add(formatId);
-  desdRenderFormatPills();
-  desdRenderAllPreviews();
-}
-
 // ── Motion ──
 function desdToggleMotion(){
   desdState.motionEnabled = !desdState.motionEnabled;
@@ -2092,41 +2113,43 @@ function desdDrawCta(ctx, w, h, el){
   ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
 }
 
-function desdRenderFormatToCanvas(canvasEl, fmt){
-  canvasEl.width = fmt.w;
-  canvasEl.height = fmt.h;
+function desdRenderFormatToCanvas(canvasEl, w, h){
+  canvasEl.width = w;
+  canvasEl.height = h;
   const ctx = canvasEl.getContext('2d');
-  ctx.clearRect(0, 0, fmt.w, fmt.h);
-  if(desdState.kvImage) desdDrawCoverFit(ctx, desdState.kvImage, fmt.w, fmt.h);
-  else { ctx.fillStyle = '#0d0d0d'; ctx.fillRect(0, 0, fmt.w, fmt.h); }
-  desdDrawHeadline(ctx, fmt.w, fmt.h, desdState.headline);
-  desdDrawCta(ctx, fmt.w, fmt.h, desdState.cta);
+  ctx.clearRect(0, 0, w, h);
+  if(desdState.kvImage) desdDrawCoverFit(ctx, desdState.kvImage, w, h);
+  else { ctx.fillStyle = '#0d0d0d'; ctx.fillRect(0, 0, w, h); }
+  desdDrawHeadline(ctx, w, h, desdState.headline);
+  desdDrawCta(ctx, w, h, desdState.cta);
 }
 
 function desdRenderAllPreviews(){
   const grid = document.getElementById('desdPreviewGrid');
   if(!grid) return;
-  const formats = DESD_FORMATS.filter(f => desdState.selectedFormats.has(f.id));
-  if(!formats.length){
-    grid.innerHTML = '<div style="grid-column:1/-1;padding:24px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-muted)">Selecione ao menos um formato acima</div>';
+  const rows = DESD_QUEUE.filter(r => desdState.selectedRowIds.has(r.row_id));
+  if(!rows.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:24px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-muted)">Marque ao menos uma linha na fila acima</div>';
     return;
   }
-  grid.innerHTML = formats.map(f => `
+  grid.innerHTML = rows.map(r => `
     <div class="desd-preview-card">
-      <canvas id="desdPrev_${f.id}"></canvas>
-      <div class="desd-preview-lbl">${f.label}</div>
+      <canvas id="desdPrev_${r.row_id}"></canvas>
+      <div class="desd-preview-lbl">${r.campaign_name} · ${r.creative_size}</div>
     </div>`).join('');
-  formats.forEach(f => desdRenderFormatToCanvas(document.getElementById('desdPrev_' + f.id), f));
+  rows.forEach(r => {
+    const {w, h} = desdParseSize(r.creative_size);
+    desdRenderFormatToCanvas(document.getElementById('desdPrev_' + r.row_id), w, h);
+  });
 }
 
 // ── Envio pra aprovação (tenta backend real, cai pro modo demo) ──
 async function desdSubmit(){
   if(!desdState.kvImage){ toast('Envie um KV antes de enviar pra aprovação', 'er'); return; }
-  const formats = DESD_FORMATS.filter(f => desdState.selectedFormats.has(f.id));
-  if(!formats.length){ toast('Selecione ao menos um formato', 'er'); return; }
+  const rows = DESD_QUEUE.filter(r => desdState.selectedRowIds.has(r.row_id));
+  if(!rows.length){ toast('Marque ao menos uma linha da fila pra atender', 'er'); return; }
 
-  const campaignName = document.getElementById('desdCampaignName').value.trim() || 'Sem campanha vinculada';
-  const brand = document.getElementById('desdBrand').value.trim();
+  const rowIds = rows.map(r => r.row_id);
 
   if(desdState.blobPath){
     try{
@@ -2135,61 +2158,63 @@ async function desdSubmit(){
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           blob_path: desdState.blobPath,
-          campaign_name: campaignName,
-          brand,
-          pieces: formats.map(f => ({
-            format_id: f.id,
-            headline: desdState.headline.text ? {text: desdState.headline.text, x_pct: desdState.headline.xPct, y_pct: desdState.headline.yPct, max_width_pct: desdState.headline.maxWidthPct, font_size_pct: desdState.headline.fontSizePct, color: desdState.headline.color, align: desdState.headline.align} : null,
-            cta: desdState.cta.text ? {text: desdState.cta.text, x_pct: desdState.cta.xPct, y_pct: desdState.cta.yPct, width_pct: desdState.cta.widthPct, height_pct: desdState.cta.heightPct, bg_color: desdState.cta.bg, text_color: desdState.cta.color, shape: desdState.cta.shape} : null,
-            motion_template_id: desdState.motionEnabled ? desdState.motionTemplateId : null,
-            row_id: desdState.activeQueueRowId,
-          })),
+          row_ids: rowIds,
+          headline: desdState.headline.text ? {text: desdState.headline.text, x_pct: desdState.headline.xPct, y_pct: desdState.headline.yPct, max_width_pct: desdState.headline.maxWidthPct, font_size_pct: desdState.headline.fontSizePct, color: desdState.headline.color, align: desdState.headline.align} : null,
+          cta: desdState.cta.text ? {text: desdState.cta.text, x_pct: desdState.cta.xPct, y_pct: desdState.cta.yPct, width_pct: desdState.cta.widthPct, height_pct: desdState.cta.heightPct, bg_color: desdState.cta.bg, text_color: desdState.cta.color, shape: desdState.cta.shape} : null,
+          motion_template_id: desdState.motionEnabled ? desdState.motionTemplateId : null,
         }),
       });
       if(!res.ok) throw new Error('backend recusou o submit');
-      toast('✓ Enviado pro backend — ' + formats.length + ' peça(s) na fila de aprovação', 'ok');
-      desdPushToLocalPending(formats); // mantém a demo consistente mesmo com backend real
+      toast('✓ Enviado pro backend — ' + rows.length + ' peça(s) na fila de aprovação', 'ok');
+      desdPushToLocalPending(rows); // mantém a demo consistente mesmo com backend real
       return;
     }catch(e){
       // segue pro fallback local abaixo
     }
   }
 
-  desdPushToLocalPending(formats);
-  toast('✓ Modo demo — ' + formats.length + ' peça(s) enviada(s) pra Criativos › Aguardando Aprovação', 'ok');
+  desdPushToLocalPending(rows);
+  toast('✓ Modo demo — ' + rows.length + ' peça(s) enviada(s) pra Criativos › Aguardando Aprovação', 'ok');
 }
 
-function desdPushToLocalPending(formats){
+function desdPushToLocalPending(rows){
   const nextId = Math.max(0, ...PENDING_ASSETS.map(a => a.id)) + 1;
-  const campaignName = document.getElementById('desdCampaignName').value.trim() || 'Sem campanha vinculada';
   const now = new Date();
   const dateStr = now.toLocaleDateString('pt-BR', {day:'2-digit', month:'short', year:'numeric'});
 
-  formats.forEach((f, i) => {
+  rows.forEach((r, i) => {
+    const {w, h} = desdParseSize(r.creative_size);
     const canvas = document.createElement('canvas');
-    desdRenderFormatToCanvas(canvas, f);
+    desdRenderFormatToCanvas(canvas, w, h);
     const dataUrl = canvas.toDataURL('image/png');
     PENDING_ASSETS.push({
       id: nextId + i,
-      name: `${f.label.replace(/[^\w]+/g,'_')}_desd`,
-      camp: campaignName,
-      plat: f.group,
+      name: `${r.campaign_name.replace(/[^\w]+/g,'_')}_${w}x${h}_${r.row_id}`,
+      camp: r.campaign_name,
+      plat: r.source,
       type: desdState.motionEnabled ? 'html5' : 'image',
       date: dateStr,
       img: dataUrl,
-      dims: `${f.w}×${f.h}px`,
+      dims: `${w}×${h}px`,
       size: '—',
       fmt: desdState.motionEnabled ? 'HTML5 ZIP (motion)' : 'PNG',
       version: 'v1',
       kv: 'Desdobrador',
-      tags: ['Desdobrador', f.group, desdState.motionEnabled ? 'Motion' : 'Estático'],
+      tags: ['Desdobrador', r.source, desdState.motionEnabled ? 'Motion' : 'Estático'],
       submittedBy: 'Desdobrador de Peças',
       submittedAt: now.toLocaleString('pt-BR'),
     });
+    // a linha foi atendida — some da fila, igual aconteceria com o status
+    // real do material-request mudando de 'pending' pra outra coisa
+    const qIdx = DESD_QUEUE.findIndex(q => q.row_id === r.row_id);
+    if(qIdx >= 0) DESD_QUEUE.splice(qIdx, 1);
+    desdState.selectedRowIds.delete(r.row_id);
   });
   renderPending();
+  renderDesdQueue();
+  desdRenderSelectedSummary();
+  desdRenderAllPreviews();
 }
-
 // ── INIT ──
 window.addEventListener('load',()=>{
   renderPacing();
@@ -2205,7 +2230,7 @@ window.addEventListener('load',()=>{
   renderAudHeatmap();
   renderAudCards();
   renderDesdQueue();
-  desdRenderFormatPills();
+  desdRenderSelectedSummary();
   desdRenderAllPreviews();
   desdSetupDropzone();
   // small timeout ensures DOM is painted before Chart.js measures canvas
@@ -2235,6 +2260,214 @@ function desdSetupDropzone(){
     input.files = e.dataTransfer.files;
     desdOnFileSelected({target:{files:[file]}});
   });
+}
+// ── CONEXÕES + USUÁRIOS (v2.6 — RBAC analista/editor/admin) ──
+// Integrado nesta sessão a partir de claude/conexoes-usuarios.js. Redeclara
+// renderConns/renderUsers (chamadas em openRpPage() acima mas nunca antes
+// definidas) e adiciona as funções de conectar/desconectar plataforma e
+// gerenciar membros. Backend real: api/connect.py + api/workspace.py +
+// core/rbac.py — sem login (JWT) implementado neste arquivo ainda, então os
+// fetches caem no modo demo local até isso existir (mesmo padrão do resto
+// do arquivo, ex. desdUploadKvToBackend).
+
+// Preencha depois de implementar o login (JWT do core/auth.py).
+let AUTH_TOKEN = null;
+
+function authHeaders() {
+  return AUTH_TOKEN ? { 'Authorization': 'Bearer ' + AUTH_TOKEN } : {};
+}
+
+// ── CONEXÕES ────────────────────────────────────────────────────────────
+
+const PLATFORM_KEYS = { 'Google Ads': 'google_ads', 'Meta Ads': 'meta', 'TikTok Ads': 'tiktok' };
+
+async function renderConns() {
+  const el = document.getElementById('connList');
+  if (!el) return;
+  el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);padding:12px 0">Carregando conexões...</div>';
+
+  let backendStatus = null;
+  try {
+    const res = await fetch(API_BASE + '/connect/status', { headers: authHeaders() });
+    if (res.ok) backendStatus = await res.json();
+  } catch (e) { /* segue no modo demo */ }
+
+  if (backendStatus) {
+    PLATS.forEach(p => {
+      const key = PLATFORM_KEYS[p.name];
+      if (key && key in backendStatus) p.on = !!backendStatus[key];
+    });
+  }
+
+  el.innerHTML = PLATS.map(p => {
+    const key = PLATFORM_KEYS[p.name];
+    const hasBackend = !!key;
+    const actions = p.on
+      ? '<div style="display:flex;gap:6px">'
+        + (hasBackend ? '<button class="btn-sm ghost" onclick="showAccounts(\'' + key + '\')">Contas</button>' : '')
+        + '<button class="btn-sm ghost" onclick="disconnectPlatform(\'' + p.name + '\',\'' + (key || '') + '\')">Desconectar</button>'
+        + '</div>'
+      : '<button class="btn-sm" onclick="connectPlatform(\'' + p.name + '\',\'' + (key || '') + '\')">Conectar</button>';
+    return '<div class="conn-item">'
+      + '<div><div class="conn-name">' + p.name + '</div>'
+      + '<div class="conn-status ' + (p.on ? 'on' : 'off') + '">' + (p.on ? '● Conectado' : '○ Desconectado') + '</div></div>'
+      + actions
+      + '</div>';
+  }).join('');
+}
+
+function connectPlatform(name, key) {
+  if (!key) { // sem integração real ainda (YouTube, DV360, LinkedIn, Pinterest, Amazon Ads, GA4)
+    const p = PLATS.find(x => x.name === name);
+    if (p) p.on = true;
+    renderConns();
+    toast('✓ ' + name + ' conectado (demo — integração real ainda não existe)', 'ok');
+    return;
+  }
+  // OAuth real precisa abrir em nova aba (o backend redireciona pro provedor);
+  // exige login (JWT) que este operations.html ainda não implementa.
+  toast('Abrindo OAuth de ' + name + '... (requer login implementado)', '');
+  window.open(API_BASE + '/connect/' + key, '_blank');
+}
+
+async function disconnectPlatform(name, key) {
+  if (key) {
+    try {
+      const res = await fetch(API_BASE + '/connect/' + key, { method: 'DELETE', headers: authHeaders() });
+      if (res.ok) {
+        toast('✓ ' + name + ' desconectado', 'ok');
+        renderConns();
+        return;
+      }
+    } catch (e) { /* cai no demo abaixo */ }
+  }
+  const p = PLATS.find(x => x.name === name);
+  if (p) p.on = false;
+  renderConns();
+  toast('✓ ' + name + ' desconectado (demo)', 'ok');
+}
+
+async function showAccounts(key) {
+  try {
+    const res = await fetch(API_BASE + '/connect/accounts/' + key, { headers: authHeaders() });
+    if (!res.ok) throw new Error('sem acesso ao backend');
+    const data = await res.json();
+    const list = (data.accounts || []).map(a => a.name || a.id).join(', ') || 'nenhuma conta encontrada';
+    toast(key + ' — contas: ' + list, 'ok');
+  } catch (e) {
+    toast('Não foi possível listar contas de ' + key + ' agora (backend/login pendente)', 'er');
+  }
+}
+
+// ── USUÁRIOS (papéis: analista / editor / admin) ───────────────────────
+
+const ROLE_LABEL = { admin: 'Admin', editor: 'Editor', analista: 'Analista' };
+const ROLE_BADGE_CLASS = { admin: 'b-g', editor: 'b-b', analista: 'b-gr' };
+
+// Substitui o array USERS antigo (papéis "Admin"/"Aprovador"/"Leitura" não
+// batiam com a hierarquia pedida) — mesmo dado, papéis remapeados.
+const USERS_V2 = [
+  { name: 'Leonardo Gardezani', email: 'leo@riseupmtech.com', role: 'admin' },
+  { name: 'Ana Souza', email: 'ana@riseupmtech.com', role: 'editor' },
+  { name: 'Carlos Lima', email: 'carlos@riseupmtech.com', role: 'analista' },
+];
+
+async function renderUsers() {
+  const el = document.getElementById('userList');
+  if (!el) return;
+  el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);padding:12px 0">Carregando usuários...</div>';
+
+  let members = null;
+  try {
+    const res = await fetch(API_BASE + '/workspace/members', { headers: authHeaders() });
+    if (res.ok) { const data = await res.json(); members = data.members; }
+  } catch (e) { /* segue no modo demo */ }
+
+  const list = members || USERS_V2;
+  const usingBackend = !!members;
+
+  el.innerHTML = list.map(u => {
+    const name = u.name || u.email;
+    const badge = '<span class="badge ' + (ROLE_BADGE_CLASS[u.role] || 'b-gr') + '">' + (ROLE_LABEL[u.role] || u.role) + '</span>';
+    return '<div class="conn-item">'
+      + '<div><div class="conn-name">' + name + '</div>'
+      + '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:2px">' + u.email + '</div></div>'
+      + '<div style="display:flex;gap:6px;align-items:center">'
+      + badge
+      + '<select class="fs_" style="width:auto;padding:4px 20px 4px 8px;font-size:10px" onchange="updateMemberRole(\'' + u.email + '\', this.value, ' + usingBackend + ')">'
+      + ['analista', 'editor', 'admin'].map(r => '<option value="' + r + '"' + (r === u.role ? ' selected' : '') + '>' + ROLE_LABEL[r] + '</option>').join('')
+      + '</select>'
+      + '<button class="btn-sm ghost" onclick="removeMember(\'' + u.email + '\', ' + usingBackend + ')">✕</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+async function updateMemberRole(email, role, usingBackend) {
+  if (usingBackend) {
+    try {
+      const res = await fetch(API_BASE + '/workspace/members/' + encodeURIComponent(email) + '/role', {
+        method: 'PATCH',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+        body: JSON.stringify({ role }),
+      });
+      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.detail || 'falha ao atualizar papel'); }
+      toast('✓ Papel de ' + email + ' atualizado para ' + ROLE_LABEL[role], 'ok');
+      renderUsers();
+      return;
+    } catch (e) {
+      toast('✕ ' + (e.message || 'Não foi possível atualizar (backend)'), 'er');
+      renderUsers();
+      return;
+    }
+  }
+  const u = USERS_V2.find(x => x.email === email);
+  if (u) u.role = role;
+  renderUsers();
+  toast('✓ Papel de ' + email + ' atualizado (demo)', 'ok');
+}
+
+async function removeMember(email, usingBackend) {
+  if (usingBackend) {
+    try {
+      const res = await fetch(API_BASE + '/workspace/members/' + encodeURIComponent(email), {
+        method: 'DELETE', headers: authHeaders(),
+      });
+      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.detail || 'falha ao remover'); }
+      toast('✓ ' + email + ' removido', 'ok');
+      renderUsers();
+      return;
+    } catch (e) {
+      toast('✕ ' + (e.message || 'Não foi possível remover (backend)'), 'er');
+      return;
+    }
+  }
+  const idx = USERS_V2.findIndex(x => x.email === email);
+  if (idx >= 0) USERS_V2.splice(idx, 1);
+  renderUsers();
+  toast('✓ ' + email + ' removido (demo)', 'ok');
+}
+
+async function inviteMember() {
+  const emailEl = document.getElementById('inviteEmail');
+  const roleEl = document.getElementById('inviteRole');
+  const email = emailEl ? emailEl.value.trim() : '';
+  const role = roleEl ? roleEl.value : 'analista';
+  if (!email || !email.includes('@')) { toast('Informe um e-mail válido', 'er'); return; }
+
+  try {
+    const res = await fetch(API_BASE + '/workspace/members/invite', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+      body: JSON.stringify({ email, role }),
+    });
+    if (!res.ok) throw new Error('backend indisponível');
+    toast('✓ ' + email + ' convidado como ' + ROLE_LABEL[role], 'ok');
+  } catch (e) {
+    USERS_V2.push({ name: email.split('@')[0], email, role });
+    toast('✓ ' + email + ' convidado como ' + ROLE_LABEL[role] + ' (demo)', 'ok');
+  }
+  if (emailEl) emailEl.value = '';
+  renderUsers();
 }
 </script>
 </body>
