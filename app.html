@@ -682,31 +682,15 @@
       </div>
       <div class="l-tag">// Media Automation Platform</div>
     </div>
-    <div class="l-tabs">
-      <button class="l-tab on" id="tL" onclick="swTab('l')">Entrar</button>
-      <button class="l-tab" id="tR" onclick="swTab('r')">Criar conta</button>
-    </div>
-    <!-- Login -->
+    <!-- Login via Google OAuth (único fluxo que o backend suporta hoje: GET /auth/login) -->
     <div id="fL">
-      <div class="l-title">Bem-vindo de volta</div>
+      <div class="l-title">Bem-vindo</div>
       <div class="l-sub">Acesse sua conta para continuar.</div>
-      <div class="fd"><label>Email</label><input class="fi" id="lE" type="email" placeholder="seu@empresa.com" onkeydown="if(event.key==='Enter')doL()"></div>
-      <div class="fd"><label>Senha</label><div class="fd-wrap"><input class="fi fi-pw" id="lP" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doL()"><button class="ftgl" onclick="tp('lP',this)">◎</button></div></div>
       <div class="ferr" id="lErr"></div>
-      <button class="fsub" onclick="doL()">Entrar</button>
-    </div>
-    <!-- Register -->
-    <div id="fR" style="display:none">
-      <div class="l-title">Criar conta</div>
-      <div class="l-sub">Preencha seus dados para começar.</div>
-      <div class="fd"><label>Nome completo</label><input class="fi" id="rN" type="text" placeholder="Seu nome"></div>
-      <div class="fd"><label>Email corporativo</label><input class="fi" id="rE" type="email" placeholder="seu@empresa.com"></div>
-      <div class="fd"><label>Senha <span style="color:var(--text-dimmer);font-weight:300">(mín. 8 caracteres)</span></label>
-        <div class="fd-wrap"><input class="fi fi-pw" id="rP" type="password" placeholder="••••••••"><button class="ftgl" onclick="tp('rP',this)">◎</button></div>
-      </div>
-      <div class="fd"><label>Confirmar senha</label><input class="fi" id="rC" type="password" placeholder="••••••••"></div>
-      <div class="ferr" id="rErr"></div>
-      <button class="fsub" onclick="doR()">Criar conta</button>
+      <button class="fsub" onclick="doL()" style="display:flex;align-items:center;justify-content:center;gap:10px">
+        <svg width="16" height="16" viewBox="0 0 48 48" style="flex-shrink:0"><path fill="#050508" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.3 0 6.3 1.2 8.6 3.2l6.4-6.4C35.6 4.5 30.1 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></svg>
+        Entrar com Google
+      </button>
     </div>
     <div class="l-footer">
       <a href="https://riseupmtech.com/terms-of-service.html" target="_blank">Termos de Uso</a>
@@ -895,36 +879,7 @@ async function rq(p,o={}){const h={'Content-Type':'application/json'};if(S.token
 function sv(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function sp(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('p-'+id).classList.add('active');document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));if(el)el.classList.add('on');document.getElementById('pT').textContent={workspace:'Workspace',campaigns:'Campanhas',status:'Status',dashboard:'Dashboard',report:'Reports',platforms:'Plataformas',users:'Usuários',settings:'Configurações'}[id]||id;if(id==='status')ldS();if(id==='campaigns')ldC();}
 
-function swTab(t){
-  const l=t==='l';
-  document.getElementById('fL').style.display=l?'block':'none';
-  document.getElementById('fR').style.display=l?'none':'block';
-  const tL=document.getElementById('tL');
-  const tR=document.getElementById('tR');
-  const lw=document.querySelector('.lw');
-  tL.classList.toggle('on',l);
-  tL.classList.toggle('on-mag',false);
-  tR.classList.toggle('on',false);
-  tR.classList.toggle('on-mag',!l);
-  lw.classList.toggle('reg',!l);
-}
-function tp(id,b){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';b.textContent=i.type==='password'?'◎':'●';}
-
-async function doL(){
-  const e=document.getElementById('lE').value.trim(),p=document.getElementById('lP').value,er=document.getElementById('lErr');er.style.display='none';
-  if(!e||!p){er.textContent='// preencha email e senha.';er.style.display='block';return;}
-  try{const d=await rq('/auth/login',{method:'POST',body:JSON.stringify({email:e,password:p})});localStorage.setItem('riseup_token',d.token);localStorage.setItem('riseup_role',d.role);S.token=d.token;S.role=d.role;S.user={name:d.name,email:d.email};enter(d.has_workspace);}
-  catch(x){er.textContent='// '+( x.detail||'email ou senha incorretos.');er.style.display='block';}
-}
-
-async function doR(){
-  const n=document.getElementById('rN').value.trim(),e=document.getElementById('rE').value.trim(),p=document.getElementById('rP').value,c=document.getElementById('rC').value,er=document.getElementById('rErr');er.style.display='none';
-  if(!n||!e||!p){er.textContent='// preencha todos os campos.';er.style.display='block';return;}
-  if(p.length<8){er.textContent='// senha deve ter no mínimo 8 caracteres.';er.style.display='block';return;}
-  if(p!==c){er.textContent='// as senhas não coincidem.';er.style.display='block';return;}
-  try{const d=await rq('/auth/register',{method:'POST',body:JSON.stringify({name:n,email:e,password:p})});localStorage.setItem('riseup_token',d.token);localStorage.setItem('riseup_role',d.role);S.token=d.token;S.role=d.role;S.user={name:d.name,email:d.email};enter(false);toast('Conta criada!','ok');}
-  catch(x){er.textContent='// '+(x.detail||'erro ao criar conta.');er.style.display='block';}
-}
+function doL(){location.href=API+'/auth/login';}
 
 function lo(){['riseup_token','riseup_role','riseup_ws'].forEach(k=>localStorage.removeItem(k));S={...S,token:null,user:null,ws:null};sv('vl');}
 
