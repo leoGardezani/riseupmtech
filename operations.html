@@ -36,6 +36,8 @@
   .topbar-user{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:rgba(255,255,255,.4);text-transform:uppercase;}
   .btn-menu{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:#fff;border:none;cursor:pointer;padding:7px 16px;transition:all .2s;}
   .btn-menu:hover{background:#e0e0e0;}
+  .btn-logout{margin-right:6px;background:transparent;color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.25);}
+  .btn-logout:hover{background:rgba(255,255,255,.1);color:#fff;}
   /* ── FILTERS ── */
   .filters{position:fixed;top:var(--topbar-h);left:0;right:0;height:var(--filter-h);background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;z-index:100;gap:0;overflow-x:auto;}
   .fg-{display:flex;align-items:center;gap:8px;margin-right:20px;flex-shrink:0;}
@@ -373,7 +375,8 @@
     <button class="tab-btn" onclick="switchTab('bigtable',this)">Big Table</button>
   </div>
   <div class="topbar-right">
-    <span class="topbar-user" id="topUser">// Leonardo G.</span>
+    <span class="topbar-user" id="topUser">—</span>
+    <button class="btn-menu btn-logout" onclick="doLogout()" title="Sair">↩ Sair</button>
     <button class="btn-menu" onclick="togglePanel()">☰ Menu</button>
   </div>
 </div>
@@ -2292,12 +2295,39 @@ function desdSetupDropzone(){
 // fetches caem no modo demo local até isso existir (mesmo padrão do resto
 // do arquivo, ex. desdUploadKvToBackend).
 
-// Preencha depois de implementar o login (JWT do core/auth.py).
-let AUTH_TOKEN = null;
+// Login real via Google OAuth acontece no app.html (tela dark/matrix —
+// identidade visual do site). operations.html só consome o token: se não
+// tiver um válido em localStorage, manda pro app.html pra autenticar.
+let AUTH_TOKEN = localStorage.getItem('riseup_token') || null;
 
 function authHeaders() {
   return AUTH_TOKEN ? { 'Authorization': 'Bearer ' + AUTH_TOKEN } : {};
 }
+function doLogout(){
+  localStorage.removeItem('riseup_token');
+  localStorage.removeItem('riseup_user');
+  location.href = 'app.html';
+}
+async function verifyAuth(){
+  try{
+    const res = await fetch(API_BASE + '/auth/me', { headers: authHeaders() });
+    if(!res.ok) throw new Error('unauthorized');
+    const u = await res.json();
+    localStorage.setItem('riseup_user', JSON.stringify({name:u.name, email:u.email}));
+    return u;
+  }catch(e){
+    localStorage.removeItem('riseup_token');
+    return null;
+  }
+}
+async function checkAuth(){
+  if(!AUTH_TOKEN){ location.href = 'app.html'; return; }
+  const u = await verifyAuth();
+  if(!u){ location.href = 'app.html'; return; }
+  const el = document.getElementById('topUser');
+  if(el) el.textContent = '// ' + (u.name || u.email);
+}
+window.addEventListener('load', checkAuth);
 
 // ── CONEXÕES ────────────────────────────────────────────────────────────
 
