@@ -907,19 +907,23 @@
       <button class="rp-back" onclick="openRpPage('nav')">← Voltar</button>
       <div class="rp-page-title">Planilha</div>
       <div class="rp-page-sub">Cria a planilha Google Sheets do workspace — substitui o Apps Script (Code.gs) como automação.</div>
-      <div id="planStatusBox" style="margin-bottom:14px"></div>
+      <div id="planWorkspaceList" style="margin-bottom:16px"></div>
+      <div class="divider" style="margin:16px 0"></div>
+      <div class="rp-section-label" style="padding:0">Nova planilha</div>
       <div class="fg" id="planCreateForm">
         <label class="fl">Nome do cliente</label>
         <input class="fi" id="planClientName" placeholder="ex: Produto A Ltda">
       </div>
+      <div class="fg">
+        <label class="fl">E-mail do cliente <span style="color:var(--ink-muted);font-weight:300">(opcional — evita duplicar se já provisionado antes)</span></label>
+        <input class="fi" id="planClientEmail" placeholder="ex: contato@produtoa.com">
+      </div>
       <button class="btn-full" id="planCreateBtn" onclick="planProvision()">Criar Planilha</button>
-      <div id="planAutoSyncNote" style="display:none;font-family:var(--mono);font-size:9px;color:var(--success);margin-top:10px;line-height:1.6">✓ Sincronização automática a cada 15min via Cloud Scheduler — não precisa clicar em nada</div>
-      <button class="btn-ghost" id="planSyncBtn" onclick="planSync()" style="display:none">↻ Forçar sincronização agora</button>
       <div class="divider" style="margin:20px 0"></div>
       <div class="rp-section-label" style="padding:0">Alternativas</div>
       <button class="btn-ghost" onclick="window.open(API_BASE + '/upload/template','_blank')">↓ Baixar template Excel</button>
       <button class="btn-ghost" onclick="openRpPage('upload')">📥 Importar .xlsx existente</button>
-      <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px;line-height:1.6">// tenta o backend real (/plan/provision, /plan/sync, /plan/status); sem login (JWT) implementado ainda, cai no modo demo local</div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px;line-height:1.6">// sincronização automática a cada 15min via Cloud Scheduler — o botão ↻ em cada planilha da lista acima força uma sincronização manual imediata</div>
     </div>
   </div>
   <div class="rp-page" id="rp-upload">
@@ -1044,7 +1048,7 @@ function openRpPage(id){
   document.getElementById('rp-'+id).classList.add('active');
   if(id==='conexoes')renderConns();
   if(id==='usuarios')renderUsers();
-  if(id==='planilha')planLoadStatus();
+  if(id==='planilha')planLoadWorkspaces();
 }
 // ── COLLAPSIBLE ──
 function toggleColl(id){
@@ -2523,96 +2527,88 @@ async function inviteMember() {
 }
 
 // ── PLANILHA (Google Sheets do workspace) ──
-// Espelha api/plan.py (POST /plan/provision, POST /plan/sync, GET /plan/status)
-// e services/sheets.py (SheetsService.create_workspace_spreadsheet) — essa é
-// a automação que substituiu o Code.gs (Apps Script). Sem login (JWT)
-// implementado neste operations.html ainda, /plan/provision cai em 401 e o
-// fluxo usa um fallback demo local só pra manter a UI navegável — a criação
-// de verdade só acontece quando o usuário estiver autenticado de fato.
-let planState = { spreadsheetUrl: null, clientName: '', demo: false };
+// Espelha api/plan.py (POST /plan/provision, GET /plan/workspaces,
+// POST /plan/sync, GET /plan/status) e services/sheets.py
+// (SheetsService.create_workspace_spreadsheet) — automação que substituiu
+// o Code.gs (Apps Script). Um operador de agência provisiona uma planilha
+// por cliente, então a tela mostra TODAS as planilhas que o usuário
+// logado tem acesso (GET /plan/workspaces), não só uma — bug corrigido
+// nesta sessão: a versão anterior tratava "1 usuário logado = 1
+// planilha", sempre reabrindo a mesma em vez de deixar criar mais.
+let planWorkspaces = [];
 
-function renderPlanStatusBox(extraHtml){
-  const box = document.getElementById('planStatusBox');
-  const syncBtn = document.getElementById('planSyncBtn');
-  const autoNote = document.getElementById('planAutoSyncNote');
+function renderPlanWorkspaceList(){
+  const box = document.getElementById('planWorkspaceList');
   if(!box) return;
-  if(!planState.spreadsheetUrl){
-    box.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);margin-bottom:4px">Nenhuma planilha vinculada a este workspace ainda.</div>';
-    if(syncBtn) syncBtn.style.display = 'none';
-    if(autoNote) autoNote.style.display = 'none';
+  if(!planWorkspaces.length){
+    box.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);margin-bottom:4px">Nenhuma planilha criada ainda.</div>';
     return;
   }
-  box.innerHTML = '<div class="conn-item">'
-    + '<div><div class="conn-name">' + (planState.clientName || 'Planilha do workspace') + '</div>'
-    + '<div class="conn-status on">● ' + (planState.demo ? 'Modo demo — backend/login pendente' : 'Conectada') + '</div></div>'
-    + '<a href="' + planState.spreadsheetUrl + '" target="_blank" class="btn-sm ghost">Abrir ↗</a>'
-    + '</div>'
-    + (extraHtml || '');
-  if(syncBtn) syncBtn.style.display = 'block';
-  // A sincronização de verdade roda sozinha via Cloud Scheduler batendo em
-  // /plan/sync-all a cada 15min (v2.7) — o botão continua existindo só
-  // como atalho manual/emergencial (ex.: acabou de editar e não quer
-  // esperar o próximo ciclo), não porque seja necessário.
-  if(autoNote) autoNote.style.display = planState.demo ? 'none' : 'block';
+  box.innerHTML = planWorkspaces.map(w => (
+    '<div class="conn-item" data-ws="' + w.workspace_id + '">'
+    + '<div><div class="conn-name">' + (w.client_name || 'Sem nome') + '</div>'
+    + '<div class="conn-status on">● Conectada</div></div>'
+    + '<div style="display:flex;gap:6px">'
+    + '<button class="btn-sm ghost" onclick="planSync(\'' + w.workspace_id + '\',this)" title="Forçar sincronização agora">↻</button>'
+    + '<a href="' + w.spreadsheet_url + '" target="_blank" class="btn-sm ghost">Abrir ↗</a>'
+    + '</div></div>'
+  )).join('');
 }
 
-async function planLoadStatus(){
-  if(!planState.spreadsheetUrl){ renderPlanStatusBox(); return; }
-  renderPlanStatusBox();
-  if(planState.demo) return; // sem dado real pra buscar no modo demo
+async function planLoadWorkspaces(){
   try{
-    const res = await fetch(API_BASE + '/plan/status', { headers: authHeaders() });
+    const res = await fetch(API_BASE + '/plan/workspaces', { headers: authHeaders() });
     if(!res.ok) throw new Error('sem acesso ao backend');
-    const data = await res.json();
-    const extra = '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:10px;line-height:1.6">'
-      + 'material-request: ' + data.material_request_rows + ' linhas · implementation: ' + data.implementation_rows + ' linhas'
-      + (data.structure_valid ? '' : '<br>⚠ abas faltando: ' + data.missing_sheets.join(', '))
-      + '</div>';
-    renderPlanStatusBox(extra);
+    planWorkspaces = await res.json();
   }catch(e){
-    // planilha existe mas não deu pra buscar status agora — sem crash, só sem o extra
+    planWorkspaces = [];
   }
+  renderPlanWorkspaceList();
 }
 
 async function planProvision(){
   const nameEl = document.getElementById('planClientName');
+  const emailEl = document.getElementById('planClientEmail');
   const clientName = nameEl ? nameEl.value.trim() : '';
+  const clientEmail = emailEl ? emailEl.value.trim() : '';
   if(!clientName){ toast('Informe o nome do cliente', 'er'); return; }
 
+  const btn = document.getElementById('planCreateBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Criando...'; }
   try{
     const res = await fetch(API_BASE + '/plan/provision', {
       method: 'POST',
       headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
-      body: JSON.stringify({ client_name: clientName }),
+      body: JSON.stringify({ client_name: clientName, client_email: clientEmail || null }),
     });
-    if(!res.ok) throw new Error('backend indisponível ou sem login');
-    const data = await res.json();
-    planState = { spreadsheetUrl: data.spreadsheet_url, clientName, demo: false };
-    toast(data.reused ? '✓ Workspace já tinha planilha — vinculada' : '✓ Planilha criada com sucesso', 'ok');
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.detail || 'backend indisponível ou sem login');
+    toast(data.reused ? '✓ Cliente já tinha planilha — vinculada' : '✓ Planilha criada com sucesso', 'ok');
+    if(nameEl) nameEl.value = '';
+    if(emailEl) emailEl.value = '';
+    await planLoadWorkspaces();
   }catch(e){
-    planState = {
-      spreadsheetUrl: 'https://docs.google.com/spreadsheets/d/DEMO_' + clientName.replace(/[^\w]+/g,'_') + '/edit',
-      clientName,
-      demo: true,
-    };
-    toast('✓ Planilha criada (demo — requer login/backend pra criar de verdade)', 'ok');
+    toast('✕ ' + (e.message || 'Falha ao criar a planilha'), 'er');
   }
-  planLoadStatus();
+  if(btn){ btn.disabled = false; btn.textContent = 'Criar Planilha'; }
 }
 
-async function planSync(){
+async function planSync(workspaceId, btnEl){
   // O Cloud Scheduler já roda isso sozinho a cada 15min (/plan/sync-all,
-  // v2.7) — este botão é só um atalho manual pra forçar agora, sem
-  // esperar o próximo ciclo (ex.: acabou de editar a planilha).
-  if(planState.demo){ toast('Sincronização real requer planilha conectada de verdade (login pendente)', 'er'); return; }
+  // v2.7) pra todos os workspaces — este botão por linha é só um atalho
+  // manual pra forçar um cliente específico agora, sem esperar o próximo
+  // ciclo (ex.: acabou de editar a planilha dele).
+  if(btnEl){ btnEl.disabled = true; }
   try{
-    const res = await fetch(API_BASE + '/plan/sync', { method: 'POST', headers: authHeaders() });
+    const res = await fetch(API_BASE + '/plan/sync?workspace_id=' + encodeURIComponent(workspaceId), {
+      method: 'POST', headers: authHeaders(),
+    });
     if(!res.ok) throw new Error('falha na sincronização');
-    toast('✓ Sincronizado com o BigQuery (a automática já roda a cada 15min)', 'ok');
-    planLoadStatus();
+    toast('✓ Sincronizado com o BigQuery', 'ok');
   }catch(e){
     toast('✕ Não foi possível sincronizar agora', 'er');
   }
+  if(btnEl){ btnEl.disabled = false; }
 }
 </script>
 </body>
