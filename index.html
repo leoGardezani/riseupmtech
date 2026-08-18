@@ -796,7 +796,7 @@
     <p class="cta-sub">Fale com a equipe e descubra qual módulo faz mais sentido para a operação da sua agência.</p>
     <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
       <a href="/cdn-cgi/l/email-protection#e5868a8b9184918aa5978c96809095889180868dcb868a88" class="btn-primary">Falar com a Equipe</a>
-      <a href="https://app.riseupmtech.com" class="btn-ghost">Acessar o Sistema →</a>
+      <a href="https://riseupmtech.com/app.html" class="btn-ghost">Acessar o Sistema →</a>
     </div>
   </div>
 </section>
@@ -1016,4 +1016,11 @@
   // wait for layout then init
   setTimeout(() => {
     resize();
-    wind
+    window.addEventListener('resize', resize);
+    function loop(){ draw(); requestAnimationFrame(loop); }
+    loop();
+  }, 50);
+})();
+</script>
+</body>
+</html>
