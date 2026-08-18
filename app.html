@@ -863,11 +863,13 @@ let S={token:localStorage.getItem('riseup_token'),role:localStorage.getItem('ris
 window.addEventListener('load',()=>{
   const p=new URLSearchParams(location.search);
   if(p.get('token')){
-    localStorage.setItem('riseup_token',p.get('token'));localStorage.setItem('riseup_role',p.get('role')||'editor');
-    S.token=p.get('token');S.role=p.get('role')||'editor';S.user={name:decodeURIComponent(p.get('name')||''),email:decodeURIComponent(p.get('email')||'')};
-    history.replaceState({},'',location.pathname);enter(p.get('has_workspace')==='true');return;
+    localStorage.setItem('riseup_token',p.get('token'));
+    localStorage.setItem('riseup_user',JSON.stringify({name:decodeURIComponent(p.get('name')||''),email:decodeURIComponent(p.get('email')||'')}));
+    location.href='operations.html';
+    return;
   }
-  S.token?me():sv('vl');
+  if(S.token){location.href='operations.html';return;}
+  sv('vl');
 });
 
 async function me(){try{const r=await rq('/auth/me');S.user=r;enter(r.has_workspace);}catch{localStorage.removeItem('riseup_token');sv('vl');}}
