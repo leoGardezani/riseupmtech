@@ -798,35 +798,6 @@
       </div>
     </div>
   </div>
-<!-- DETAIL MODAL -->
-<div class="detail-modal" id="detailModal" onclick="closeDetail(event)">
-  <div class="detail-box" id="detailBox">
-    <div class="detail-header">
-      <div>
-        <div class="detail-title" id="dm-title">—</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.08em;margin-top:4px" id="dm-meta">—</div>
-      </div>
-      <button class="detail-close" onclick="closeDetailBtn()">×</button>
-    </div>
-    <div class="detail-body">
-      <div class="detail-preview"><img id="dm-img" src="" alt=""></div>
-      <div class="detail-spec-group" id="dm-specs"></div>
-      <div class="detail-spec-group" id="dm-specs2"></div>
-      <div class="detail-actions" id="dm-actions"></div>
-    </div>
-  </div>
-</div>
-<!-- CONFIRM MODAL (exclusão de planilha) -->
-<div class="confirm-modal" id="confirmModal" onclick="closeConfirmModal(event)">
-  <div class="confirm-box">
-    <div class="confirm-title">Excluir planilha?</div>
-    <div class="confirm-text" id="confirmText">—</div>
-    <div class="confirm-actions">
-      <button class="confirm-btn ghost" onclick="closeConfirmModal()">Cancelar</button>
-      <button class="confirm-btn danger" onclick="planDeleteConfirm()">Excluir</button>
-    </div>
-  </div>
-</div>
   <!-- ── BIG TABLE ── -->
   <div class="tab-page" id="tab-bigtable">
     <div class="section-title">Big Table</div>
@@ -897,6 +868,41 @@
         </thead>
         <tbody id="btBody"></tbody>
       </table>
+    </div>
+  </div>
+</div>
+<!-- DETAIL MODAL -->
+<!-- Fica FORA de #main de propósito: #main é position:fixed, e todo
+     position:fixed sempre cria seu próprio contexto de empilhamento no CSS
+     atual — se o modal ficasse dentro de #main, o z-index dele só valeria
+     dentro do contexto de #main, e nunca conseguiria ficar acima de
+     elementos irmãos de #main como #overlay (menu lateral). Bug real
+     encontrado e corrigido nesta sessão (testado com Playwright). -->
+<div class="detail-modal" id="detailModal" onclick="closeDetail(event)">
+  <div class="detail-box" id="detailBox">
+    <div class="detail-header">
+      <div>
+        <div class="detail-title" id="dm-title">—</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.08em;margin-top:4px" id="dm-meta">—</div>
+      </div>
+      <button class="detail-close" onclick="closeDetailBtn()">×</button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-preview"><img id="dm-img" src="" alt=""></div>
+      <div class="detail-spec-group" id="dm-specs"></div>
+      <div class="detail-spec-group" id="dm-specs2"></div>
+      <div class="detail-actions" id="dm-actions"></div>
+    </div>
+  </div>
+</div>
+<!-- CONFIRM MODAL (exclusão de planilha) — mesma razão acima -->
+<div class="confirm-modal" id="confirmModal" onclick="closeConfirmModal(event)">
+  <div class="confirm-box">
+    <div class="confirm-title">Excluir planilha?</div>
+    <div class="confirm-text" id="confirmText">—</div>
+    <div class="confirm-actions">
+      <button class="confirm-btn ghost" onclick="closeConfirmModal()">Cancelar</button>
+      <button class="confirm-btn danger" onclick="planDeleteConfirm()">Excluir</button>
     </div>
   </div>
 </div>
@@ -1090,6 +1096,29 @@ function toggleColl(id){
     body.classList.add('open');
     hdr.classList.add('open');
   }
+}
+// ── ESCAPE HELPERS ──
+// _escJsAttr: prepara uma string pra entrar dentro de um argumento de
+// função em atributo onclick="..." delimitado por ASPAS DUPLAS, quando o
+// argumento em si usa aspas SIMPLES (onclick="fn('valor')"). Bug corrigido
+// nesta sessão: usar JSON.stringify() aqui quebrava tudo, porque
+// JSON.stringify sempre devolve aspas DUPLAS — que colidem com as aspas
+// duplas do atributo onclick e cortam o HTML no meio, deixando o resto
+// como texto solto (o clique simplesmente não chamava a função, sem erro
+// nenhum visível no console). Aqui: escapa backslash e aspas simples pro
+// JS não quebrar, e aspas duplas viram &quot; pro HTML não quebrar.
+function _escJsAttr(str){
+  return String(str == null ? '' : str)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '&quot;');
+}
+// _escHtml: escapa texto que vai virar innerHTML (não onclick) — usado
+// pra nome de cliente/planilha não quebrar a marcação se tiver <, >, & etc.
+function _escHtml(str){
+  const div = document.createElement('div');
+  div.textContent = String(str == null ? '' : str);
+  return div.innerHTML;
 }
 // ── TOAST ──
 // NOTA: essa função era chamada em 17 lugares do arquivo original mas nunca
@@ -2579,12 +2608,12 @@ function renderPlanWorkspaceList(){
   }
   box.innerHTML = planWorkspaces.map(w => (
     '<div class="conn-item" data-ws="' + w.workspace_id + '">'
-    + '<div><div class="conn-name">' + (w.client_name || 'Sem nome') + '</div>'
+    + '<div><div class="conn-name">' + _escHtml(w.client_name || 'Sem nome') + '</div>'
     + '<div class="conn-status on">● Conectada</div></div>'
     + '<div style="display:flex;gap:6px">'
     + '<button class="btn-sm ghost" onclick="planSync(\'' + w.workspace_id + '\',this)" title="Forçar sincronização agora">↻</button>'
     + '<a href="' + w.spreadsheet_url + '" target="_blank" class="btn-sm ghost">Abrir ↗</a>'
-    + '<button class="btn-sm ghost" style="color:var(--danger);border-color:#fecaca" onclick="planDeleteRequest(\'' + w.workspace_id + '\', ' + JSON.stringify(w.client_name || 'esta planilha') + ')" title="Excluir planilha">✕</button>'
+    + '<button class="btn-sm ghost" style="color:var(--danger);border-color:#fecaca" onclick="planDeleteRequest(\'' + w.workspace_id + '\', \'' + _escJsAttr(w.client_name || 'esta planilha') + '\')" title="Excluir planilha">✕</button>'
     + '</div></div>'
   )).join('');
 }
@@ -2661,7 +2690,7 @@ function planDeleteRequest(workspaceId, clientName){
   pendingDeleteWorkspace = workspaceId;
   const textEl = document.getElementById('confirmText');
   if(textEl){
-    textEl.innerHTML = 'Isso remove <strong>' + clientName + '</strong> da lista de workspaces e move a planilha do Google Sheets para a lixeira do Drive (recuperável por 30 dias — não é apagada na hora). Essa ação não pode ser desfeita por aqui.';
+    textEl.innerHTML = 'Isso remove <strong>' + _escHtml(clientName) + '</strong> da lista de workspaces e move a planilha do Google Sheets para a lixeira do Drive (recuperável por 30 dias — não é apagada na hora). Essa ação não pode ser desfeita por aqui.';
   }
   document.getElementById('confirmModal').classList.add('open');
 }
