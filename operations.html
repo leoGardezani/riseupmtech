@@ -730,7 +730,6 @@
     <div class="section-sub">Combinações com melhor performance no período</div>
     <div id="ov-top3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:24px"></div>
   </div>
-</div>
   <!-- ── CRIATIVOS ── -->
   <div class="tab-page" id="tab-criativos">
     <div class="section-title">Repositório de Criativos</div>
@@ -789,7 +788,7 @@
       <div class="coll-header open" onclick="toggleColl('approved')">
         <div>
           <div class="coll-title">Repositório — Assets Aprovados</div>
-          <div class="coll-meta" id="repo-count">16 assets</div>
+          <div class="coll-meta" id="repo-count-header">16 assets</div>
         </div>
         <span class="coll-arrow">▼</span>
       </div>
@@ -900,6 +899,7 @@
       </table>
     </div>
   </div>
+</div>
 <!-- RIGHT PANEL -->
 <div class="r-panel" id="rPanel">
   <div class="rp-head">
@@ -1371,7 +1371,10 @@ function filterRepo(){
 function renderRepo(assets){
   const grid = document.getElementById('repoGrid');
   const cnt = document.getElementById('repo-count');
-  if(cnt) cnt.textContent = assets.length + ' asset' + (assets.length !== 1 ? 's' : '');
+  const cntHeader = document.getElementById('repo-count-header');
+  const label = assets.length + ' asset' + (assets.length !== 1 ? 's' : '');
+  if(cnt) cnt.textContent = label;
+  if(cntHeader) cntHeader.textContent = label;
   if(!grid) return;
   if(!assets.length){
     grid.innerHTML = '<div style="grid-column:1/-1;padding:60px;text-align:center;background:var(--bg)">'
@@ -2279,9 +2282,8 @@ window.addEventListener('load',()=>{
   renderSocialPyramid();
   renderStatus();
   renderGantt();
-  renderRepo(REPO_ASSETS);
+  renderRepo(REPO_ASSETS); // já atualiza repo-count e repo-count-header
   renderPending();
-  document.getElementById('repo-count').textContent=REPO_ASSETS.length+' assets';
   renderAudHeatmap();
   renderAudCards();
   renderDesdQueue();
