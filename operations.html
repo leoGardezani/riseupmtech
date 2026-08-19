@@ -426,6 +426,21 @@
 <div class="main" id="main">
   <!-- ── CAMPANHAS ── -->
   <div class="tab-page" id="tab-campanhas">
+    <!-- RODAR PIPELINE DE CAMPANHAS -->
+    <div class="tbox" style="margin-bottom:24px">
+      <div class="tbox-head">
+        <div class="tbox-title">Rodar Pipeline de Campanhas</div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// cria campanha + ad group nas plataformas conectadas, pra linhas "ready to setup"</span>
+      </div>
+      <div style="padding:16px 20px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <div style="flex:1;min-width:220px">
+          <label class="fl">Workspace</label>
+          <select class="fs_" id="campWorkspaceSelect"><option value="">Carregando...</option></select>
+        </div>
+        <button class="bt-btn" id="campRunBtn" onclick="campRunPipeline()" disabled>▶ Rodar Campanhas</button>
+      </div>
+      <div id="campRunResult" style="padding:0 20px 16px"></div>
+    </div>
     <!-- KPIs -->
     <div class="section-title">Resultados do Período</div>
     <div class="section-sub">KPIs consolidados vs meta</div>
@@ -1778,6 +1793,7 @@ function switchTab(id, el){
   document.getElementById('tab-'+id).classList.add('active');
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
   el.classList.add('on');
+  if(id === 'campanhas') campLoadWorkspaces();
   if(!chartsInited.has(id)){
     chartsInited.add(id);
     setTimeout(() => initChartsForTab(id), 60);
@@ -2627,6 +2643,89 @@ async function planLoadWorkspaces(){
     planWorkspaces = [];
   }
   renderPlanWorkspaceList();
+}
+
+// ── CAMPANHAS — rodar pipeline (POST /campaigns/run) ──────────────────────
+// Adicionado nesta sessão. Precisa de workspace_id explícito (o backend só
+// ganhou esse parâmetro agora — antes rodava sempre no "primeiro workspace
+// encontrado" do usuário, o que ficou ambíguo assim que um operador passou
+// a ter vários workspaces de teste ativos ao mesmo tempo). Reaproveita
+// GET /plan/workspaces, a mesma fonte de dados da aba Planilha.
+async function campLoadWorkspaces(){
+  const sel = document.getElementById('campWorkspaceSelect');
+  const btn = document.getElementById('campRunBtn');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Carregando...</option>';
+  if(btn) btn.disabled = true;
+  try{
+    const res = await fetch(API_BASE + '/plan/workspaces', { headers: authHeaders() });
+    if(!res.ok) throw new Error('sem acesso ao backend');
+    const list = await res.json();
+    if(!list.length){
+      sel.innerHTML = '<option value="">Nenhum workspace encontrado</option>';
+      return;
+    }
+    sel.innerHTML = list.map(w =>
+      '<option value="' + w.workspace_id + '">' + _escHtml(w.client_name || w.workspace_id) + '</option>'
+    ).join('');
+    if(btn) btn.disabled = false;
+  }catch(e){
+    sel.innerHTML = '<option value="">Falha ao carregar workspaces</option>';
+  }
+}
+
+async function campRunPipeline(){
+  const sel = document.getElementById('campWorkspaceSelect');
+  const workspaceId = sel ? sel.value : '';
+  if(!workspaceId){ toast('Selecione um workspace primeiro', 'er'); return; }
+
+  const btn = document.getElementById('campRunBtn');
+  const resultEl = document.getElementById('campRunResult');
+  if(btn){ btn.disabled = true; btn.textContent = 'Rodando...'; }
+  if(resultEl) resultEl.innerHTML = '';
+
+  try{
+    const res = await fetch(API_BASE + '/campaigns/run?workspace_id=' + encodeURIComponent(workspaceId), {
+      method: 'POST', headers: authHeaders(),
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.detail || 'Falha ao rodar o pipeline');
+    campRenderRunResult(data);
+    const nCreated = (data.created || []).length;
+    toast(nCreated ? ('✓ ' + nCreated + ' campanha(s) criada(s)') : '✓ Rodou — nenhuma campanha nova (ver detalhe abaixo)', 'ok');
+  }catch(e){
+    toast('✕ ' + (e.message || 'Falha ao rodar o pipeline'), 'er');
+  }
+  if(btn){ btn.disabled = false; btn.textContent = '▶ Rodar Campanhas'; }
+}
+
+function campRenderRunResult(data){
+  const el = document.getElementById('campRunResult');
+  if(!el) return;
+  const created = data.created || [], skipped = data.skipped || [], errors = data.errors || [];
+  let html = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);margin-bottom:8px">'
+    + (data.groups_total || 0) + ' grupo(s) analisado(s) · ' + created.length + ' criado(s) · '
+    + skipped.length + ' pulado(s) · ' + errors.length + ' erro(s)</div>';
+
+  if(created.length){
+    html += '<div style="margin-bottom:10px">'
+      + '<div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--success);margin-bottom:4px">✓ Criadas</div>'
+      + created.map(c => '<div style="font-size:12px;padding:4px 0">' + _escHtml(c.group) + ' — campaign_id <span class="td-mono">' + _escHtml(c.campaign_id) + '</span> (' + c.rows + ' linha' + (c.rows !== 1 ? 's' : '') + ')</div>').join('')
+      + '</div>';
+  }
+  if(skipped.length){
+    html += '<div style="margin-bottom:10px">'
+      + '<div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:4px">— Puladas</div>'
+      + skipped.map(s => '<div style="font-size:12px;padding:4px 0;color:var(--ink-mid)">' + _escHtml(s.group) + ' — ' + _escHtml(s.reason) + '</div>').join('')
+      + '</div>';
+  }
+  if(errors.length){
+    html += '<div>'
+      + '<div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--danger);margin-bottom:4px">✕ Erros</div>'
+      + errors.map(e => '<div style="font-size:12px;padding:4px 0;color:var(--danger)">' + _escHtml(e.group || '') + ' — ' + _escHtml(e.error || '') + '</div>').join('')
+      + '</div>';
+  }
+  el.innerHTML = html;
 }
 
 async function planProvision(){
