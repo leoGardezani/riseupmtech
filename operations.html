@@ -287,6 +287,21 @@
   .detail-btn.ghost:hover{border-color:var(--ink);color:var(--ink);}
   /* role badge */
   .r-ap{background:#f0fdf4;color:#15803d;}
+  /* confirm modal (exclusão de planilha) */
+  .confirm-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+  .confirm-modal.open{display:flex;}
+  .confirm-box{background:var(--bg);width:400px;max-width:90vw;position:relative;padding:28px;}
+  .confirm-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--danger);}
+  .confirm-title{font-family:var(--fh);font-weight:700;font-size:18px;text-transform:uppercase;letter-spacing:.02em;margin-bottom:10px;}
+  .confirm-text{font-size:13px;color:var(--ink-soft);line-height:1.6;margin-bottom:24px;}
+  .confirm-text strong{color:var(--ink);}
+  .confirm-actions{display:flex;gap:8px;}
+  .confirm-btn{flex:1;padding:11px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;border:none;cursor:pointer;transition:background .2s;}
+  .confirm-btn.danger{background:var(--danger);color:#fff;}
+  .confirm-btn.danger:hover{background:#b91c1c;}
+  .confirm-btn.danger:disabled{opacity:.6;cursor:default;}
+  .confirm-btn.ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--border);}
+  .confirm-btn.ghost:hover{border-color:var(--ink);color:var(--ink);}
   /* ── BIG TABLE ── */
   .bt-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
   .bt-search{font-family:var(--mono);font-size:11px;letter-spacing:.04em;padding:7px 14px;border:1px solid var(--border);background:var(--bg2);color:var(--ink);outline:none;width:240px;transition:border-color .2s;}
@@ -799,6 +814,17 @@
       <div class="detail-spec-group" id="dm-specs"></div>
       <div class="detail-spec-group" id="dm-specs2"></div>
       <div class="detail-actions" id="dm-actions"></div>
+    </div>
+  </div>
+</div>
+<!-- CONFIRM MODAL (exclusão de planilha) -->
+<div class="confirm-modal" id="confirmModal" onclick="closeConfirmModal(event)">
+  <div class="confirm-box">
+    <div class="confirm-title">Excluir planilha?</div>
+    <div class="confirm-text" id="confirmText">—</div>
+    <div class="confirm-actions">
+      <button class="confirm-btn ghost" onclick="closeConfirmModal()">Cancelar</button>
+      <button class="confirm-btn danger" onclick="planDeleteConfirm()">Excluir</button>
     </div>
   </div>
 </div>
@@ -2537,6 +2563,11 @@ async function inviteMember() {
 // planilha", sempre reabrindo a mesma em vez de deixar criar mais.
 let planWorkspaces = [];
 
+// Guarda o workspace_id pendente de exclusão enquanto o modal de
+// confirmação está aberto — usado por planDeleteRequest/planDeleteConfirm
+// (nova função desta sessão, ver mais abaixo).
+let pendingDeleteWorkspace = null;
+
 function renderPlanWorkspaceList(){
   const box = document.getElementById('planWorkspaceList');
   if(!box) return;
@@ -2551,6 +2582,7 @@ function renderPlanWorkspaceList(){
     + '<div style="display:flex;gap:6px">'
     + '<button class="btn-sm ghost" onclick="planSync(\'' + w.workspace_id + '\',this)" title="Forçar sincronização agora">↻</button>'
     + '<a href="' + w.spreadsheet_url + '" target="_blank" class="btn-sm ghost">Abrir ↗</a>'
+    + '<button class="btn-sm ghost" style="color:var(--danger);border-color:#fecaca" onclick="planDeleteRequest(\'' + w.workspace_id + '\', ' + JSON.stringify(w.client_name || 'esta planilha') + ')" title="Excluir planilha">✕</button>'
     + '</div></div>'
   )).join('');
 }
@@ -2609,6 +2641,59 @@ async function planSync(workspaceId, btnEl){
     toast('✕ Não foi possível sincronizar agora', 'er');
   }
   if(btnEl){ btnEl.disabled = false; }
+}
+
+// ── EXCLUSÃO DE PLANILHA (nova nesta sessão) ──
+// Fluxo: botão ✕ por linha (renderPlanWorkspaceList) -> planDeleteRequest
+// abre o modal de confirmação com o nome do cliente -> usuário confirma ->
+// planDeleteConfirm chama DELETE /plan/workspaces/{workspace_id}.
+// IMPORTANTE: não existe fallback "modo demo" pra exclusão (diferente do
+// resto do arquivo) — de propósito. Fingir que excluiu algo que na
+// verdade não foi removido do backend é pior que mostrar um erro claro;
+// o endpoint DELETE /plan/workspaces/{workspace_id} ainda PRECISA ser
+// implementado no backend (api/plan.py) pra este botão funcionar de
+// verdade — até lá, o clique vai mostrar um toast de erro, o que é o
+// comportamento correto (nunca remover da lista sem confirmação real do
+// servidor).
+function planDeleteRequest(workspaceId, clientName){
+  pendingDeleteWorkspace = workspaceId;
+  const textEl = document.getElementById('confirmText');
+  if(textEl){
+    textEl.innerHTML = 'Isso remove <strong>' + clientName + '</strong> da lista de workspaces e move a planilha do Google Sheets para a lixeira do Drive (recuperável por 30 dias — não é apagada na hora). Essa ação não pode ser desfeita por aqui.';
+  }
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function closeConfirmModal(e){
+  // Se veio de um clique no overlay (e.target === o próprio modal), fecha.
+  // Se veio do botão Cancelar (chamado sem argumento), também fecha.
+  if(e && e.target !== document.getElementById('confirmModal')) return;
+  document.getElementById('confirmModal').classList.remove('open');
+  pendingDeleteWorkspace = null;
+}
+
+async function planDeleteConfirm(){
+  if(!pendingDeleteWorkspace) return;
+  const workspaceId = pendingDeleteWorkspace;
+  const btn = document.querySelector('#confirmModal .confirm-btn.danger');
+  if(btn){ btn.disabled = true; btn.textContent = 'Excluindo...'; }
+  try{
+    const res = await fetch(API_BASE + '/plan/workspaces/' + encodeURIComponent(workspaceId), {
+      method: 'DELETE', headers: authHeaders(),
+    });
+    if(!res.ok){
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'falha ao excluir (endpoint pode ainda não existir no backend)');
+    }
+    planWorkspaces = planWorkspaces.filter(w => w.workspace_id !== workspaceId);
+    renderPlanWorkspaceList();
+    toast('✓ Planilha excluída', 'ok');
+  }catch(e){
+    toast('✕ ' + (e.message || 'Não foi possível excluir agora'), 'er');
+  }
+  if(btn){ btn.disabled = false; btn.textContent = 'Excluir'; }
+  document.getElementById('confirmModal').classList.remove('open');
+  pendingDeleteWorkspace = null;
 }
 </script>
 </body>
