@@ -2501,6 +2501,10 @@ const _CONN_ACCOUNT_MOUNTS = [
   { platform: 'tiktok',     mountId: 'acctMount-tiktok', field: null,       kindFilter: null },
 ];
 const _pendingHtml = '<span style="font-family:var(--mono);font-size:9px;color:var(--warn);letter-spacing:.04em">conexão pendente</span>';
+// Guarda a última resposta de /connect/accounts/meta em escopo de módulo —
+// usada por connOnMetaPageChange pra re-filtrar o seletor de Instagram sem
+// precisar buscar de novo no backend toda vez que a Página muda.
+let _metaAccountsCache = null;
 
 async function connRenderAccountMounts(workspaceId, backendStatus){
   if(!workspaceId){
@@ -2521,6 +2525,7 @@ async function connRenderAccountMounts(workspaceId, backendStatus){
     }catch(e){
       accountsCache[platform] = null;
     }
+    if(platform === 'meta') _metaAccountsCache = accountsCache[platform];
     return accountsCache[platform];
   }
 
@@ -2538,19 +2543,55 @@ async function connRenderAccountMounts(workspaceId, backendStatus){
       continue;
     }
     const allAccounts = data.accounts || [];
-    const accounts = m.kindFilter ? allAccounts.filter(a => a.kind === m.kindFilter) : allAccounts;
+    let accounts = m.kindFilter ? allAccounts.filter(a => a.kind === m.kindFilter) : allAccounts;
+    // Instagram — pedido do Leonardo: a conta de Instagram sempre pertence
+    // a UMA Página específica do Facebook, não é uma escolha independente.
+    // Filtra pra só mostrar as contas de Instagram vinculadas à Página
+    // atualmente selecionada, evitando uma combinação inválida (Página A +
+    // Instagram vinculado à Página B). Se a Página ainda não tiver sido
+    // escolhida nesta sessão de tela, cai no page_id já salvo (data.selected).
+    if(m.field === 'instagram_account_id'){
+      const pageSelEl = document.getElementById('acctSel-acctMount-meta-page_id');
+      const currentPageId = (pageSelEl && pageSelEl.value) || (data.selected || {}).page_id || null;
+      if(currentPageId) accounts = accounts.filter(a => a.page_id === currentPageId);
+    }
     if(!accounts.length){
-      el.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">nenhuma conta encontrada</span>';
+      el.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">'
+        + (m.field === 'instagram_account_id' ? 'sem Instagram vinculado a essa Página' : 'nenhuma conta encontrada')
+        + '</span>';
       continue;
     }
     const selectedVal = m.field ? (data.selected || {})[m.field] : Object.values(data.selected || {})[0];
     const selectId = 'acctSel-' + m.mountId;
+    const onchangeCall = m.field === 'page_id'
+      ? 'connOnMetaPageChange(\'' + workspaceId + '\',this)'
+      : 'connSaveAccountSelection(\'' + m.platform + '\',' + (m.field ? "'" + m.field + "'" : 'null') + ',\'' + workspaceId + '\',this.value,this)';
     el.innerHTML = '<select class="fs_" id="' + selectId + '" style="font-size:10px;padding:6px 22px 6px 8px" '
-      + 'onchange="connSaveAccountSelection(\'' + m.platform + '\',' + (m.field ? "'" + m.field + "'" : 'null') + ',\'' + workspaceId + '\',this.value,this)">'
+      + 'onchange="' + onchangeCall + '">'
       + '<option value="">Selecione…</option>'
       + accounts.map(a => '<option value="' + a.id + '"' + (a.id === selectedVal ? ' selected' : '') + '>' + _escHtml(a.name || a.id) + '</option>').join('')
       + '</select>';
   }
+}
+
+// Página do Facebook mudou — salva a seleção (igual antes) E re-renderiza
+// só o mount do Instagram, filtrado pra essa página nova.
+async function connOnMetaPageChange(workspaceId, selectEl){
+  await connSaveAccountSelection('meta', 'page_id', workspaceId, selectEl.value, selectEl);
+  const igEl = document.getElementById('acctMount-meta-instagram_account_id');
+  if(!igEl || !_metaAccountsCache) return;
+  const igAccounts = (_metaAccountsCache.accounts || [])
+    .filter(a => a.kind === 'instagram_account' && a.page_id === selectEl.value);
+  if(!igAccounts.length){
+    igEl.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">sem Instagram vinculado a essa Página</span>';
+    return;
+  }
+  const selectedVal = (_metaAccountsCache.selected || {}).instagram_account_id;
+  igEl.innerHTML = '<select class="fs_" id="acctSel-acctMount-meta-instagram_account_id" style="font-size:10px;padding:6px 22px 6px 8px" '
+    + 'onchange="connSaveAccountSelection(\'meta\',\'instagram_account_id\',\'' + workspaceId + '\',this.value,this)">'
+    + '<option value="">Selecione…</option>'
+    + igAccounts.map(a => '<option value="' + a.id + '"' + (a.id === selectedVal ? ' selected' : '') + '>' + _escHtml(a.name || a.id) + '</option>').join('')
+    + '</select>';
 }
 
 async function connSaveAccountSelection(platform, field, workspaceId, accountId, selectEl){
@@ -2832,9 +2873,22 @@ async function campRunPipeline(){
 
   const btn = document.getElementById('campRunBtn');
   const resultEl = document.getElementById('campRunResult');
-  if(btn){ btn.disabled = true; btn.textContent = 'Rodando...'; }
+  if(btn){ btn.disabled = true; btn.textContent = 'Sincronizando...'; }
   if(resultEl) resultEl.innerHTML = '';
 
+  // Sync ANTES — pedido do Leonardo: garante que material-request esteja
+  // atualizado (media-plan editado recentemente etc.) antes do pipeline
+  // ler as linhas "ready to setup". Falha de sync aqui não impede seguir
+  // pro pipeline — só avisa; os dados podem já estar frescos o bastante.
+  try{
+    await fetch(API_BASE + '/plan/sync?workspace_id=' + encodeURIComponent(workspaceId), {
+      method: 'POST', headers: authHeaders(),
+    });
+  }catch(e){
+    toast('Sync prévio falhou, seguindo mesmo assim...', '');
+  }
+
+  if(btn) btn.textContent = 'Rodando...';
   try{
     const res = await fetch(API_BASE + '/campaigns/run?workspace_id=' + encodeURIComponent(workspaceId), {
       method: 'POST', headers: authHeaders(),
@@ -2847,6 +2901,19 @@ async function campRunPipeline(){
   }catch(e){
     toast('✕ ' + (e.message || 'Falha ao rodar o pipeline'), 'er');
   }
+
+  // Sync DEPOIS — garante que status/IDs de campanha/ad group gravados
+  // pelo pipeline (inclusive em cima de erro parcial) propaguem pra
+  // implementation + BigQuery, sem depender só do sync condicional que já
+  // existe dentro do próprio /campaigns/run (que só dispara se algo mudou
+  // NESSA chamada específica).
+  if(btn) btn.textContent = 'Sincronizando...';
+  try{
+    await fetch(API_BASE + '/plan/sync?workspace_id=' + encodeURIComponent(workspaceId), {
+      method: 'POST', headers: authHeaders(),
+    });
+  }catch(e){ /* silencioso — o pipeline já rodou, isso é só garantir a propagação */ }
+
   if(btn){ btn.disabled = false; btn.textContent = '▶ Rodar Campanhas'; }
 }
 
