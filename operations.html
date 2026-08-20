@@ -980,7 +980,10 @@
     <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Relatórios</div><div class="rp-page-sub">Envie um .pptx para gerar report dinâmico.</div><div class="uz" onclick="toast('Selecione um arquivo','')"><div class="uz-icon">📄</div><div class="uz-text"><strong>Selecione o .pptx</strong></div><div class="uz-hint">máx. 50MB</div></div><button class="btn-full" onclick="toast('Processando...','ok')">Processar</button></div>
   </div>
   <div class="rp-page" id="rp-conexoes">
-    <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Conexões</div><div class="rp-page-sub">Autorizações de páginas e contas de anúncio — compartilhadas com todo o time do cliente.</div><div id="connList"></div></div>
+    <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Conexões</div><div class="rp-page-sub">Autorizações de páginas e contas de anúncio — compartilhadas com todo o time do cliente.</div>
+      <div class="fg"><label class="fl">Workspace</label><select class="fs_" id="connWorkspaceSelect" onchange="renderConns()"><option value="">Carregando...</option></select></div>
+      <div id="connList"></div>
+    </div>
   </div>
   <div class="rp-page" id="rp-usuarios">
     <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Usuários</div><div class="rp-page-sub">Acessos e papéis — analista, editor, admin.</div>
@@ -2409,15 +2412,45 @@ window.addEventListener('load', checkAuth);
 // ── CONEXÕES ────────────────────────────────────────────────────────────
 
 const PLATFORM_KEYS = { 'Google Ads': 'google_ads', 'Meta Ads': 'meta', 'TikTok Ads': 'tiktok' };
+let connWorkspacesLoaded = false;
+
+async function connLoadWorkspaceSelect(){
+  const sel = document.getElementById('connWorkspaceSelect');
+  if(!sel) return;
+  try{
+    const res = await fetch(API_BASE + '/plan/workspaces', { headers: authHeaders() });
+    if(!res.ok) throw new Error();
+    const list = await res.json();
+    const prev = sel.value;
+    if(!list.length){ sel.innerHTML = '<option value="">Nenhum workspace</option>'; return; }
+    sel.innerHTML = list.map(w =>
+      '<option value="' + w.workspace_id + '">' + _escHtml(w.client_name || w.workspace_id) + '</option>'
+    ).join('');
+    if(prev && list.some(w => w.workspace_id === prev)) sel.value = prev;
+  }catch(e){
+    sel.innerHTML = '<option value="">Falha ao carregar</option>';
+  }
+}
 
 async function renderConns() {
   const el = document.getElementById('connList');
   if (!el) return;
+
+  if(!connWorkspacesLoaded){
+    connWorkspacesLoaded = true;
+    await connLoadWorkspaceSelect();
+  }
+  const workspaceId = document.getElementById('connWorkspaceSelect')?.value || '';
+
   el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);padding:12px 0">Carregando conexões...</div>';
+  if(!workspaceId){
+    el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);padding:12px 0">Selecione um workspace acima</div>';
+    return;
+  }
 
   let backendStatus = null;
   try {
-    const res = await fetch(API_BASE + '/connect/status', { headers: authHeaders() });
+    const res = await fetch(API_BASE + '/connect/status?workspace_id=' + encodeURIComponent(workspaceId), { headers: authHeaders() });
     if (res.ok) backendStatus = await res.json();
   } catch (e) { /* segue no modo demo */ }
 
@@ -2453,10 +2486,20 @@ function connectPlatform(name, key) {
     toast('✓ ' + name + ' conectado (demo — integração real ainda não existe)', 'ok');
     return;
   }
-  // OAuth real precisa abrir em nova aba (o backend redireciona pro provedor);
-  // exige login (JWT) que este operations.html ainda não implementa.
-  toast('Abrindo OAuth de ' + name + '... (requer login implementado)', '');
-  window.open(API_BASE + '/connect/' + key, '_blank');
+  const workspaceId = document.getElementById('connWorkspaceSelect')?.value || '';
+  if(!workspaceId){ toast('Selecione um workspace primeiro', 'er'); return; }
+  // OAuth real precisa abrir em nova aba (o backend redireciona pro provedor).
+  // Bug corrigido nesta sessão: window.open() é navegação de aba comum, NÃO
+  // manda o header Authorization — então token e workspace_id vão como
+  // query string mesmo (o backend aceita os dois, ver
+  // core.auth.get_current_user_flexible). Isso significa que o JWT fica
+  // visível na URL desta aba/nos logs de acesso do navegador — aceitável
+  // aqui porque é um fluxo de poucos segundos até o redirect pro provedor,
+  // mas vale saber que não é o padrão usado no resto do app.
+  const url = API_BASE + '/connect/' + key
+    + '?workspace_id=' + encodeURIComponent(workspaceId)
+    + '&token=' + encodeURIComponent(AUTH_TOKEN || '');
+  window.open(url, '_blank');
 }
 
 async function disconnectPlatform(name, key) {
