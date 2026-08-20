@@ -432,11 +432,18 @@
         <div class="tbox-title">Rodar Pipeline de Campanhas</div>
         <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// cria campanha + ad group nas plataformas conectadas, pra linhas "ready to setup"</span>
       </div>
-      <div style="padding:16px 20px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
-        <div style="flex:1;min-width:220px">
+      <div style="padding:16px 20px 4px;display:flex;gap:8px;flex-wrap:wrap">
+        <div style="flex:1;min-width:160px">
           <label class="fl">Workspace</label>
-          <select class="fs_" id="campWorkspaceSelect"><option value="">Carregando...</option></select>
+          <select class="fs_" id="campWorkspaceSelect" onchange="campOnWorkspaceChange()"><option value="">Carregando...</option></select>
         </div>
+        <div style="flex:1;min-width:100px"><label class="fl">Google Ads</label><div id="acctMount-google_ads"></div></div>
+        <div style="flex:1;min-width:100px"><label class="fl">Meta — Conta</label><div id="acctMount-meta-ad_account_id"></div></div>
+        <div style="flex:1;min-width:100px"><label class="fl">Meta — Página FB</label><div id="acctMount-meta-page_id"></div></div>
+        <div style="flex:1;min-width:100px"><label class="fl">Meta — Instagram</label><div id="acctMount-meta-instagram_account_id"></div></div>
+        <div style="flex:1;min-width:100px"><label class="fl">TikTok</label><div id="acctMount-tiktok"></div></div>
+      </div>
+      <div style="padding:4px 20px 16px">
         <button class="bt-btn" id="campRunBtn" onclick="campRunPipeline()" disabled>▶ Rodar Campanhas</button>
       </div>
       <div id="campRunResult" style="padding:0 20px 16px"></div>
@@ -980,15 +987,8 @@
     <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Relatórios</div><div class="rp-page-sub">Envie um .pptx para gerar report dinâmico.</div><div class="uz" onclick="toast('Selecione um arquivo','')"><div class="uz-icon">📄</div><div class="uz-text"><strong>Selecione o .pptx</strong></div><div class="uz-hint">máx. 50MB</div></div><button class="btn-full" onclick="toast('Processando...','ok')">Processar</button></div>
   </div>
   <div class="rp-page" id="rp-conexoes">
-    <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Conexões</div><div class="rp-page-sub">Autorizações de páginas e contas de anúncio — compartilhadas com todo o time do cliente.</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
-        <div class="fg" style="flex:1;min-width:130px"><label class="fl">Workspace</label><select class="fs_" id="connWorkspaceSelect" onchange="connOnWorkspaceChange()"><option value="">Carregando...</option></select></div>
-        <div class="fg" style="flex:1;min-width:100px"><label class="fl">Google Ads</label><div id="acctMount-google_ads"></div></div>
-        <div class="fg" style="flex:1;min-width:100px"><label class="fl">Meta — Conta</label><div id="acctMount-meta-ad_account_id"></div></div>
-        <div class="fg" style="flex:1;min-width:100px"><label class="fl">Meta — Página FB</label><div id="acctMount-meta-page_id"></div></div>
-        <div class="fg" style="flex:1;min-width:100px"><label class="fl">Meta — Instagram</label><div id="acctMount-meta-instagram_account_id"></div></div>
-        <div class="fg" style="flex:1;min-width:100px"><label class="fl">TikTok</label><div id="acctMount-tiktok"></div></div>
-      </div>
+    <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Conexões</div><div class="rp-page-sub">Autorizações de páginas e contas de anúncio — compartilhadas com todo o time do cliente. A escolha de conta/página específica fica na aba Campanhas, junto do botão de rodar o pipeline.</div>
+      <div class="fg"><label class="fl">Workspace</label><select class="fs_" id="connWorkspaceSelect" onchange="connOnWorkspaceChange()"><option value="">Carregando...</option></select></div>
       <div id="connList"></div>
     </div>
   </div>
@@ -2452,7 +2452,6 @@ async function renderConns() {
   el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);padding:12px 0">Carregando conexões...</div>';
   if(!workspaceId){
     el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);padding:12px 0">Selecione um workspace acima</div>';
-    connRenderAccountMounts(null); // limpa os seletores de conta — sem workspace, sem conexão
     return;
   }
 
@@ -2483,8 +2482,6 @@ async function renderConns() {
       + actions
       + '</div>';
   }).join('');
-
-  connRenderAccountMounts(workspaceId, backendStatus);
 }
 
 // ── Seletores de conta por plataforma (topo da aba) ────────────────────
@@ -2797,15 +2794,35 @@ async function campLoadWorkspaces(){
     const list = await res.json();
     if(!list.length){
       sel.innerHTML = '<option value="">Nenhum workspace encontrado</option>';
+      connRenderAccountMounts(null);
       return;
     }
     sel.innerHTML = list.map(w =>
       '<option value="' + w.workspace_id + '">' + _escHtml(w.client_name || w.workspace_id) + '</option>'
     ).join('');
     if(btn) btn.disabled = false;
+    await campOnWorkspaceChange();
   }catch(e){
     sel.innerHTML = '<option value="">Falha ao carregar workspaces</option>';
+    connRenderAccountMounts(null);
   }
+}
+
+// Adicionado nesta sessão — os seletores de conta/página (Google Ads,
+// Meta×3, TikTok) foram movidos da aba Conexões pra cá, junto do botão de
+// rodar o pipeline (pedido do Leonardo: "ali [Conexões] é exclusivo pra
+// conexões mesmo"). Reaproveita connRenderAccountMounts, que já existia
+// pra isso — só troca quem chama.
+async function campOnWorkspaceChange(){
+  const sel = document.getElementById('campWorkspaceSelect');
+  const workspaceId = sel ? sel.value : '';
+  if(!workspaceId){ connRenderAccountMounts(null); return; }
+  let backendStatus = null;
+  try{
+    const res = await fetch(API_BASE + '/connect/status?workspace_id=' + encodeURIComponent(workspaceId), { headers: authHeaders() });
+    if(res.ok) backendStatus = await res.json();
+  }catch(e){ /* connRenderAccountMounts já trata backendStatus null como tudo pendente */ }
+  connRenderAccountMounts(workspaceId, backendStatus);
 }
 
 async function campRunPipeline(){
