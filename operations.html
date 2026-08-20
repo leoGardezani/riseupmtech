@@ -988,7 +988,10 @@
   </div>
   <div class="rp-page" id="rp-conexoes">
     <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Conexões</div><div class="rp-page-sub">Autorizações de páginas e contas de anúncio — compartilhadas com todo o time do cliente. A escolha de conta/página específica fica na aba Campanhas, junto do botão de rodar o pipeline.</div>
-      <div class="fg"><label class="fl">Workspace</label><select class="fs_" id="connWorkspaceSelect" onchange="connOnWorkspaceChange()"><option value="">Carregando...</option></select></div>
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:4px">
+        <div class="fg" style="flex:1;margin-bottom:0"><label class="fl">Workspace</label><select class="fs_" id="connWorkspaceSelect" onchange="connOnWorkspaceChange()"><option value="">Carregando...</option></select></div>
+        <button class="btn-sm ghost" id="connSyncBtn" onclick="connSyncWorkspace()" title="Sincroniza planilha + BigQuery com verificação de consistência">↻ Sincronizar</button>
+      </div>
       <div id="connList"></div>
     </div>
   </div>
@@ -2642,6 +2645,29 @@ function connOnWorkspaceChange(){
   renderConns();
 }
 
+// Botão de sincronizar na aba Conexões — pedido do Leonardo: chama o
+// MESMO /plan/sync robusto (com verificação de consistência planilha <->
+// BigQuery, retry embutido — ver services/plan_sync.sync_and_verify())
+// usado pelo pipeline de campanhas, só que disparável manualmente aqui,
+// sem precisar ir até a aba Planilha.
+async function connSyncWorkspace(){
+  const workspaceId = document.getElementById('connWorkspaceSelect')?.value || '';
+  if(!workspaceId){ toast('Selecione um workspace primeiro', 'er'); return; }
+  const btn = document.getElementById('connSyncBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Sincronizando...'; }
+  try{
+    const res = await fetch(API_BASE + '/plan/sync?workspace_id=' + encodeURIComponent(workspaceId), {
+      method: 'POST', headers: authHeaders(),
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.detail || 'falha ao sincronizar');
+    toast('✓ Sincronizado com o BigQuery', 'ok');
+  }catch(e){
+    toast('✕ ' + (e.message || 'Não foi possível sincronizar agora'), 'er');
+  }
+  if(btn){ btn.disabled = false; btn.textContent = '↻ Sincronizar'; }
+}
+
 async function disconnectPlatform(name, key) {
   const workspaceId = document.getElementById('connWorkspaceSelect')?.value || '';
   if (key && workspaceId) {
@@ -2873,22 +2899,14 @@ async function campRunPipeline(){
 
   const btn = document.getElementById('campRunBtn');
   const resultEl = document.getElementById('campRunResult');
-  if(btn){ btn.disabled = true; btn.textContent = 'Sincronizando...'; }
+  if(btn){ btn.disabled = true; btn.textContent = 'Rodando...'; }
   if(resultEl) resultEl.innerHTML = '';
 
-  // Sync ANTES — pedido do Leonardo: garante que material-request esteja
-  // atualizado (media-plan editado recentemente etc.) antes do pipeline
-  // ler as linhas "ready to setup". Falha de sync aqui não impede seguir
-  // pro pipeline — só avisa; os dados podem já estar frescos o bastante.
-  try{
-    await fetch(API_BASE + '/plan/sync?workspace_id=' + encodeURIComponent(workspaceId), {
-      method: 'POST', headers: authHeaders(),
-    });
-  }catch(e){
-    toast('Sync prévio falhou, seguindo mesmo assim...', '');
-  }
-
-  if(btn) btn.textContent = 'Rodando...';
+  // O sync (com verificação de consistência planilha <-> BigQuery, com
+  // retry) agora roda DENTRO do backend, no início de
+  // services/campaigns_engine.run_campaigns_pipeline — tirado daqui pra
+  // não duplicar a chamada (era redundante ter os dois). Ver
+  // services/plan_sync.sync_and_verify().
   try{
     const res = await fetch(API_BASE + '/campaigns/run?workspace_id=' + encodeURIComponent(workspaceId), {
       method: 'POST', headers: authHeaders(),
@@ -2901,18 +2919,6 @@ async function campRunPipeline(){
   }catch(e){
     toast('✕ ' + (e.message || 'Falha ao rodar o pipeline'), 'er');
   }
-
-  // Sync DEPOIS — garante que status/IDs de campanha/ad group gravados
-  // pelo pipeline (inclusive em cima de erro parcial) propaguem pra
-  // implementation + BigQuery, sem depender só do sync condicional que já
-  // existe dentro do próprio /campaigns/run (que só dispara se algo mudou
-  // NESSA chamada específica).
-  if(btn) btn.textContent = 'Sincronizando...';
-  try{
-    await fetch(API_BASE + '/plan/sync?workspace_id=' + encodeURIComponent(workspaceId), {
-      method: 'POST', headers: authHeaders(),
-    });
-  }catch(e){ /* silencioso — o pipeline já rodou, isso é só garantir a propagação */ }
 
   if(btn){ btn.disabled = false; btn.textContent = '▶ Rodar Campanhas'; }
 }
