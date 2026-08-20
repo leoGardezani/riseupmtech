@@ -981,7 +981,14 @@
   </div>
   <div class="rp-page" id="rp-conexoes">
     <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Conexões</div><div class="rp-page-sub">Autorizações de páginas e contas de anúncio — compartilhadas com todo o time do cliente.</div>
-      <div class="fg"><label class="fl">Workspace</label><select class="fs_" id="connWorkspaceSelect" onchange="renderConns()"><option value="">Carregando...</option></select></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+        <div class="fg" style="flex:1;min-width:130px"><label class="fl">Workspace</label><select class="fs_" id="connWorkspaceSelect" onchange="connOnWorkspaceChange()"><option value="">Carregando...</option></select></div>
+        <div class="fg" style="flex:1;min-width:100px"><label class="fl">Google Ads</label><div id="acctMount-google_ads"></div></div>
+        <div class="fg" style="flex:1;min-width:100px"><label class="fl">Meta — Conta</label><div id="acctMount-meta-ad_account_id"></div></div>
+        <div class="fg" style="flex:1;min-width:100px"><label class="fl">Meta — Página FB</label><div id="acctMount-meta-page_id"></div></div>
+        <div class="fg" style="flex:1;min-width:100px"><label class="fl">Meta — Instagram</label><div id="acctMount-meta-instagram_account_id"></div></div>
+        <div class="fg" style="flex:1;min-width:100px"><label class="fl">TikTok</label><div id="acctMount-tiktok"></div></div>
+      </div>
       <div id="connList"></div>
     </div>
   </div>
@@ -2445,6 +2452,7 @@ async function renderConns() {
   el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);padding:12px 0">Carregando conexões...</div>';
   if(!workspaceId){
     el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);padding:12px 0">Selecione um workspace acima</div>';
+    connRenderAccountMounts(null); // limpa os seletores de conta — sem workspace, sem conexão
     return;
   }
 
@@ -2466,7 +2474,6 @@ async function renderConns() {
     const hasBackend = !!key;
     const actions = p.on
       ? '<div style="display:flex;gap:6px">'
-        + (hasBackend ? '<button class="btn-sm ghost" onclick="showAccounts(\'' + key + '\')">Contas</button>' : '')
         + '<button class="btn-sm ghost" onclick="disconnectPlatform(\'' + p.name + '\',\'' + (key || '') + '\')">Desconectar</button>'
         + '</div>'
       : '<button class="btn-sm" onclick="connectPlatform(\'' + p.name + '\',\'' + (key || '') + '\')">Conectar</button>';
@@ -2476,6 +2483,97 @@ async function renderConns() {
       + actions
       + '</div>';
   }).join('');
+
+  connRenderAccountMounts(workspaceId, backendStatus);
+}
+
+// ── Seletores de conta por plataforma (topo da aba) ────────────────────
+// Adicionado nesta sessão — antes só existia um botão "Contas" que mostrava
+// um toast com a lista, sem jeito nenhum de ESCOLHER qual conta usar (o
+// pipeline de campanhas quebrava com "act_None" na Meta por causa disso:
+// OAuth conecta, mas sem selecionar a conta de anúncio o resto não
+// funciona). Um seletor compacto por plataforma, ao lado do de workspace —
+// pedido explícito do Leonardo. Meta precisa de TRÊS seleções (conta de
+// anúncio, Página do Facebook, conta do Instagram — cada uma é uma
+// entidade separada na API do Meta), as outras só uma.
+const _CONN_ACCOUNT_MOUNTS = [
+  { platform: 'google_ads', mountId: 'acctMount-google_ads', field: null,                    kindFilter: null },
+  { platform: 'meta',       mountId: 'acctMount-meta-ad_account_id',        field: 'ad_account_id',        kindFilter: 'ad_account' },
+  { platform: 'meta',       mountId: 'acctMount-meta-page_id',              field: 'page_id',              kindFilter: 'page' },
+  { platform: 'meta',       mountId: 'acctMount-meta-instagram_account_id', field: 'instagram_account_id', kindFilter: 'instagram_account' },
+  { platform: 'tiktok',     mountId: 'acctMount-tiktok', field: null,       kindFilter: null },
+];
+const _pendingHtml = '<span style="font-family:var(--mono);font-size:9px;color:var(--warn);letter-spacing:.04em">conexão pendente</span>';
+
+async function connRenderAccountMounts(workspaceId, backendStatus){
+  if(!workspaceId){
+    _CONN_ACCOUNT_MOUNTS.forEach(m => {
+      const el = document.getElementById(m.mountId);
+      if(el) el.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">—</span>';
+    });
+    return;
+  }
+  // Uma chamada por plataforma só (não por mount — Meta tem 3 mounts mas
+  // usa a mesma resposta de /connect/accounts/meta).
+  const accountsCache = {};
+  async function fetchAccountsOnce(platform){
+    if(platform in accountsCache) return accountsCache[platform];
+    try{
+      const res = await fetch(API_BASE + '/connect/accounts/' + platform + '?workspace_id=' + encodeURIComponent(workspaceId), { headers: authHeaders() });
+      accountsCache[platform] = res.ok ? await res.json() : null;
+    }catch(e){
+      accountsCache[platform] = null;
+    }
+    return accountsCache[platform];
+  }
+
+  for(const m of _CONN_ACCOUNT_MOUNTS){
+    const el = document.getElementById(m.mountId);
+    if(!el) continue;
+    const isConnected = backendStatus ? !!backendStatus[m.platform] : false;
+    if(!isConnected){
+      el.innerHTML = _pendingHtml;
+      continue;
+    }
+    const data = await fetchAccountsOnce(m.platform);
+    if(!data){
+      el.innerHTML = _pendingHtml;
+      continue;
+    }
+    const allAccounts = data.accounts || [];
+    const accounts = m.kindFilter ? allAccounts.filter(a => a.kind === m.kindFilter) : allAccounts;
+    if(!accounts.length){
+      el.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">nenhuma conta encontrada</span>';
+      continue;
+    }
+    const selectedVal = m.field ? (data.selected || {})[m.field] : Object.values(data.selected || {})[0];
+    const selectId = 'acctSel-' + m.mountId;
+    el.innerHTML = '<select class="fs_" id="' + selectId + '" style="font-size:10px;padding:6px 22px 6px 8px" '
+      + 'onchange="connSaveAccountSelection(\'' + m.platform + '\',' + (m.field ? "'" + m.field + "'" : 'null') + ',\'' + workspaceId + '\',this.value,this)">'
+      + '<option value="">Selecione…</option>'
+      + accounts.map(a => '<option value="' + a.id + '"' + (a.id === selectedVal ? ' selected' : '') + '>' + _escHtml(a.name || a.id) + '</option>').join('')
+      + '</select>';
+  }
+}
+
+async function connSaveAccountSelection(platform, field, workspaceId, accountId, selectEl){
+  if(!accountId) return;
+  if(selectEl) selectEl.disabled = true;
+  try{
+    const body = { account_id: accountId };
+    if(field) body.field = field;
+    const res = await fetch(API_BASE + '/connect/accounts/' + platform + '/select?workspace_id=' + encodeURIComponent(workspaceId), {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.detail || 'falha ao salvar');
+    toast('✓ Conta selecionada', 'ok');
+  }catch(e){
+    toast('✕ ' + (e.message || 'Não foi possível salvar a seleção'), 'er');
+  }
+  if(selectEl) selectEl.disabled = false;
 }
 
 function connectPlatform(name, key) {
@@ -2502,10 +2600,15 @@ function connectPlatform(name, key) {
   window.open(url, '_blank');
 }
 
+function connOnWorkspaceChange(){
+  renderConns();
+}
+
 async function disconnectPlatform(name, key) {
-  if (key) {
+  const workspaceId = document.getElementById('connWorkspaceSelect')?.value || '';
+  if (key && workspaceId) {
     try {
-      const res = await fetch(API_BASE + '/connect/' + key, { method: 'DELETE', headers: authHeaders() });
+      const res = await fetch(API_BASE + '/connect/' + key + '?workspace_id=' + encodeURIComponent(workspaceId), { method: 'DELETE', headers: authHeaders() });
       if (res.ok) {
         toast('✓ ' + name + ' desconectado', 'ok');
         renderConns();
@@ -2517,18 +2620,6 @@ async function disconnectPlatform(name, key) {
   if (p) p.on = false;
   renderConns();
   toast('✓ ' + name + ' desconectado (demo)', 'ok');
-}
-
-async function showAccounts(key) {
-  try {
-    const res = await fetch(API_BASE + '/connect/accounts/' + key, { headers: authHeaders() });
-    if (!res.ok) throw new Error('sem acesso ao backend');
-    const data = await res.json();
-    const list = (data.accounts || []).map(a => a.name || a.id).join(', ') || 'nenhuma conta encontrada';
-    toast(key + ' — contas: ' + list, 'ok');
-  } catch (e) {
-    toast('Não foi possível listar contas de ' + key + ' agora (backend/login pendente)', 'er');
-  }
 }
 
 // ── USUÁRIOS (papéis: analista / editor / admin) ───────────────────────
