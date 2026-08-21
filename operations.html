@@ -602,6 +602,17 @@
     <div class="section-title">Desdobrador de Peças</div>
     <div class="section-sub">Um KV vira todos os formatos — posicione headline e CTA, escolha o motion e envie pra aprovação</div>
 
+    <!-- Workspace do desdobrador -->
+    <div class="tbox" style="margin-bottom:20px">
+      <div class="tbox-head">
+        <div class="tbox-title">Workspace</div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// a fila abaixo é carregada do material-request deste workspace</span>
+      </div>
+      <div style="padding:16px 20px">
+        <select class="fs_" id="desdWorkspaceSelect" onchange="desdOnWorkspaceChange()" style="max-width:360px"><option value="">Carregando...</option></select>
+      </div>
+    </div>
+
     <!-- Fila de material-request aguardando peça -->
     <div class="tbox">
       <div class="tbox-head">
@@ -684,7 +695,7 @@
         <div class="fg"><label class="fl">Marca</label><input class="fi" id="desdBrand" placeholder="ex: Produto A"></div>
 
         <button class="btn-full" style="margin-top:8px" onclick="desdSubmit()">Enviar para Aprovação →</button>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px;line-height:1.6">// tenta o backend real (/desdobrador/submit); se não responder, cai no modo demo e já alimenta a aba Criativos › Aguardando Aprovação</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px;line-height:1.6">// envia pro backend real (/desdobrador/submit) e alimenta a fila real de Aguardando Aprovação (/desdobrador/pending)</div>
       </div>
     </div>
   </div>
@@ -794,13 +805,13 @@
       <div class="coll-header open" onclick="toggleColl('pending')" style="border-left:3px solid #f59e0b">
         <div>
           <div class="coll-title">Aguardando Aprovação</div>
-          <div class="coll-meta" id="pending-count">5 aguardando</div>
+          <div class="coll-meta" id="pending-count">carregando…</div>
         </div>
         <span class="coll-arrow">▼</span>
       </div>
       <div class="coll-body open">
         <div style="font-size:13px;color:var(--ink-mid);margin:12px 0 16px;line-height:1.6">
-          Criativos gerados pelo sistema aguardando revisão do <strong>Aprovador</strong>. Ao aprovar, o asset é adicionado automaticamente ao repositório.
+          Criativos gerados pelo Desdobrador aguardando revisão. Ao aprovar, o backend sobe o ad de verdade na plataforma (Google/Meta/TikTok) e o status vira "implemented"; ao reprovar, vira "creative_rejected".
         </div>
         <div class="repo-grid" id="pendingGrid"></div>
       </div>
@@ -815,6 +826,7 @@
         <span class="coll-arrow">▼</span>
       </div>
       <div class="coll-body open">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:8px;line-height:1.6">// ainda em modo demo — o backend não tem endpoint de listagem de assets aprovados ainda, só de pendentes (GET /desdobrador/pending). A seção "Aguardando Aprovação" acima já é 100% real.</div>
         <!-- Grid -->
         <div class="repo-grid" id="repoGrid" style="margin-top:16px"></div>
       </div>
@@ -1389,28 +1401,7 @@ const REPO_ASSETS = [
    img:'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&h=338&fit=crop',
    dims:'—',size:'1,4MB',fmt:'MP3 · 15s · 320kbps',version:'v1',kv:'KV_Leads_V1',tags:['Rádio','15s'],approved:true},
 ];
-const PENDING_ASSETS = [
-  {id:101,name:'Feed_1080x1080_V3',camp:'Performance — Leads',plat:'Meta Ads',type:'image',date:'25 Mar 2025',
-   img:'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=600&fit=crop',
-   dims:'1080×1080px',size:'198KB',fmt:'JPG',version:'v3',kv:'KV_Leads_V2',
-   tags:['Meta','Feed','1:1'],submittedBy:'IA Desdobramento',submittedAt:'25 Mar 2025 14:32'},
-  {id:102,name:'Stories_1080x1920_V3',camp:'Performance — Leads',plat:'Meta Ads',type:'image',date:'25 Mar 2025',
-   img:'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=338&h=600&fit=crop',
-   dims:'1080×1920px',size:'242KB',fmt:'JPG',version:'v3',kv:'KV_Leads_V2',
-   tags:['Meta','Stories','9:16'],submittedBy:'IA Desdobramento',submittedAt:'25 Mar 2025 14:32'},
-  {id:103,name:'Banner_300x250_V2',camp:'Awareness Q1',plat:'Google Ads',type:'image',date:'24 Mar 2025',
-   img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=338&fit=crop',
-   dims:'300×250px',size:'52KB',fmt:'JPG',version:'v2',kv:'KV_Awareness_Q2',
-   tags:['IAB','Display'],submittedBy:'IA Desdobramento',submittedAt:'24 Mar 2025 09:15'},
-  {id:104,name:'TopView_1080x1920_V2',camp:'TikTok — Gen Z',plat:'TikTok Ads',type:'video',date:'23 Mar 2025',
-   img:'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=338&h=600&fit=crop',
-   dims:'1080×1920px',size:'14,8MB',fmt:'MP4 · 30s',version:'v2',kv:'KV_GenZ_V2',
-   tags:['TikTok','TopView','Vídeo'],submittedBy:'IA Desdobramento',submittedAt:'23 Mar 2025 16:44'},
-  {id:105,name:'Radio_30s_V2',camp:'Awareness Q1',plat:'Rádio',type:'audio',date:'22 Mar 2025',
-   img:'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&h=338&fit=crop',
-   dims:'—',size:'2,9MB',fmt:'MP3 · 30s · 320kbps',version:'v2',kv:'KV_Awareness_Q2',
-   tags:['Rádio','30s'],submittedBy:'IA Desdobramento',submittedAt:'22 Mar 2025 11:20'},
-];
+let PENDING_ASSETS = [];
 let repoTypeFilter = '';
 function typeIcon(t){return {image:'🖼',video:'▶',html5:'⟨/⟩',audio:'♪'}[t]||'📄';}
 function typeLabel(t){return {image:'Imagem',video:'Vídeo',html5:'HTML5',audio:'Áudio'}[t]||t;}
@@ -1463,11 +1454,51 @@ function renderRepo(assets){
     grid.appendChild(div);
   });
 }
+// ── PENDING (Aguardando Aprovação) — 100% real: GET /desdobrador/pending +
+// POST /desdobrador/{row_id}/approve|reject. Substituiu o array mock que
+// existia aqui antes (esta sessão, a pedido do Leonardo). ──
+async function loadPendingFromBackend(){
+  const grid = document.getElementById('pendingGrid');
+  if(grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-muted)">Carregando fila de aprovação...</div>';
+  try{
+    const res = await fetch(API_BASE + '/desdobrador/pending', { headers: authHeaders() });
+    if(!res.ok) throw new Error('backend indisponível');
+    const data = await res.json();
+    // Mapeia a forma real (row_id, campaign_name, brand, source,
+    // creative_type, creative_name, preview_url) pra forma que
+    // renderPending()/approveAsset()/rejectAsset() já esperavam — id vira
+    // o row_id (string, não numérico como no mock antigo).
+    PENDING_ASSETS = (data.pending || []).map(p => ({
+      id: p.row_id,
+      name: p.creative_name || p.row_id,
+      camp: p.campaign_name || '—',
+      plat: p.source || '—',
+      type: 'image',
+      date: '',
+      img: p.preview_url || '',
+      dims: '—',
+      size: '—',
+      fmt: '—',
+      tags: [p.source, p.creative_type].filter(Boolean),
+      submittedBy: 'Desdobrador',
+      submittedAt: '',
+    }));
+  }catch(e){
+    PENDING_ASSETS = [];
+    if(grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--danger)">Não foi possível carregar a fila de aprovação — verifique login/conexão.</div>';
+    return;
+  }
+  renderPending();
+}
 function renderPending(){
   const grid = document.getElementById('pendingGrid');
   const cnt = document.getElementById('pending-count');
   if(!grid) return;
   if(cnt) cnt.textContent = PENDING_ASSETS.length + ' aguardando';
+  if(!PENDING_ASSETS.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-muted)">Nada aguardando aprovação agora</div>';
+    return;
+  }
   grid.innerHTML = '';
   PENDING_ASSETS.forEach(a => {
     const div = document.createElement('div');
@@ -1477,39 +1508,47 @@ function renderPending(){
     const imgStyle = a.type === 'audio' ? 'filter:grayscale(1);opacity:.5;' : '';
     div.innerHTML =
       '<div class="repo-thumb-wrap">'
-      + '<img class="repo-thumb" src="' + a.img + '" alt="' + a.name + '" loading="lazy" style="' + imgStyle + '">'
+      + '<img class="repo-thumb" src="' + a.img + '" alt="' + _escHtml(a.name) + '" loading="lazy" style="' + imgStyle + '" onerror="this.style.background=\'var(--bg3)\';this.src=\'\'">'
       + '<div class="type-tag">' + typeIcon(a.type) + ' ' + typeLabel(a.type) + '</div>'
       + '<div style="position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;padding:3px 8px;background:#f59e0b;color:#fff">⏳ Pendente</div>'
       + '</div>'
       + '<div class="repo-info">'
-      + '<div class="repo-name">' + a.name + '</div>'
-      + '<div class="repo-meta">' + a.plat + ' · ' + a.fmt + ' · ' + a.size + '</div>'
-      + '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:8px">Por ' + a.submittedBy + ' · ' + a.submittedAt + '</div>'
-      + '<div class="repo-tags">' + a.tags.map(t => '<span class="repo-tag">' + t + '</span>').join('') + '</div>'
+      + '<div class="repo-name">' + _escHtml(a.name) + '</div>'
+      + '<div class="repo-meta">' + _escHtml(a.plat) + ' · ' + _escHtml(a.camp) + '</div>'
+      + '<div class="repo-tags">' + a.tags.map(t => '<span class="repo-tag">' + _escHtml(t) + '</span>').join('') + '</div>'
       + '<div style="display:flex;gap:6px;margin-top:12px">'
-      + '<button onclick="approveAsset(' + a.id + ')" style="flex:1;padding:8px;background:var(--ink);color:#fff;border:none;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">✓ Aprovar</button>'
-      + '<button onclick="rejectAsset(' + a.id + ')" style="flex:1;padding:8px;background:transparent;color:var(--danger);border:1px solid #fecaca;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">✕ Reprovar</button>'
+      + '<button onclick="approveAsset(\'' + _escJsAttr(a.id) + '\')" style="flex:1;padding:8px;background:var(--ink);color:#fff;border:none;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">✓ Aprovar</button>'
+      + '<button onclick="rejectAsset(\'' + _escJsAttr(a.id) + '\')" style="flex:1;padding:8px;background:transparent;color:var(--danger);border:1px solid #fecaca;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">✕ Reprovar</button>'
       + '</div></div>';
     grid.appendChild(div);
   });
 }
-function approveAsset(id){
-  const idx=PENDING_ASSETS.findIndex(a=>a.id===id);
-  if(idx<0) return;
-  const a={...PENDING_ASSETS[idx],approved:true};
-  delete a.submittedBy; delete a.submittedAt;
-  REPO_ASSETS.push(a);
-  PENDING_ASSETS.splice(idx,1);
-  renderPending(); filterRepo();
-  toast('✓ '+a.name+' aprovado','ok');
+async function approveAsset(rowId){
+  try{
+    const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(rowId) + '/approve', {
+      method: 'POST', headers: authHeaders(),
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.detail || 'falha ao aprovar');
+    toast('✓ Ad criado na plataforma (' + (data.platform_ad_id || '—') + ') — status "implemented"', 'ok');
+  }catch(e){
+    toast('✕ ' + (e.message || 'Não foi possível aprovar'), 'er');
+  }
+  loadPendingFromBackend();
 }
-function rejectAsset(id){
-  const idx=PENDING_ASSETS.findIndex(a=>a.id===id);
-  if(idx<0) return;
-  const name=PENDING_ASSETS[idx].name;
-  PENDING_ASSETS.splice(idx,1);
-  renderPending();
-  toast('✕ '+name+' reprovado','er');
+async function rejectAsset(rowId){
+  try{
+    const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(rowId) + '/reject', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+      body: JSON.stringify({ reason: '' }),
+    });
+    if(!res.ok){ const err = await res.json().catch(() => ({})); throw new Error(err.detail || 'falha ao reprovar'); }
+    toast('✕ Peça reprovada', 'er');
+  }catch(e){
+    toast('✕ ' + (e.message || 'Não foi possível reprovar'), 'er');
+  }
+  loadPendingFromBackend();
 }
 function openDetail(id){
   const a = REPO_ASSETS.find(x => x.id === id);
@@ -1808,6 +1847,8 @@ function switchTab(id, el){
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
   el.classList.add('on');
   if(id === 'campanhas') campLoadWorkspaces();
+  if(id === 'desdobrador') desdLoadWorkspaces();
+  if(id === 'criativos') loadPendingFromBackend();
   if(!chartsInited.has(id)){
     chartsInited.add(id);
     setTimeout(() => initChartsForTab(id), 60);
@@ -1915,39 +1956,28 @@ function setupChartResize(){
 }
 // ── DESDOBRADOR DE PEÇAS ──
 // Espelha services/creative_engine.py (backend) — ver desdobrador-arquitetura.md.
-// Tenta o backend real primeiro; se indisponível (esperado, infra ainda não
-// provisionada), cai no render local via Canvas API, que segue exatamente o
-// mesmo algoritmo do Pillow no backend (cover-fit + wrap de texto + CTA).
+// A fila (DESD_QUEUE) agora vem 100% de GET /desdobrador/queue (esta
+// sessão — antes era um array mock fixo). O upload do KV, o submit e o
+// preview local (Canvas API, mesmo algoritmo de cover-fit+wrap do Pillow)
+// continuam como antes; o preview local é só uma aproximação visual
+// enquanto o usuário mexe no editor — o resultado final de verdade é
+// sempre gerado no backend em /desdobrador/submit.
 const API_BASE = document.querySelector('#rp-config .fi[value*="southamerica-east1"]')?.value
   || 'https://riseup-backend-509219529113.southamerica-east1.run.app';
 
-const DESD_FORMATS = [
-  {id:'google_300x250',   label:'300×250 Medium Rectangle', group:'Google Ads', w:300,  h:250},
-  {id:'google_728x90',    label:'728×90 Leaderboard',       group:'Google Ads', w:728,  h:90},
-  {id:'google_160x600',   label:'160×600 Skyscraper',       group:'Google Ads', w:160,  h:600},
-  {id:'google_320x50',    label:'320×50 Mobile',            group:'Google Ads', w:320,  h:50},
-  {id:'meta_feed_1x1',    label:'Feed 1080×1080',           group:'Meta Ads',   w:1080, h:1080},
-  {id:'meta_story_9x16',  label:'Stories/Reels 1080×1920',  group:'Meta Ads',   w:1080, h:1920},
-  {id:'tiktok_9x16',      label:'In-Feed/TopView 1080×1920',group:'TikTok Ads', w:1080, h:1920},
-  {id:'linkedin_1200x627',label:'Single Image 1200×627',    group:'LinkedIn',   w:1200, h:627},
-];
 const DESD_MOTION_TEMPLATES = [
   {id:'zoom_kv',         name:'Zoom suave no KV',            desc:'Ken Burns leve + CTA com fade-in atrasado.'},
   {id:'slide_headline',  name:'Headline desliza + CTA pulsa', desc:'Título entra da esquerda, CTA pulsa em loop.'},
   {id:'fade_cascade',    name:'Cascata de fade',              desc:'KV, headline e CTA entram em sequência.'},
   {id:'pulse_only',      name:'Estático + CTA pulsando',      desc:'Só o botão anima — bom pra remarketing.'},
 ];
-// Cada linha = UM formato pedido (creative_size tipo "300x250") — confirmado
-// com o Leonardo. Se uma campanha precisa de 4 tamanhos, são 4 linhas na aba
-// material-request, não uma linha com lista. O desdobrador não deixa mais
-// escolher formato livremente: o formato de cada peça vem da própria linha.
-const DESD_QUEUE = [
-  {row_id:'mr001', campaign_name:'Awareness Q1',       brand:'Produto A', source:'Google Ads', creative_size:'300x250', creative_type:'Imagem', delivery:'20 Mar'},
-  {row_id:'mr002', campaign_name:'Awareness Q1',       brand:'Produto A', source:'Google Ads', creative_size:'728x90',  creative_type:'Imagem', delivery:'20 Mar'},
-  {row_id:'mr003', campaign_name:'Performance — Leads', brand:'Produto B', source:'Meta Ads',   creative_size:'1080x1080', creative_type:'Imagem', delivery:'22 Mar'},
-  {row_id:'mr004', campaign_name:'Performance — Leads', brand:'Produto B', source:'Meta Ads',   creative_size:'1080x1920', creative_type:'Imagem', delivery:'22 Mar'},
-  {row_id:'mr005', campaign_name:'TikTok — Gen Z',      brand:'Produto A', source:'TikTok Ads', creative_size:'1080x1920', creative_type:'Imagem', delivery:'24 Mar'},
-];
+// Fila real de material-request "ready to setup" sem creative_name ainda —
+// carregada de GET /desdobrador/queue (esta sessão). Cada item tem:
+// row_id, campaign_name, brand, source, creative_type, creative_size,
+// creative_width, creative_title, creative_description, request_date,
+// delivery_date. Antes disto era um array mock fixo (DESD_QUEUE).
+let DESD_QUEUE = [];
+let desdWorkspaceId = '';
 
 let desdState = {
   kvDataUrl: null,
@@ -1965,21 +1995,74 @@ function desdParseSize(sizeStr){
   return m ? {w: +m[1], h: +m[2]} : {w: 1080, h: 1080};
 }
 
+// Carrega os workspaces no seletor da aba Desdobrador (mesma fonte que
+// Campanhas/Conexões — GET /plan/workspaces) e dispara o load da fila
+// pro workspace selecionado.
+async function desdLoadWorkspaces(){
+  const sel = document.getElementById('desdWorkspaceSelect');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Carregando...</option>';
+  try{
+    const res = await fetch(API_BASE + '/plan/workspaces', { headers: authHeaders() });
+    if(!res.ok) throw new Error('sem acesso ao backend');
+    const list = await res.json();
+    if(!list.length){ sel.innerHTML = '<option value="">Nenhum workspace encontrado</option>'; return; }
+    sel.innerHTML = list.map(w =>
+      '<option value="' + w.workspace_id + '">' + _escHtml(w.client_name || w.workspace_id) + '</option>'
+    ).join('');
+    if(!desdWorkspaceId) desdWorkspaceId = sel.value;
+    await desdLoadQueue();
+  }catch(e){
+    sel.innerHTML = '<option value="">Falha ao carregar workspaces</option>';
+  }
+}
+
+function desdOnWorkspaceChange(){
+  const sel = document.getElementById('desdWorkspaceSelect');
+  desdWorkspaceId = sel ? sel.value : '';
+  desdLoadQueue();
+}
+
+// GET /desdobrador/queue — linhas reais de material-request "ready to
+// setup" ainda sem creative_name. O endpoint não filtra por workspace hoje
+// (ver nota em desdobrador-arquitetura.md: "não filtra por client_id/
+// workspace ainda"), então o seletor de workspace acima serve por
+// enquanto só pra deixar explícito qual planilha vai receber o
+// creative_name gravado em /submit — a fila em si é global.
+async function desdLoadQueue(){
+  const tbody = document.getElementById('desdQueueTable');
+  if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-muted);font-family:var(--mono);font-size:11px;padding:20px">Carregando fila...</td></tr>';
+  try{
+    const res = await fetch(API_BASE + '/desdobrador/queue', { headers: authHeaders() });
+    if(!res.ok) throw new Error('backend indisponível');
+    const data = await res.json();
+    DESD_QUEUE = data.queue || [];
+  }catch(e){
+    DESD_QUEUE = [];
+    if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--danger);font-family:var(--mono);font-size:11px;padding:20px">Não foi possível carregar a fila — verifique login/conexão.</td></tr>';
+    return;
+  }
+  renderDesdQueue();
+  desdRenderSelectedSummary();
+  desdRenderAllPreviews();
+}
+
 function renderDesdQueue(){
   const tbody = document.getElementById('desdQueueTable');
   if(!tbody) return;
+  if(!DESD_QUEUE.length){
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-muted);font-family:var(--mono);font-size:11px;padding:20px">Fila vazia — todas as peças pendentes já foram desdobradas</td></tr>';
+    return;
+  }
   tbody.innerHTML = DESD_QUEUE.map(r => `
     <tr class="desd-queue-row${desdState.selectedRowIds.has(r.row_id)?' active':''}" onclick="desdToggleQueueRow('${r.row_id}')">
       <td><input type="checkbox" class="desd-queue-check" ${desdState.selectedRowIds.has(r.row_id)?'checked':''} onclick="event.stopPropagation();desdToggleQueueRow('${r.row_id}')"></td>
-      <td class="td-bold">${r.campaign_name}</td>
-      <td class="td-mono">${r.brand}</td>
-      <td class="td-mono">${r.source}</td>
-      <td class="td-mono">${r.creative_size}</td>
-      <td class="td-mono">${r.delivery}</td>
+      <td class="td-bold">${_escHtml(r.campaign_name)}</td>
+      <td class="td-mono">${_escHtml(r.brand)}</td>
+      <td class="td-mono">${_escHtml(r.source)}</td>
+      <td class="td-mono">${_escHtml(r.creative_size)}</td>
+      <td class="td-mono">${_escHtml(r.delivery_date || '')}</td>
     </tr>`).join('');
-  if(!DESD_QUEUE.length){
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-muted);font-family:var(--mono);font-size:11px;padding:20px">Fila vazia — todas as peças pendentes já foram desdobradas</td></tr>';
-  }
 }
 
 function desdToggleQueueRow(rowId){
@@ -2005,7 +2088,7 @@ function desdRenderSelectedSummary(){
     el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Nenhuma linha marcada na fila acima ainda</div>';
     return;
   }
-  el.innerHTML = rows.map(r => `<span class="desd-selected-pill">${r.campaign_name} · ${r.creative_size} · ${r.source}</span>`).join('');
+  el.innerHTML = rows.map(r => `<span class="desd-selected-pill">${_escHtml(r.campaign_name)} · ${_escHtml(r.creative_size)} · ${_escHtml(r.source)}</span>`).join('');
 }
 
 function goToDesdobrador(){
@@ -2037,12 +2120,13 @@ async function desdUploadKvToBackend(file){
   try{
     const form = new FormData();
     form.append('file', file);
-    const res = await fetch(API_BASE + '/desdobrador/kv', {method:'POST', body: form});
+    const res = await fetch(API_BASE + '/desdobrador/kv', {method:'POST', headers: authHeaders(), body: form});
     if(!res.ok) throw new Error('backend indisponível');
     const data = await res.json();
     desdState.blobPath = data.blob_path;
   }catch(e){
-    desdState.blobPath = null; // segue só no modo local — ver nota no botão de envio
+    desdState.blobPath = null;
+    toast('✕ Falha ao subir o KV pro backend — sem blob_path, o envio pra aprovação vai falhar', 'er');
   }
 }
 
@@ -2252,7 +2336,7 @@ function desdRenderAllPreviews(){
   grid.innerHTML = rows.map(r => `
     <div class="desd-preview-card">
       <canvas id="desdPrev_${r.row_id}"></canvas>
-      <div class="desd-preview-lbl">${r.campaign_name} · ${r.creative_size}</div>
+      <div class="desd-preview-lbl">${_escHtml(r.campaign_name)} · ${_escHtml(r.creative_size)}</div>
     </div>`).join('');
   rows.forEach(r => {
     const {w, h} = desdParseSize(r.creative_size);
@@ -2260,77 +2344,39 @@ function desdRenderAllPreviews(){
   });
 }
 
-// ── Envio pra aprovação (tenta backend real, cai pro modo demo) ──
+// ── Envio pra aprovação — 100% backend real (POST /desdobrador/submit) ──
 async function desdSubmit(){
   if(!desdState.kvImage){ toast('Envie um KV antes de enviar pra aprovação', 'er'); return; }
   const rows = DESD_QUEUE.filter(r => desdState.selectedRowIds.has(r.row_id));
   if(!rows.length){ toast('Marque ao menos uma linha da fila pra atender', 'er'); return; }
+  if(!desdState.blobPath){ toast('KV ainda não confirmado no backend — aguarde o upload terminar ou tente selecionar o arquivo de novo', 'er'); return; }
 
   const rowIds = rows.map(r => r.row_id);
 
-  if(desdState.blobPath){
-    try{
-      const res = await fetch(API_BASE + '/desdobrador/submit', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          blob_path: desdState.blobPath,
-          row_ids: rowIds,
-          headline: desdState.headline.text ? {text: desdState.headline.text, x_pct: desdState.headline.xPct, y_pct: desdState.headline.yPct, max_width_pct: desdState.headline.maxWidthPct, font_size_pct: desdState.headline.fontSizePct, color: desdState.headline.color, align: desdState.headline.align} : null,
-          cta: desdState.cta.text ? {text: desdState.cta.text, x_pct: desdState.cta.xPct, y_pct: desdState.cta.yPct, width_pct: desdState.cta.widthPct, height_pct: desdState.cta.heightPct, bg_color: desdState.cta.bg, text_color: desdState.cta.color, shape: desdState.cta.shape} : null,
-          motion_template_id: desdState.motionEnabled ? desdState.motionTemplateId : null,
-        }),
-      });
-      if(!res.ok) throw new Error('backend recusou o submit');
-      toast('✓ Enviado pro backend — ' + rows.length + ' peça(s) na fila de aprovação', 'ok');
-      desdPushToLocalPending(rows); // mantém a demo consistente mesmo com backend real
-      return;
-    }catch(e){
-      // segue pro fallback local abaixo
-    }
-  }
-
-  desdPushToLocalPending(rows);
-  toast('✓ Modo demo — ' + rows.length + ' peça(s) enviada(s) pra Criativos › Aguardando Aprovação', 'ok');
-}
-
-function desdPushToLocalPending(rows){
-  const nextId = Math.max(0, ...PENDING_ASSETS.map(a => a.id)) + 1;
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('pt-BR', {day:'2-digit', month:'short', year:'numeric'});
-
-  rows.forEach((r, i) => {
-    const {w, h} = desdParseSize(r.creative_size);
-    const canvas = document.createElement('canvas');
-    desdRenderFormatToCanvas(canvas, w, h);
-    const dataUrl = canvas.toDataURL('image/png');
-    PENDING_ASSETS.push({
-      id: nextId + i,
-      name: `${r.campaign_name.replace(/[^\w]+/g,'_')}_${w}x${h}_${r.row_id}`,
-      camp: r.campaign_name,
-      plat: r.source,
-      type: desdState.motionEnabled ? 'html5' : 'image',
-      date: dateStr,
-      img: dataUrl,
-      dims: `${w}×${h}px`,
-      size: '—',
-      fmt: desdState.motionEnabled ? 'HTML5 ZIP (motion)' : 'PNG',
-      version: 'v1',
-      kv: 'Desdobrador',
-      tags: ['Desdobrador', r.source, desdState.motionEnabled ? 'Motion' : 'Estático'],
-      submittedBy: 'Desdobrador de Peças',
-      submittedAt: now.toLocaleString('pt-BR'),
+  try{
+    const res = await fetch(API_BASE + '/desdobrador/submit', {
+      method: 'POST',
+      headers: Object.assign({'Content-Type': 'application/json'}, authHeaders()),
+      body: JSON.stringify({
+        blob_path: desdState.blobPath,
+        row_ids: rowIds,
+        headline: desdState.headline.text ? {text: desdState.headline.text, x_pct: desdState.headline.xPct, y_pct: desdState.headline.yPct, max_width_pct: desdState.headline.maxWidthPct, font_size_pct: desdState.headline.fontSizePct, color: desdState.headline.color, align: desdState.headline.align} : null,
+        cta: desdState.cta.text ? {text: desdState.cta.text, x_pct: desdState.cta.xPct, y_pct: desdState.cta.yPct, width_pct: desdState.cta.widthPct, height_pct: desdState.cta.heightPct, bg_color: desdState.cta.bg, text_color: desdState.cta.color, shape: desdState.cta.shape} : null,
+        motion_template_id: desdState.motionEnabled ? desdState.motionTemplateId : null,
+      }),
     });
-    // a linha foi atendida — some da fila, igual aconteceria com o status
-    // real do material-request mudando de 'pending' pra outra coisa
-    const qIdx = DESD_QUEUE.findIndex(q => q.row_id === r.row_id);
-    if(qIdx >= 0) DESD_QUEUE.splice(qIdx, 1);
-    desdState.selectedRowIds.delete(r.row_id);
-  });
-  renderPending();
-  renderDesdQueue();
-  desdRenderSelectedSummary();
-  desdRenderAllPreviews();
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.detail || 'backend recusou o submit');
+    toast('✓ ' + (data.total || rows.length) + ' peça(s) enviada(s) — na fila real de Aguardando Aprovação', 'ok');
+    // As linhas atendidas saem da fila de verdade (status virou "creative in
+    // progress" no backend) — recarrega a fila real em vez de só remover
+    // localmente, pra não ficar dessincronizado se algo tiver falhado
+    // parcialmente no backend.
+    rowIds.forEach(rid => desdState.selectedRowIds.delete(rid));
+    await desdLoadQueue();
+  }catch(e){
+    toast('✕ ' + (e.message || 'Falha ao enviar pra aprovação'), 'er');
+  }
 }
 // ── INIT ──
 window.addEventListener('load',()=>{
@@ -2342,10 +2388,8 @@ window.addEventListener('load',()=>{
   renderStatus();
   renderGantt();
   renderRepo(REPO_ASSETS); // já atualiza repo-count e repo-count-header
-  renderPending();
   renderAudHeatmap();
   renderAudCards();
-  renderDesdQueue();
   desdRenderSelectedSummary();
   desdRenderAllPreviews();
   desdSetupDropzone();
