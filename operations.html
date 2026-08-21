@@ -920,7 +920,7 @@
 <!-- CONFIRM MODAL (exclusão de planilha) — mesma razão acima -->
 <div class="confirm-modal" id="confirmModal" onclick="closeConfirmModal(event)">
   <div class="confirm-box">
-    <div class="confirm-title">Excluir planilha?</div>
+    <div class="confirm-title">Excluir plano de mídia?</div>
     <div class="confirm-text" id="confirmText">—</div>
     <div class="confirm-actions">
       <button class="confirm-btn ghost" onclick="closeConfirmModal()">Cancelar</button>
@@ -942,7 +942,7 @@
     <div class="rp-divider"></div>
     <div class="rp-section">
       <div class="rp-section-label">Operações</div>
-      <button class="rp-item" onclick="openRpPage('planilha')"><div class="rp-icon">📄</div><div><div class="rp-item-title">Planilha</div><div class="rp-item-sub">Criar/sincronizar a planilha do workspace</div></div></button>
+      <button class="rp-item" onclick="openRpPage('planilha')"><div class="rp-icon">📄</div><div><div class="rp-item-title">Plano de Mídia</div><div class="rp-item-sub">Criar/sincronizar o plano de mídia do workspace</div></div></button>
       <button class="rp-item" onclick="openRpPage('upload')"><div class="rp-icon">📥</div><div><div class="rp-item-title">Upload de Planos</div><div class="rp-item-sub">.xlsx → media plan</div></div></button>
       <button class="rp-item" onclick="openRpPage('relatorios')"><div class="rp-icon">📊</div><div><div class="rp-item-title">Relatórios Externos</div><div class="rp-item-sub">.pptx → report dinâmico</div></div></button>
     </div>
@@ -959,11 +959,11 @@
   <div class="rp-page" id="rp-planilha">
     <div class="rp-content">
       <button class="rp-back" onclick="openRpPage('nav')">← Voltar</button>
-      <div class="rp-page-title">Planilha</div>
-      <div class="rp-page-sub">Cria a planilha Google Sheets do workspace — substitui o Apps Script (Code.gs) como automação.</div>
+      <div class="rp-page-title">Plano de Mídia</div>
+      <div class="rp-page-sub">Cria o plano de mídia (Google Sheets) do workspace — substitui o Apps Script (Code.gs) como automação.</div>
       <div id="planWorkspaceList" style="margin-bottom:16px"></div>
       <div class="divider" style="margin:16px 0"></div>
-      <div class="rp-section-label" style="padding:0">Nova planilha</div>
+      <div class="rp-section-label" style="padding:0">Novo plano de mídia</div>
       <div class="fg" id="planCreateForm">
         <label class="fl">Nome do cliente</label>
         <input class="fi" id="planClientName" placeholder="ex: Produto A Ltda">
@@ -972,12 +972,12 @@
         <label class="fl">E-mail do cliente <span style="color:var(--ink-muted);font-weight:300">(opcional — evita duplicar se já provisionado antes)</span></label>
         <input class="fi" id="planClientEmail" placeholder="ex: contato@produtoa.com">
       </div>
-      <button class="btn-full" id="planCreateBtn" onclick="planProvision()">Criar Planilha</button>
+      <button class="btn-full" id="planCreateBtn" onclick="planProvision()">Criar Plano de Mídia</button>
       <div class="divider" style="margin:20px 0"></div>
       <div class="rp-section-label" style="padding:0">Alternativas</div>
       <button class="btn-ghost" onclick="window.open(API_BASE + '/upload/template','_blank')">↓ Baixar template Excel</button>
       <button class="btn-ghost" onclick="openRpPage('upload')">📥 Importar .xlsx existente</button>
-      <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px;line-height:1.6">// sincronização automática a cada 15min via Cloud Scheduler — o botão ↻ em cada planilha da lista acima força uma sincronização manual imediata</div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px;line-height:1.6">// sincronização automática a cada 15min via Cloud Scheduler — o botão ↻ em cada plano de mídia da lista acima força uma sincronização manual imediata</div>
     </div>
   </div>
   <div class="rp-page" id="rp-upload">
@@ -990,7 +990,7 @@
     <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Conexões</div><div class="rp-page-sub">Autorizações de páginas e contas de anúncio — compartilhadas com todo o time do cliente. A escolha de conta/página específica fica na aba Campanhas, junto do botão de rodar o pipeline.</div>
       <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:4px">
         <div class="fg" style="flex:1;margin-bottom:0"><label class="fl">Workspace</label><select class="fs_" id="connWorkspaceSelect" onchange="connOnWorkspaceChange()"><option value="">Carregando...</option></select></div>
-        <button class="btn-sm ghost" id="connSyncBtn" onclick="connSyncWorkspace()" title="Sincroniza planilha + BigQuery com verificação de consistência">↻ Sincronizar</button>
+        <button class="btn-sm ghost" id="connSyncBtn" onclick="connSyncWorkspace()" title="Sincroniza plano de mídia + BigQuery com verificação de consistência">↻ Sincronizar</button>
       </div>
       <div id="connList"></div>
     </div>
@@ -2830,7 +2830,7 @@ function renderPlanWorkspaceList(){
   const box = document.getElementById('planWorkspaceList');
   if(!box) return;
   if(!planWorkspaces.length){
-    box.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);margin-bottom:4px">Nenhuma planilha criada ainda.</div>';
+    box.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);margin-bottom:4px">Nenhum plano de mídia criado ainda.</div>';
     return;
   }
   box.innerHTML = planWorkspaces.map(w => (
@@ -2840,7 +2840,7 @@ function renderPlanWorkspaceList(){
     + '<div style="display:flex;gap:6px">'
     + '<button class="btn-sm ghost" onclick="planSync(\'' + w.workspace_id + '\',this)" title="Forçar sincronização agora">↻</button>'
     + '<a href="' + w.spreadsheet_url + '" target="_blank" class="btn-sm ghost">Abrir ↗</a>'
-    + '<button class="btn-sm ghost" style="color:var(--danger);border-color:#fecaca" onclick="planDeleteRequest(\'' + w.workspace_id + '\', \'' + _escJsAttr(w.client_name || 'esta planilha') + '\')" title="Excluir planilha">✕</button>'
+    + '<button class="btn-sm ghost" style="color:var(--danger);border-color:#fecaca" onclick="planDeleteRequest(\'' + w.workspace_id + '\', \'' + _escJsAttr(w.client_name || 'este plano de mídia') + '\')" title="Excluir plano de mídia">✕</button>'
     + '</div></div>'
   )).join('');
 }
@@ -2972,14 +2972,15 @@ async function planProvision(){
   const clientEmail = emailEl ? emailEl.value.trim() : '';
   if(!clientName){ toast('Informe o nome do cliente', 'er'); return; }
 
-  // Abre a aba EM BRANCO agora, de forma síncrona, ainda dentro do
-  // clique — Chrome (e a maioria dos navegadores) só bloqueia
-  // window.open() disparado DEPOIS de uma espera assíncrona (await
-  // fetch), não quando é a reação direta e imediata a um clique real.
-  // Preenche o endereço dela só depois que a resposta do backend
-  // chegar (pendingTab.location.href = ...) — a aba já está aberta, só
-  // navega ela, sem contar como pop-up novo.
-  const pendingTab = window.open('', '_blank');
+  // Abre a aba de forma síncrona, ainda dentro do clique — Chrome (e a
+  // maioria dos navegadores) só bloqueia window.open() disparado DEPOIS
+  // de uma espera assíncrona (await fetch), não quando é a reação
+  // direta e imediata a um clique real. loading.html é uma página própria
+  // (identidade visual igual ao app.html — fundo escuro, grid, logo
+  // JP/EN, barra de gradiente ciano→magenta) hospedada junto do
+  // operations.html/app.html — troca pro endereço real da planilha só
+  // depois que a resposta do backend chegar (pendingTab.location.href).
+  const pendingTab = window.open('loading.html', '_blank');
 
   const btn = document.getElementById('planCreateBtn');
   if(btn){ btn.disabled = true; btn.textContent = 'Criando...'; }
@@ -2991,7 +2992,7 @@ async function planProvision(){
     });
     const data = await res.json().catch(() => ({}));
     if(!res.ok) throw new Error(data.detail || 'backend indisponível ou sem login');
-    toast(data.reused ? '✓ Cliente já tinha planilha — vinculada' : '✓ Planilha criada com sucesso', 'ok');
+    toast(data.reused ? '✓ Cliente já tinha plano de mídia — vinculado' : '✓ Plano de mídia criado com sucesso', 'ok');
     if(nameEl) nameEl.value = '';
     if(emailEl) emailEl.value = '';
     // Navega a aba já aberta (não abre uma nova) — ver comentário acima
@@ -3002,11 +3003,20 @@ async function planProvision(){
     if(data.spreadsheet_url && !data.reused){
       if(pendingTab){
         pendingTab.location.href = data.spreadsheet_url;
+        // Tenta manter o foco na aba atual (operations.html) em vez de
+        // pular pra aba nova — sem garantia: navegadores modernos (Chrome
+        // em especial), por segurança/anti-incômodo, costumam IGNORAR
+        // tentativas de script de controlar foco de aba. Funciona em
+        // algumas configurações/navegadores, não em todos.
+        try{
+          pendingTab.blur();
+          window.focus();
+        }catch(e){}
       }else{
         // Mesmo abrindo em branco de forma síncrona, alguns navegadores
         // com configuração muito restritiva ainda podem bloquear —
         // avisa nesse caso raro.
-        toast('Planilha criada, mas o navegador bloqueou a aba automática — abre ela manualmente uma vez pra ativar a sincronização automática', '');
+        toast('Plano de mídia criado, mas o navegador bloqueou a aba automática — abre ele manualmente uma vez pra ativar a sincronização automática', '');
       }
     }else if(pendingTab){
       pendingTab.close();
@@ -3014,9 +3024,9 @@ async function planProvision(){
     await planLoadWorkspaces();
   }catch(e){
     if(pendingTab) pendingTab.close();
-    toast('✕ ' + (e.message || 'Falha ao criar a planilha'), 'er');
+    toast('✕ ' + (e.message || 'Falha ao criar o plano de mídia'), 'er');
   }
-  if(btn){ btn.disabled = false; btn.textContent = 'Criar Planilha'; }
+  if(btn){ btn.disabled = false; btn.textContent = 'Criar Plano de Mídia'; }
 }
 
 async function planSync(workspaceId, btnEl){
@@ -3053,7 +3063,7 @@ function planDeleteRequest(workspaceId, clientName){
   pendingDeleteWorkspace = workspaceId;
   const textEl = document.getElementById('confirmText');
   if(textEl){
-    textEl.innerHTML = 'Isso remove <strong>' + _escHtml(clientName) + '</strong> da lista de workspaces e move a planilha do Google Sheets para a lixeira do Drive (recuperável por 30 dias — não é apagada na hora). Essa ação não pode ser desfeita por aqui.';
+    textEl.innerHTML = 'Isso remove <strong>' + _escHtml(clientName) + '</strong> da lista de workspaces e move o plano de mídia (Google Sheets) para a lixeira do Drive (recuperável por 30 dias — não é apagada na hora). Essa ação não pode ser desfeita por aqui.';
   }
   document.getElementById('confirmModal').classList.add('open');
 }
@@ -3081,7 +3091,7 @@ async function planDeleteConfirm(){
     }
     planWorkspaces = planWorkspaces.filter(w => w.workspace_id !== workspaceId);
     renderPlanWorkspaceList();
-    toast('✓ Planilha excluída', 'ok');
+    toast('✓ Plano de mídia excluído', 'ok');
   }catch(e){
     toast('✕ ' + (e.message || 'Não foi possível excluir agora'), 'er');
   }
