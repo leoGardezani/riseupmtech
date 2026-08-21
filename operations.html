@@ -1083,6 +1083,7 @@ const CREATIVES_SOCIAL=[
   {name:'InMail_B2B',plat:'LinkedIn',img:'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=225&fit=crop',m1:{l:'Reações',v:'8,2k'},m2:{l:'Coment.',v:'480'},m3:{l:'Shares',v:'920'},m4:{l:'Follows',v:'340'}},
 ];
 const PLATS=[
+  {name:'Google Drive',on:true,alwaysOn:true},
   {name:'Google Ads',on:true},{name:'Meta Ads',on:true},{name:'TikTok Ads',on:true},
   {name:'YouTube',on:true},{name:'DV360',on:false},{name:'LinkedIn',on:false},
   {name:'Pinterest',on:false},{name:'Amazon Ads',on:false},{name:'GA4',on:true},
@@ -2474,6 +2475,18 @@ async function renderConns() {
   el.innerHTML = PLATS.map(p => {
     const key = PLATFORM_KEYS[p.name];
     const hasBackend = !!key;
+    // Google Drive — adicionado nesta sessão, pedido do Leonardo: exibe
+    // como "sempre conectado" só por transparência (o cliente vê que o
+    // Drive já está integrado), sem botão de conectar/desconectar — não
+    // é uma conexão OAuth separada de verdade, já vem embutida no login
+    // principal do app (mesmos escopos usados por /plan/provision).
+    if (p.alwaysOn) {
+      return '<div class="conn-item">'
+        + '<div><div class="conn-name">' + p.name + '</div>'
+        + '<div class="conn-status on">● Conectado</div></div>'
+        + '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">via login</span>'
+        + '</div>';
+    }
     const actions = p.on
       ? '<div style="display:flex;gap:6px">'
         + '<button class="btn-sm ghost" onclick="disconnectPlatform(\'' + p.name + '\',\'' + (key || '') + '\')">Desconectar</button>'
