@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rise Up MTech — Plataforma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:           #050508;
+    --bg2:          #080810;
+    --surface:      #0d0d1a;
+    --surface2:     #111120;
+    --surface3:     #16162a;
+    --orange:       #007a8a;
+    --orange-bright:#00e5ff;
+    --orange-glow:  rgba(0,229,255,0.1);
+    --orange-lt:    rgba(0,229,255,0.06);
+    --magenta:      #ff2d78;
+    --text:         #e8e8f0;
+    --text-dim:     #9090b0;
+    --text-dimmer:  #3a3a5a;
+    --border:       rgba(196,94,0,0.2);
+    --border-dim:   rgba(255,255,255,0.06);
+    --success:      #22c55e;
+    --danger:       #ef4444;
+    --info:         #3b82f6;
+    --ff:           'Barlow', sans-serif;
+    --mono:         'Share Tech Mono', monospace;
+    --sw:           220px;
+    --r:            4px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: var(--ff);
+    font-weight: 400;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  button { font-family: var(--ff); cursor: pointer; }
+  input, select, textarea { font-family: var(--ff); }
+  ::placeholder { color: var(--text-dimmer); }
+
+  /* GRID BG */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(196,94,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(196,94,0,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .view { display: none; } .view.active { display: flex; }
+  .page { display: none; } .page.active { display: block; }
+
+  /* ─── LOGIN ─── */
+  #vl {
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    position: relative;
+    z-index: 1;
+  }
+
+  .login-orb {
+    position: fixed;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,94,0,0.1) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    animation: lOrb 6s ease-in-out infinite;
+  }
+  #loginCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes lOrb {
+    0%,100% { opacity:0.5; transform:translate(-50%,-50%) scale(1); }
+    50%      { opacity:1;   transform:translate(-50%,-50%) scale(1.1); }
+  }
+
+  .lw {
+    position: relative;
+    z-index: 1;
+    width: 420px;
+    max-width: 92vw;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 44px;
+    animation: fadeUp 0.5s ease forwards;
+  }
+  .lw.reg .l-title { color: var(--text); }
+  .lw.reg .fi:focus { border-color: var(--magenta); }
+  .lw.reg .fsub { background: var(--magenta); color: #fff; }
+  .lw.reg .fsub:hover { box-shadow: 0 0 30px rgba(255,45,120,0.5); }
+  .lw.reg .lw-line { background: linear-gradient(90deg, transparent, var(--magenta), transparent); }
+  .lw.reg .ftgl:hover { color: var(--magenta); }
+  .lw.reg .ferr { border-color: rgba(255,45,120,0.3); background: rgba(255,45,120,0.06); color: var(--magenta); }
+
+  .lw::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--orange-bright), var(--magenta), transparent);
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .l-brand { text-align: center; margin-bottom: 36px; }
+  .l-logo {
+    font-family: var(--mono);
+    font-size: 16px;
+    letter-spacing: 0.1em;
+    color: var(--orange-bright);
+    text-transform: uppercase;
+  }
+  .l-logo span { color: var(--text-dim); }
+  .l-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--text-dimmer);
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .l-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-dim);
+    margin-bottom: 32px;
+  }
+  .l-tab {
+    flex: 1;
+    padding: 10px 0 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dimmer);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .l-tab.on { color: var(--orange-bright); border-bottom-color: var(--orange-bright); }
+  .l-tab.on-mag { color: var(--magenta); border-bottom-color: var(--magenta); }
+
+  .l-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  .l-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 28px; text-align: center; }
+
+  .fd { margin-bottom: 16px; }
+  .fd label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    display: block;
+    margin-bottom: 7px;
+    text-align: center;
+  }
+  .fd-wrap { position: relative; }
+  .fi {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border-dim);
+    background: var(--bg2);
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    border-radius: 0;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .fi:focus { border-color: var(--orange); background: var(--surface2); }
+  .fi-pw { padding-right: 44px; }
+  .ftgl {
+    position: absolute; right: 12px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none;
+    color: var(--text-dimmer); cursor: pointer;
+    font-size: 13px; padding: 4px;
+    transition: color 0.2s;
+  }
+  .ftgl:hover { color: var(--orange-bright); }
+
+  .ferr {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--danger);
+    margin-bottom: 14px;
+    display: none;
+    padding: 10px 14px;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.25);
+  }
+
+  .fsub {
+    width: 100%;
+    padding: 13px;
+    background: var(--orange-bright);
+    color: var(--bg);
+    border: none;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .fsub::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,0.12); transform:translateX(-100%); transition:transform 0.3s; }
+  .fsub:hover::after { transform:translateX(0); }
+  .fsub:hover { box-shadow: 0 0 30px rgba(255,122,26,0.4); }
+
+  .l-footer {
+    margin-top: 20px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text-dimmer);
+    text-align: center;
+  }
+  .l-footer a { color: var(--text-dimmer); text-decoration: none; transition: color 0.2s; }
+  .l-footer a:hover { color: var(--orange-bright); }
+
+  /* ─── APP ─── */
+  #va { height: 100vh; flex-direction: row; position: relative; z-index: 1; }
+
+  /* SIDEBAR */
+  .sb {
+    width: var(--sw);
+    background: var(--surface);
+    border-right: 1px solid var(--border-dim);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    height: 100vh;
+    position: fixed;
+    left: 0; top: 0;
+    z-index: 10;
+  }
+
+  .sb-logo {
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid var(--border-dim);
+  }
+  .sb-logo-t {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    color: var(--orange-bright);
+    text-transform: uppercase;
+    position: relative;
+    cursor: default;
+  }
+  .sb-logo-t .jp { display: inline; transition: opacity 0.3s; }
+  .sb-logo-t .en { position: absolute; left: 0; top: 0; opacity: 0; white-space: nowrap; transition: opacity 0.3s; }
+  .sb-logo-t .en span { color: var(--text-dim); }
+  .sb-logo-t:hover .jp { opacity: 0; }
+  .sb-logo-t:hover .en { opacity: 1; }
+  .sb-logo-s {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--text-dimmer);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .sb-nav {
+    flex: 1;
+    padding: 12px 8px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .ns {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dimmer);
+    padding: 12px 10px 4px;
+  }
+  .ns::before { content: '// '; }
+
+  .ni {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-dim);
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .ni:hover { background: var(--surface2); color: var(--text); }
+  .ni.on {
+    background: var(--orange-lt);
+    color: var(--orange-bright);
+    font-weight: 500;
+  }
+  .ni.on::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--orange-bright);
+  }
+
+  .sb-user {
+    padding: 14px 16px;
+    border-top: 1px solid var(--border-dim);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ua {
+    width: 30px; height: 30px;
+    background: var(--orange);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--bg);
+    flex-shrink: 0;
+  }
+  .un { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ur { font-family: var(--mono); font-size: 10px; color: var(--text-dimmer); margin-top: 2px; letter-spacing: 0.05em; }
+  .btn-lo {
+    background: none; border: none;
+    color: var(--text-dimmer);
+    font-size: 14px; cursor: pointer;
+    padding: 4px; margin-left: auto;
+    transition: color 0.15s;
+  }
+  .btn-lo:hover { color: var(--orange-bright); }
+
+  /* MAIN */
+  .mn { margin-left: var(--sw); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .mh {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-dim);
+    padding: 0 28px;
+    height: 52px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .pt {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .pt::before { content: '// '; color: var(--text-dimmer); }
+  .mc { flex: 1; overflow-y: auto; padding: 28px; background: var(--bg); }
+
+  /* ─── COMPONENTS ─── */
+  .sh { margin-bottom: 24px; }
+  .st {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+  }
+  .ss { font-size: 13px; color: var(--text-dim); }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border-dim);
+    padding: 22px;
+  }
+  .ch { display: flex; align-items: center; gap: 13px; margin-bottom: 18px; }
+  .ci {
+    width: 38px; height: 38px;
+    background: var(--orange-lt);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .ct { font-size: 14px; font-weight: 600; }
+  .cs { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+  /* STAT GRID */
+  .sg { display: grid; grid-template-columns: repeat(4,1fr); gap: 2px; margin-bottom: 24px; background: var(--border-dim); }
+  .sc {
+    background: var(--surface);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .sc::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:var(--border-dim); }
+  .sl {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dimmer);
+    margin-bottom: 10px;
+  }
+  .sv {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text);
+  }
+  .sc.hi .sv { color: var(--orange-bright); }
+
+  /* UPLOAD ZONE */
+  .uz {
+    border: 1px dashed var(--border-dim);
+    padding: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg2);
+  }
+  .uz:hover, .uz.dg { border-color: var(--orange); background: var(--orange-lt); }
+  .ui { font-size: 24px; margin-bottom: 8px; }
+  .ut { font-size: 13px; color: var(--text-dim); }
+  .ut strong { color: var(--orange-bright); }
+  .us { font-family: var(--mono); font-size: 10px; color: var(--text-dimmer); margin-top: 6px; letter-spacing: 0.1em; }
+
+  /* INPUTS */
+  .inp {
+    padding: 10px 14px;
+    border: 1px solid var(--border-dim);
+    background: var(--bg2);
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .inp:focus { border-color: var(--orange); }
+  .ir { display: flex; gap: 8px; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 9px 18px;
+    font-size: 12px;
+    font-family: var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .bd { background: var(--orange-bright); color: var(--bg); }
+  .bd:hover { box-shadow: 0 0 20px rgba(255,122,26,0.4); }
+  .bg { background: transparent; color: var(--text-dim); border: 1px solid var(--border-dim); }
+  .bg:hover { border-color: var(--border); color: var(--text); }
+  .bdr { background: rgba(239,68,68,0.08); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+  .bdr:hover { background: rgba(239,68,68,0.14); }
+  .sm { padding: 6px 13px; font-size: 11px; }
+
+  /* TABLE */
+  .tw { background: var(--surface); border: 1px solid var(--border-dim); overflow: hidden; }
+  .tt {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-dim);
+  }
+  .tn { font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: var(--surface2); }
+  th {
+    padding: 9px 16px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dimmer);
+    white-space: nowrap;
+  }
+  td { padding: 11px 16px; font-size: 13px; color: var(--text-dim); border-bottom: 1px solid var(--border-dim); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  /* BADGES */
+  .bg_ { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; }
+  .bg_::before { content:''; width:4px; height:4px; border-radius:50%; background:currentColor; flex-shrink:0; }
+  .b-g  { background: rgba(34,197,94,0.1);  color: var(--success); border: 1px solid rgba(34,197,94,0.2); }
+  .b-o  { background: var(--orange-lt);      color: var(--orange-bright); border: 1px solid var(--border); }
+  .b-r  { background: rgba(239,68,68,0.1);  color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+  .b-gr { background: var(--surface2);       color: var(--text-dimmer); border: 1px solid var(--border-dim); }
+  .b-b  { background: rgba(59,130,246,0.1); color: var(--info); border: 1px solid rgba(59,130,246,0.2); }
+
+  /* PLATFORMS GRID */
+  .pg { display: grid; grid-template-columns: repeat(3,1fr); gap: 2px; background: var(--border-dim); }
+  .pc {
+    background: var(--surface);
+    padding: 18px 20px;
+    display: flex; align-items: center; gap: 13px;
+    transition: background 0.2s;
+    position: relative;
+  }
+  .pc::after { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--orange); transform:scaleY(0); transition:transform 0.3s; }
+  .pc:hover { background: var(--surface2); }
+  .pc.cn::after { transform:scaleY(1); background: var(--success); }
+  .pio {
+    width: 36px; height: 36px;
+    background: var(--surface2);
+    border: 1px solid var(--border-dim);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+  .pn { font-size: 13px; font-weight: 600; }
+  .ps { font-family: var(--mono); font-size: 10px; color: var(--text-dimmer); margin-top: 3px; letter-spacing: 0.05em; }
+  .pc.cn .ps { color: var(--success); }
+
+  /* ROLE BADGES */
+  .rl { display: inline-flex; padding: 3px 10px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; }
+  .r-a { background: rgba(251,191,36,0.1); color: #f59e0b; border: 1px solid rgba(251,191,36,0.2); }
+  .r-e { background: rgba(59,130,246,0.1); color: var(--info); border: 1px solid rgba(59,130,246,0.2); }
+  .r-v { background: var(--surface2); color: var(--text-dimmer); border: 1px solid var(--border-dim); }
+
+  /* FORM GROUP */
+  .fg { margin-bottom: 16px; }
+  .fl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); display: block; margin-bottom: 6px; }
+  .fs_ {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-dim);
+    background: var(--bg2);
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+  }
+  .fs_:focus { border-color: var(--orange); }
+
+  /* MODAL */
+  .mo {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .mo.op { display: flex; }
+  .md {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px;
+    width: 420px; max-width: 92vw;
+    position: relative;
+  }
+  .md::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--orange-bright),transparent); }
+  .md-t { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; text-transform: uppercase; letter-spacing: 0.02em; margin-bottom: 6px; }
+  .md-s { font-size: 13px; color: var(--text-dim); margin-bottom: 24px; }
+  .md-f { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
+
+  /* TOAST */
+  .tc { position: fixed; top: 18px; right: 18px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+  .to {
+    background: var(--surface);
+    border: 1px solid var(--border-dim);
+    color: var(--text);
+    padding: 11px 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    display: flex; align-items: center; gap: 10px;
+    animation: tIn 0.2s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .to.ok { border-color: rgba(34,197,94,0.3); }
+  .to.ok span:first-child { color: var(--success); }
+  .to.er { border-color: rgba(239,68,68,0.3); }
+  .to.er span:first-child { color: var(--danger); }
+  @keyframes tIn { from { transform:translateX(16px); opacity:0; } to { transform:none; opacity:1; } }
+
+  /* EMPTY STATE */
+  .em { text-align: center; padding: 56px 24px; }
+  .em-i { font-size: 28px; margin-bottom: 14px; filter: grayscale(1) opacity(0.4); }
+  .em-t { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px; text-transform: uppercase; color: var(--text-dimmer); margin-bottom: 6px; }
+  .em-s { font-family: var(--mono); font-size: 11px; color: var(--text-dimmer); letter-spacing: 0.1em; }
+
+  @media (max-width: 768px) {
+    :root { --sw: 0px; }
+    .sb { display: none; }
+    .mn { margin-left: 0; }
+    .sg { grid-template-columns: repeat(2,1fr); }
+    .pg { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tc" id="tc"></div>
+
+<!-- MODAL INVITE -->
+<div class="mo" id="mInv">
+  <div class="md">
+    <div class="md-t">Convidar usuário</div>
+    <div class="md-s">O usuário terá acesso com as permissões selecionadas.</div>
+    <div class="fg"><label class="fl">Email</label><input class="inp" id="iEmail" type="email" placeholder="email@empresa.com" style="width:100%"></div>
+    <div class="fg"><label class="fl">Acesso</label>
+      <select class="fs_" id="iRole">
+        <option value="editor">Editor — pode criar e editar campanhas</option>
+        <option value="viewer">Leitura — apenas visualização</option>
+        <option value="admin">Admin — acesso total</option>
+      </select>
+    </div>
+    <div class="md-f">
+      <button class="btn bg sm" onclick="cm('mInv')">Cancelar</button>
+      <button class="btn bd sm" onclick="invUser()">Enviar convite</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DELETE -->
+<div class="mo" id="mDel">
+  <div class="md">
+    <div class="md-t">Remover usuário?</div>
+    <div class="md-s" id="mDelS">Esta ação não pode ser desfeita.</div>
+    <div class="md-f">
+      <button class="btn bg sm" onclick="cm('mDel')">Cancelar</button>
+      <button class="btn bdr sm" onclick="confDel()">Remover</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── LOGIN ── -->
+<div class="view active" id="vl">
+  <canvas id="loginCanvas"></canvas>
+  <div class="login-orb"></div>
+  <div class="lw">
+    <div class="l-brand">
+      <div class="l-logo" style="position:relative;cursor:default;display:inline-block">
+        <span class="l-jp" style="display:inline;transition:opacity 0.3s">ライズアップ_エムテック</span>
+        <span class="l-en" style="position:absolute;left:0;top:0;opacity:0;white-space:nowrap;transition:opacity 0.3s">Rise Up<span>_MTech</span></span>
+      </div>
+      <div class="l-tag">// Media Automation Platform</div>
+    </div>
+    <!-- Login via Google OAuth (único fluxo que o backend suporta hoje: GET /auth/login) -->
+    <div id="fL">
+      <div class="l-title">Bem-vindo</div>
+      <div class="l-sub">Acesse sua conta para continuar.</div>
+      <div class="ferr" id="lErr"></div>
+      <button class="fsub" onclick="doL()" style="display:flex;align-items:center;justify-content:center;gap:10px">
+        <svg width="16" height="16" viewBox="0 0 48 48" style="flex-shrink:0"><path fill="#050508" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.3 0 6.3 1.2 8.6 3.2l6.4-6.4C35.6 4.5 30.1 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></svg>
+        Entrar com Google
+      </button>
+    </div>
+    <div class="l-footer">
+      <a href="https://riseupmtech.com/terms-of-service.html" target="_blank">Termos de Uso</a>
+      &nbsp;·&nbsp;
+      <a href="https://riseupmtech.com/privacy-policy.html" target="_blank">Privacidade</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div class="view" id="va">
+  <aside class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-t">
+        <span class="jp">ライズアップ_エムテック</span>
+        <span class="en">Rise Up<span>_MTech</span></span>
+      </div>
+      <div class="sb-logo-s">Plataforma</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="ns">Principal</div>
+      <button class="ni on" onclick="sp('workspace',this)">🏠 Workspace</button>
+      <button class="ni" onclick="sp('campaigns',this)">🚀 Campanhas</button>
+      <button class="ni" onclick="sp('status',this)">📊 Status</button>
+      <div class="ns">Analytics</div>
+      <button class="ni" onclick="sp('dashboard',this)">📈 Dashboard</button>
+      <button class="ni" onclick="sp('report',this)">📄 Reports</button>
+      <div class="ns">Configuração</div>
+      <button class="ni" onclick="sp('platforms',this)">🔌 Plataformas</button>
+      <button class="ni" onclick="sp('users',this)" id="nU">👥 Usuários</button>
+      <button class="ni" onclick="sp('settings',this)">⚙️ Configurações</button>
+    </nav>
+    <div class="sb-user">
+      <div class="ua" id="av">U</div>
+      <div style="flex:1;min-width:0"><div class="un" id="uN">—</div><div class="ur" id="uR">—</div></div>
+      <button class="btn-lo" onclick="lo()" title="Sair">↩</button>
+    </div>
+  </aside>
+
+  <div class="mn">
+    <div class="mh"><div class="pt" id="pT">Workspace</div></div>
+    <div class="mc">
+
+      <!-- WORKSPACE -->
+      <div class="page active" id="p-workspace">
+        <div id="wS" style="max-width:580px;margin:0 auto">
+          <div class="sh"><div class="st">Configure seu Workspace</div><div class="ss">Importe seu plano de mídia para começar a automação.</div></div>
+          <div class="card" style="margin-bottom:2px">
+            <div class="ch"><div class="ci">📊</div><div><div class="ct">Upload de planilha Excel</div><div class="cs">Suba seu plano de mídia em .xlsx</div></div></div>
+            <div class="uz" id="dZ" onclick="document.getElementById('fI').click()" ondragover="event.preventDefault();this.classList.add('dg')" ondragleave="this.classList.remove('dg')" ondrop="hDrop(event)">
+              <div class="ui">📁</div><div class="ut"><strong>Clique ou arraste aqui</strong></div><div class="us">.xlsx — máximo 10MB</div>
+            </div>
+            <input type="file" id="fI" accept=".xlsx,.xls" style="display:none" onchange="hFile(event)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px">
+              <button onclick="dlTpl()" style="background:none;border:none;font-family:var(--mono);font-size:11px;letter-spacing:0.1em;color:var(--orange-bright);cursor:pointer;padding:0;text-transform:uppercase">↓ Baixar template</button>
+              <button class="btn bd sm" id="bUp" onclick="upXls()" disabled style="opacity:.35">Importar</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="ch"><div class="ci">🔗</div><div><div class="ct">Conectar Google Sheets</div><div class="cs">Cole o link de uma planilha existente</div></div></div>
+            <div class="ir"><input class="inp" id="sUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/..." style="flex:1"><button class="btn bd sm" onclick="conSheets()">Conectar</button></div>
+          </div>
+        </div>
+        <div id="wA" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+            <div class="sh" style="margin:0"><div class="st">Workspace Ativo</div><div class="ss">Planilha conectada e pronta.</div></div>
+            <button class="btn bg sm" onclick="shSetup()">Trocar planilha</button>
+          </div>
+          <div class="sg">
+            <div class="sc hi"><div class="sl">Planilha</div><div class="sv" style="font-size:15px;letter-spacing:0" id="wN">—</div></div>
+            <div class="sc"><div class="sl">Abas criadas</div><div class="sv" id="wT">—</div></div>
+            <div class="sc"><div class="sl">Status</div><div class="sv" style="font-size:14px;color:var(--success)">● Ativo</div></div>
+            <div class="sc"><div class="sl">Ações</div><div style="margin-top:10px"><a id="wL" href="#" target="_blank" class="btn bg sm">Abrir Sheets ↗</a></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAMPAIGNS -->
+      <div class="page" id="p-campaigns">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+          <div class="sh" style="margin:0"><div class="st">Implementação</div><div class="ss">Dispare campanhas com status "ready to setup".</div></div>
+          <button class="btn bd" onclick="runC()">↑ Implementar agora</button>
+        </div>
+        <div class="tw"><div class="tt"><div class="tn">Fila</div><button class="btn bg sm" onclick="ldC()">↻</button></div>
+        <div id="cB"><div class="em"><div class="em-i">🚀</div><div class="em-t">Fila vazia</div><div class="em-s">// marque linhas como "ready to setup"</div></div></div></div>
+      </div>
+
+      <!-- STATUS -->
+      <div class="page" id="p-status">
+        <div class="sh"><div class="st">Status das Campanhas</div><div class="ss">Visão em tempo real.</div></div>
+        <div class="sg" style="margin-bottom:20px">
+          <div class="sc"><div class="sl">Implementadas</div><div class="sv" id="sI">—</div></div>
+          <div class="sc"><div class="sl">Pendentes</div><div class="sv" id="sP">—</div></div>
+          <div class="sc"><div class="sl">Com erro</div><div class="sv" id="sE">—</div></div>
+          <div class="sc"><div class="sl">Total</div><div class="sv" id="sT">—</div></div>
+        </div>
+        <div class="tw"><div class="tt"><div class="tn">Campanhas</div><button class="btn bg sm" onclick="ldS()">↻</button></div>
+        <div id="stB"><div class="em"><div class="em-i">📊</div><div class="em-t">Sem dados</div><div class="em-s">// conecte um workspace</div></div></div></div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div class="page" id="p-dashboard">
+        <div class="em" style="padding:80px 24px">
+          <div class="em-i">📈</div>
+          <div class="em-t">Dashboard de Performance</div>
+          <div class="em-s">// em desenvolvimento — disponível em breve</div>
+        </div>
+      </div>
+
+      <!-- REPORT -->
+      <div class="page" id="p-report">
+        <div class="sh"><div class="st">Report Engine</div><div class="ss">Suba um .pptx e o sistema replica o layout com dados dinâmicos.</div></div>
+        <div class="card" style="max-width:520px">
+          <div class="ch"><div class="ci">📄</div><div><div class="ct">Upload de apresentação</div><div class="cs">Aceita .pptx — máx. 50MB</div></div></div>
+          <div class="uz" onclick="document.getElementById('pI').click()"><div class="ui">📄</div><div class="ut"><strong>Selecione o arquivo .pptx</strong></div></div>
+          <input type="file" id="pI" accept=".pptx" style="display:none" onchange="upPPT(event)">
+        </div>
+        <div id="rOut" style="margin-top:14px"></div>
+      </div>
+
+      <!-- PLATFORMS -->
+      <div class="page" id="p-platforms">
+        <div class="sh"><div class="st">Plataformas de Anúncios</div><div class="ss">Conecte suas contas para habilitar a implementação automática.</div></div>
+        <div class="pg" id="plG"></div>
+      </div>
+
+      <!-- USERS -->
+      <div class="page" id="p-users">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+          <div class="sh" style="margin:0"><div class="st">Usuários</div><div class="ss">Controle quem acessa e com quais permissões.</div></div>
+          <button class="btn bd" onclick="om('mInv')">+ Convidar</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:20px;background:var(--border-dim)">
+          <div class="card"><span class="rl r-a" style="margin-bottom:8px;display:inline-flex">Admin</span><p style="font-size:12px;color:var(--text-dim);line-height:1.7">Acesso total — gerencia usuários, plataformas e campanhas.</p></div>
+          <div class="card"><span class="rl r-e" style="margin-bottom:8px;display:inline-flex">Editor</span><p style="font-size:12px;color:var(--text-dim);line-height:1.7">Pode criar workspaces e disparar campanhas. Sem gestão de usuários.</p></div>
+          <div class="card"><span class="rl r-v" style="margin-bottom:8px;display:inline-flex">Leitura</span><p style="font-size:12px;color:var(--text-dim);line-height:1.7">Apenas visualização de status, dashboards e relatórios.</p></div>
+        </div>
+        <div class="tw"><div class="tt"><div class="tn">Usuários ativos</div></div>
+        <table><thead><tr><th>Usuário</th><th>Email</th><th>Acesso</th><th>Status</th><th>Desde</th><th>Ações</th></tr></thead>
+        <tbody id="uB"></tbody></table></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="p-settings">
+        <div style="max-width:500px">
+          <div class="sh"><div class="st">Configurações</div></div>
+          <div class="card" style="margin-bottom:2px">
+            <div class="ch"><div class="ci">🏢</div><div><div class="ct">Conta</div><div class="cs">Informações da organização</div></div></div>
+            <div class="fg"><label class="fl">Nome da empresa</label><input class="inp" id="sCo" placeholder="Rise Up MTech" style="width:100%"></div>
+            <div class="fg"><label class="fl">Email de contato</label><input class="inp" id="sEm" type="email" placeholder="contato@empresa.com" style="width:100%"></div>
+            <button class="btn bd sm" onclick="toast('Configurações salvas','ok')">Salvar</button>
+          </div>
+          <div class="card">
+            <div class="ch"><div class="ci">🔑</div><div><div class="ct">Conexão com o backend</div><div class="cs">URL do servidor</div></div></div>
+            <div class="fg"><label class="fl">URL da API</label><input class="inp" id="sApi" style="width:100%" value="https://riseup-backend-509219529113.southamerica-east1.run.app"></div>
+            <div style="display:flex;align-items:center;gap:12px"><button class="btn bg sm" onclick="testC()">Testar conexão</button><span id="cSt" style="font-family:var(--mono);font-size:11px;color:var(--text-dimmer);letter-spacing:0.05em"></span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const API=localStorage.getItem('riseup_api')||'https://riseup-backend-509219529113.southamerica-east1.run.app';
+let S={token:localStorage.getItem('riseup_token'),role:localStorage.getItem('riseup_role')||'editor',user:null,ws:JSON.parse(localStorage.getItem('riseup_ws')||'null'),file:null,delT:null,
+  users:[{id:1,name:'Leonardo Gardezani',email:'leonardo.gardezani@gmail.com',role:'admin',status:'active',since:'18/03/2026'}]};
+
+window.addEventListener('load',()=>{
+  const p=new URLSearchParams(location.search);
+  if(p.get('token')){
+    localStorage.setItem('riseup_token',p.get('token'));
+    localStorage.setItem('riseup_user',JSON.stringify({name:decodeURIComponent(p.get('name')||''),email:decodeURIComponent(p.get('email')||'')}));
+    location.href='operations.html';
+    return;
+  }
+  if(S.token){location.href='operations.html';return;}
+  sv('vl');
+});
+
+async function me(){try{const r=await rq('/auth/me');S.user=r;enter(r.has_workspace);}catch{localStorage.removeItem('riseup_token');sv('vl');}}
+function enter(hw){sv('va');updUI();rPlats();rUsers();if(S.role!=='admin')document.getElementById('nU').style.display='none';if(hw||S.ws)shWA();}
+function updUI(){const u=S.user;if(!u)return;document.getElementById('av').textContent=(u.name||u.email||'U').slice(0,1).toUpperCase();document.getElementById('uN').textContent=u.name||u.email||'—';document.getElementById('uR').textContent={admin:'Admin',editor:'Editor',viewer:'Leitura'}[S.role]||S.role;}
+
+async function rq(p,o={}){const h={'Content-Type':'application/json'};if(S.token)h['Authorization']=`Bearer ${S.token}`;const r=await fetch(API+p,{...o,headers:{...h,...(o.headers||{})}});if(!r.ok){const e=await r.json().catch(()=>{});throw Object.assign(new Error(r.status),{detail:e?.detail});}return r.json();}
+
+function sv(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function sp(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('p-'+id).classList.add('active');document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));if(el)el.classList.add('on');document.getElementById('pT').textContent={workspace:'Workspace',campaigns:'Campanhas',status:'Status',dashboard:'Dashboard',report:'Reports',platforms:'Plataformas',users:'Usuários',settings:'Configurações'}[id]||id;if(id==='status')ldS();if(id==='campaigns')ldC();}
+
+function doL(){location.href=API+'/auth/login';}
+
+function lo(){['riseup_token','riseup_role','riseup_ws'].forEach(k=>localStorage.removeItem(k));S={...S,token:null,user:null,ws:null};sv('vl');}
+
+function shWA(){document.getElementById('wS').style.display='none';document.getElementById('wA').style.display='block';const w=S.ws;if(w){document.getElementById('wN').textContent='Planilha conectada';document.getElementById('wT').textContent=(w.sheets_created||[]).length;document.getElementById('wL').href=w.spreadsheet_url||'#';}}
+function shSetup(){document.getElementById('wS').style.display='block';document.getElementById('wA').style.display='none';}
+function hDrop(e){e.preventDefault();document.getElementById('dZ').classList.remove('dg');const f=e.dataTransfer.files[0];if(f)setF(f);}
+function hFile(e){const f=e.target.files[0];if(f)setF(f);}
+function setF(f){S.file=f;document.getElementById('dZ').innerHTML=`<div class="ui">✓</div><div class="ut"><strong>${f.name}</strong></div><div class="us">${(f.size/1024).toFixed(0)} KB</div>`;const b=document.getElementById('bUp');b.disabled=false;b.style.opacity='1';}
+async function upXls(){if(!S.file)return;const fm=new FormData();fm.append('file',S.file);const n=S.user?.name||'Cliente',em=S.user?.email||'';try{toast('Importando...');const r=await fetch(`${API}/upload/excel?client_name=${encodeURIComponent(n)}&client_email=${encodeURIComponent(em)}`,{method:'POST',body:fm,headers:{Authorization:`Bearer ${S.token}`}});const d=await r.json();if(d.success){S.ws=d;localStorage.setItem('riseup_ws',JSON.stringify(d));shWA();toast('Planilha importada!','ok');}else toast('Erro ao importar.','er');}catch{toast('Erro de conexão.','er');}}
+async function conSheets(){const u=document.getElementById('sUrl').value.trim();if(!u)return;try{toast('Conectando...');const r=await fetch(`${API}/upload/sheets-link`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${S.token}`},body:JSON.stringify({sheets_url:u,client_email:S.user?.email||''})});const d=await r.json();if(d.success){S.ws=d;localStorage.setItem('riseup_ws',JSON.stringify(d));shWA();toast('Conectada!','ok');}}catch{toast('Erro.','er');}}
+function dlTpl(){window.open(`${API}/upload/template`,'_blank');}
+
+async function runC(){try{toast('Iniciando...');await rq('/campaigns/run',{method:'POST'});toast('Pipeline iniciado!','ok');setTimeout(()=>sp('status',null),1500);}catch{toast('Erro.','er');}}
+async function ldC(){try{const d=await rq('/status/campaigns');const rows=(d.campaigns||[]).filter(c=>c.status==='ready to setup'||c.status==='pending');const el=document.getElementById('cB');if(!rows.length){el.innerHTML='<div class="em"><div class="em-i">🚀</div><div class="em-t">Fila vazia</div><div class="em-s">// marque "ready to setup" na planilha</div></div>';return;}el.innerHTML=`<table><thead><tr><th>Criativo</th><th>Plataforma</th><th>Campanha</th><th>Status</th></tr></thead><tbody>${rows.map(c=>`<tr><td style="font-weight:600;color:var(--text)">${c.creative_name||'—'}</td><td>${c.source||'—'}</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.campaign_name||'—'}</td><td>${bH(c.status)}</td></tr>`).join('')}</tbody></table>`;}catch{}}
+async function ldS(){try{const d=await rq('/status/campaigns'),cs=d.campaigns||[];document.getElementById('sI').textContent=cs.filter(c=>c.status==='implemented').length;document.getElementById('sP').textContent=cs.filter(c=>c.status?.includes('ready')||c.status==='pending').length;document.getElementById('sE').textContent=cs.filter(c=>c.status?.includes('error')).length;document.getElementById('sT').textContent=cs.length;const el=document.getElementById('stB');if(!cs.length){el.innerHTML='<div class="em"><div class="em-i">📊</div><div class="em-t">Sem dados</div><div class="em-s">// conecte um workspace</div></div>';return;}el.innerHTML=`<table><thead><tr><th>Criativo</th><th>Plataforma</th><th>Campanha</th><th>Status</th><th>Ad ID</th></tr></thead><tbody>${cs.map(c=>`<tr><td style="font-weight:600;color:var(--text)">${c.creative_name||'—'}</td><td>${c.source||'—'}</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.campaign_name||'—'}</td><td>${bH(c.status)}</td><td style="font-family:var(--mono);font-size:11px;color:var(--text-dimmer)">${c.platform_ad_id||'—'}</td></tr>`).join('')}</tbody></table>`;}catch{}}
+
+const PL=[{key:'google_ads',name:'Google Ads',ic:'G',url:'/connect/google-ads'},{key:'meta',name:'Meta Ads',ic:'M',url:'/connect/meta'},{key:'tiktok',name:'TikTok Ads',ic:'T',url:'/connect/tiktok'},{key:'dv360',name:'DV360',ic:'D',url:null,soon:true},{key:'linkedin',name:'LinkedIn Ads',ic:'L',url:null,soon:true},{key:'pinterest',name:'Pinterest Ads',ic:'P',url:null,soon:true}];
+async function rPlats(){let c={};try{c=await rq('/connect/status');}catch{}document.getElementById('plG').innerHTML=PL.map(p=>`<div class="pc ${c[p.key]?'cn':''}"><div class="pio">${p.ic}</div><div style="flex:1"><div class="pn">${p.name}</div><div class="ps">${p.soon?'// em breve':c[p.key]?'● conectado':'○ não conectado'}</div></div>${!p.soon?`<button class="btn sm ${c[p.key]?'bg':'bd'}" onclick="conP('${p.url}')">${c[p.key]?'Reconectar':'Conectar'}</button>`:''}</div>`).join('');}
+function conP(url){if(url)location.href=API+url;}
+
+function rLabel(r){return{admin:'Admin',editor:'Editor',viewer:'Leitura'}[r]||r;}
+function rClass(r){return{admin:'r-a',editor:'r-e',viewer:'r-v'}[r]||'r-v';}
+function rUsers(){const me=S.user?.email;document.getElementById('uB').innerHTML=S.users.map(u=>`<tr><td><div style="display:flex;align-items:center;gap:10px"><div class="ua" style="width:26px;height:26px;font-size:11px">${u.name.slice(0,1).toUpperCase()}</div><span style="font-weight:600;color:var(--text)">${u.name}</span>${u.email===me?'<span style="font-family:var(--mono);font-size:10px;color:var(--text-dimmer)">// você</span>':''}</div></td><td style="font-family:var(--mono);font-size:11px">${u.email}</td><td><span class="rl ${rClass(u.role)}">${rLabel(u.role)}</span></td><td><span class="bg_ b-g">Ativo</span></td><td style="font-family:var(--mono);font-size:11px">${u.since}</td><td><div style="display:flex;gap:6px;align-items:center">${u.email!==me?`<select class="fs_" style="padding:5px 8px;font-size:11px;width:auto;font-family:var(--mono)" onchange="chRole(${u.id},this.value)"><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option><option value="editor" ${u.role==='editor'?'selected':''}>Editor</option><option value="viewer" ${u.role==='viewer'?'selected':''}>Leitura</option></select><button class="btn bdr sm" onclick="delUser(${u.id},'${u.name}')" style="padding:5px 9px">×</button>`:'<span style="font-family:var(--mono);font-size:11px;color:var(--text-dimmer)">—</span>'}</div></td></tr>`).join('');}
+function om(id){document.getElementById(id).classList.add('op');}
+function cm(id){document.getElementById(id).classList.remove('op');}
+function invUser(){const e=document.getElementById('iEmail').value.trim(),r=document.getElementById('iRole').value;if(!e)return;S.users.push({id:Date.now(),name:e.split('@')[0],email:e,role:r,status:'active',since:new Date().toLocaleDateString('pt-BR')});rUsers();cm('mInv');document.getElementById('iEmail').value='';toast(`Convite enviado para ${e}`,'ok');}
+function chRole(id,r){const u=S.users.find(u=>u.id===id);if(u){u.role=r;rUsers();toast('Permissão atualizada','ok');}}
+function delUser(id,n){S.delT=id;document.getElementById('mDelS').textContent=`Tem certeza que deseja remover ${n}?`;om('mDel');}
+function confDel(){S.users=S.users.filter(u=>u.id!==S.delT);rUsers();cm('mDel');toast('Usuário removido','ok');}
+
+async function upPPT(e){const f=e.target.files[0];if(!f)return;toast('Processando...');const fm=new FormData();fm.append('file',f);try{const r=await fetch(`${API}/report/parse-pptx`,{method:'POST',body:fm,headers:{Authorization:`Bearer ${S.token}`}});const d=await r.json();if(d.success){document.getElementById('rOut').innerHTML=`<div class="card"><div style="font-weight:600;margin-bottom:6px">✓ ${d.message}</div><div style="font-family:var(--mono);font-size:12px;color:var(--text-dim)">${d.data.total_slides} slides · ${d.data.slide_width_px}×${d.data.slide_height_px}px</div></div>`;toast('Processado!','ok');}}catch{toast('Erro.','er');}}
+
+async function testC(){const u=document.getElementById('sApi').value.trim(),el=document.getElementById('cSt');el.textContent='// testando...';try{const d=await fetch(u+'/health').then(r=>r.json());el.textContent=`// conectado — v${d.version}`;el.style.color='var(--success)';localStorage.setItem('riseup_api',u);}catch{el.textContent='// sem conexão';el.style.color='var(--danger)';}}
+
+function bH(s){if(!s)return`<span class="bg_ b-gr">—</span>`;if(s==='implemented')return`<span class="bg_ b-g">Implementado</span>`;if(s==='ready to setup'||s==='pending')return`<span class="bg_ b-b">Na fila</span>`;if(s==='stand by')return`<span class="bg_ b-gr">Stand By</span>`;if(s?.includes('error'))return`<span class="bg_ b-r">Erro</span>`;return`<span class="bg_ b-gr">${s}</span>`;}
+function toast(msg,type=''){const t=document.createElement('div');t.className=`to ${type}`;t.innerHTML=`<span>${type==='ok'?'✓':type==='er'?'✕':'·'}</span><span>${msg}</span>`;document.getElementById('tc').appendChild(t);setTimeout(()=>t.remove(),3200);}
+
+// ── LOGIN LOGO HOVER ──
+(function(){
+  const logo = document.querySelector('.l-logo');
+  if(!logo) return;
+  const jp = logo.querySelector('.l-jp');
+  const en = logo.querySelector('.l-en');
+  logo.addEventListener('mouseenter', () => { jp.style.opacity='0'; en.style.opacity='1'; });
+  logo.addEventListener('mouseleave', () => { jp.style.opacity='1'; en.style.opacity='0'; });
+})();
+
+// ── LOGIN DATA STREAM ──
+(function(){
+  const canvas = document.getElementById('loginCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const KATA = 'アイウエオカキクケコサシスセソ01βΩΔFF00A3B2';
+  let W, H, streams;
+
+  function randChar(){ return KATA[Math.floor(Math.random()*KATA.length)]; }
+
+  function initStream(){
+    return {
+      x3d: (Math.random()-0.5)*2000,
+      y: -(Math.random()*800),
+      z: 300+Math.random()*700,
+      speed: 0.5+Math.random()*1.3,
+      chars: Array.from({length:6+Math.floor(Math.random()*12)},()=>({char:randChar(),timer:Math.floor(Math.random()*30)})),
+      opacity: 0.08+Math.random()*0.18,
+      color: Math.random()<0.18?'#ff2d78':'#00e5ff',
+      spacing: 18+Math.random()*8,
+    };
+  }
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    streams = Array.from({length:55},initStream);
+  }
+
+  function project(x3d,y3d,z){
+    const fov=600,scale=fov/(fov+z);
+    return{x:W/2+x3d*scale,y:H/2+y3d*scale,scale};
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const vg=ctx.createRadialGradient(W/2,H/2,H*0.1,W/2,H/2,H*0.85);
+    vg.addColorStop(0,'rgba(5,5,8,0)');
+    vg.addColorStop(1,'rgba(5,5,8,0.75)');
+    ctx.fillStyle=vg;
+    ctx.fillRect(0,0,W,H);
+
+    streams.forEach((s,si)=>{
+      s.y+=s.speed*(600/(600+s.z))*2.2;
+      s.chars.forEach((ch,i)=>{
+        ch.timer--;
+        if(ch.timer<=0){ch.char=randChar();ch.timer=15+Math.floor(Math.random()*40);}
+        const proj=project(s.x3d,s.y+i*s.spacing-H/2,s.z);
+        if(proj.x<-60||proj.x>W+60||proj.y<-40||proj.y>H+40)return;
+        const isHead=i===s.chars.length-1;
+        const alpha=isHead?Math.min(1,s.opacity*4):s.opacity*(1-i/s.chars.length*0.6);
+        ctx.save();
+        ctx.globalAlpha=alpha;
+        ctx.font=`${Math.max(8,13*proj.scale)}px 'Share Tech Mono',monospace`;
+        ctx.fillStyle=isHead?'#ffffff':s.color;
+        if(isHead){ctx.shadowColor=s.color;ctx.shadowBlur=8*proj.scale;}
+        ctx.fillText(ch.char,proj.x,proj.y);
+        ctx.restore();
+      });
+      const hp=project(s.x3d,s.y-H/2,s.z);
+      if(hp.y>H+200){streams[si]=initStream();streams[si].y=-100-Math.random()*300;}
+    });
+  }
+
+  resize();
+  window.addEventListener('resize',resize);
+  function loop(){draw();requestAnimationFrame(loop);}
+  loop();
+})();
+</script>
+</body>
+</html>
