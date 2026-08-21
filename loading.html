@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rise Up MTech — Preparando</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:            #050508;
+    --orange-bright: #00e5ff;
+    --magenta:       #ff2d78;
+    --text:          #e8e8f0;
+    --text-dim:      #9090b0;
+    --text-dimmer:   #3a3a5a;
+    --border-dim:    rgba(255,255,255,0.06);
+    --ff:            'Barlow', sans-serif;
+    --mono:          'Share Tech Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--ff);
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* mesmo grid de fundo do app.html */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(196,94,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(196,94,0,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .orb {
+    position: fixed;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    animation: orbPulse 6s ease-in-out infinite;
+  }
+  @keyframes orbPulse {
+    0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+    50%      { opacity: 1;   transform: translate(-50%, -50%) scale(1.1); }
+  }
+  .wrap { position: relative; z-index: 1; text-align: center; }
+  .logo {
+    position: relative;
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 16px;
+    letter-spacing: 0.1em;
+    color: var(--orange-bright);
+    text-transform: uppercase;
+    cursor: default;
+    margin-bottom: 8px;
+  }
+  .logo .jp { display: inline; transition: opacity 0.3s; }
+  .logo .en {
+    position: absolute; left: 0; top: 0;
+    opacity: 0; white-space: nowrap;
+    transition: opacity 0.3s;
+  }
+  .logo .en span { color: var(--text-dim); }
+  .logo:hover .jp { opacity: 0; }
+  .logo:hover .en { opacity: 1; }
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--text-dimmer);
+    text-transform: uppercase;
+    margin-bottom: 44px;
+  }
+  .bar {
+    width: 220px;
+    height: 2px;
+    margin: 0 auto 22px;
+    background: linear-gradient(90deg, transparent, var(--orange-bright), var(--magenta), transparent);
+    background-size: 200% 100%;
+    animation: sweep 1.6s linear infinite;
+  }
+  @keyframes sweep {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .msg {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .msg::before { content: '// '; color: var(--text-dimmer); }
+</style>
+</head>
+<body>
+  <div class="orb"></div>
+  <div class="wrap">
+    <div class="logo">
+      <span class="jp">ライズアップ_エムテック</span>
+      <span class="en">Rise Up<span>_MTech</span></span>
+    </div>
+    <div class="tag">Media Automation Platform</div>
+    <div class="bar"></div>
+    <div class="msg" id="msg">Criando planilha...</div>
+  </div>
+</body>
+</html>
