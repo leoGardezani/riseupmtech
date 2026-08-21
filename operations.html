@@ -2985,6 +2985,28 @@ async function planProvision(){
     toast(data.reused ? '✓ Cliente já tinha planilha — vinculada' : '✓ Planilha criada com sucesso', 'ok');
     if(nameEl) nameEl.value = '';
     if(emailEl) emailEl.value = '';
+    // Abre a planilha nova numa aba — ideia do Leonardo: isso dispara um
+    // evento de abertura REAL no Google Sheets (onOpen), que instala
+    // sozinho o trigger de sincronização automática (Code.gs, vinculado
+    // ao template, função ensureEditTriggerInstalled_). Substitui a
+    // tentativa anterior de instalar isso via API do Apps Script
+    // (scripts.run), que esbarrou num limite real da própria API do
+    // Google (script recém-criado via API não vem associado ao projeto
+    // GCP padrão, e a Execution API exige essa associação — sem chamada
+    // de API limpa pra resolver isso sozinha). window.open() é chamado
+    // só se a planilha foi CRIADA agora (não quando reused=true, já que
+    // aí o trigger já deve ter sido instalado numa criação anterior).
+    if(data.spreadsheet_url && !data.reused){
+      const win = window.open(data.spreadsheet_url, '_blank');
+      if(!win){
+        // Pop-up bloqueado pelo navegador (comum quando window.open()
+        // roda depois de um await — alguns navegadores só permitem
+        // pop-up disparado sincronamente dentro do clique). Sem a aba
+        // abrindo sozinha, o trigger de sync automático não se instala
+        // sozinho — avisa e deixa claro o que fazer.
+        toast('Planilha criada, mas o navegador bloqueou a aba automática — abre ela manualmente uma vez pra ativar a sincronização automática', '');
+      }
+    }
     await planLoadWorkspaces();
   }catch(e){
     toast('✕ ' + (e.message || 'Falha ao criar a planilha'), 'er');
