@@ -2972,6 +2972,15 @@ async function planProvision(){
   const clientEmail = emailEl ? emailEl.value.trim() : '';
   if(!clientName){ toast('Informe o nome do cliente', 'er'); return; }
 
+  // Abre a aba EM BRANCO agora, de forma síncrona, ainda dentro do
+  // clique — Chrome (e a maioria dos navegadores) só bloqueia
+  // window.open() disparado DEPOIS de uma espera assíncrona (await
+  // fetch), não quando é a reação direta e imediata a um clique real.
+  // Preenche o endereço dela só depois que a resposta do backend
+  // chegar (pendingTab.location.href = ...) — a aba já está aberta, só
+  // navega ela, sem contar como pop-up novo.
+  const pendingTab = window.open('', '_blank');
+
   const btn = document.getElementById('planCreateBtn');
   if(btn){ btn.disabled = true; btn.textContent = 'Criando...'; }
   try{
@@ -2985,30 +2994,26 @@ async function planProvision(){
     toast(data.reused ? '✓ Cliente já tinha planilha — vinculada' : '✓ Planilha criada com sucesso', 'ok');
     if(nameEl) nameEl.value = '';
     if(emailEl) emailEl.value = '';
-    // Abre a planilha nova numa aba — ideia do Leonardo: isso dispara um
-    // evento de abertura REAL no Google Sheets (onOpen), que instala
-    // sozinho o trigger de sincronização automática (Code.gs, vinculado
-    // ao template, função ensureEditTriggerInstalled_). Substitui a
-    // tentativa anterior de instalar isso via API do Apps Script
-    // (scripts.run), que esbarrou num limite real da própria API do
-    // Google (script recém-criado via API não vem associado ao projeto
-    // GCP padrão, e a Execution API exige essa associação — sem chamada
-    // de API limpa pra resolver isso sozinha). window.open() é chamado
-    // só se a planilha foi CRIADA agora (não quando reused=true, já que
-    // aí o trigger já deve ter sido instalado numa criação anterior).
+    // Navega a aba já aberta (não abre uma nova) — ver comentário acima
+    // do pendingTab. Só navega se a planilha foi CRIADA agora (não
+    // quando reused=true, já que aí o trigger já deve ter sido
+    // instalado numa criação anterior) — fecha a aba em branco nesse
+    // caso, pra não deixar sobrando.
     if(data.spreadsheet_url && !data.reused){
-      const win = window.open(data.spreadsheet_url, '_blank');
-      if(!win){
-        // Pop-up bloqueado pelo navegador (comum quando window.open()
-        // roda depois de um await — alguns navegadores só permitem
-        // pop-up disparado sincronamente dentro do clique). Sem a aba
-        // abrindo sozinha, o trigger de sync automático não se instala
-        // sozinho — avisa e deixa claro o que fazer.
+      if(pendingTab){
+        pendingTab.location.href = data.spreadsheet_url;
+      }else{
+        // Mesmo abrindo em branco de forma síncrona, alguns navegadores
+        // com configuração muito restritiva ainda podem bloquear —
+        // avisa nesse caso raro.
         toast('Planilha criada, mas o navegador bloqueou a aba automática — abre ela manualmente uma vez pra ativar a sincronização automática', '');
       }
+    }else if(pendingTab){
+      pendingTab.close();
     }
     await planLoadWorkspaces();
   }catch(e){
+    if(pendingTab) pendingTab.close();
     toast('✕ ' + (e.message || 'Falha ao criar a planilha'), 'er');
   }
   if(btn){ btn.disabled = false; btn.textContent = 'Criar Planilha'; }
