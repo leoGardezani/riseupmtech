@@ -2499,22 +2499,46 @@ function doLogout(){
   location.href = 'app.html';
 }
 async function verifyAuth(){
+  // Bug real corrigido nesta sessão: antes, QUALQUER falha aqui (erro de
+  // rede, timeout, o Cloud Run "acordando" de cold start e devolvendo
+  // 500/502 por um instante) era tratada como "não autenticado" e
+  // deslogava na hora — Ctrl+Shift+R (hard refresh) expôs isso mais
+  // porque força tudo a recarregar do zero, batendo com mais frequência
+  // num backend frio. Agora: só desloga de verdade em 401/403 (rejeição
+  // de auth confirmada pelo backend); qualquer outra falha (rede, 5xx)
+  // tenta de novo (_fetchWithRetry) e, se persistir, MANTÉM a sessão
+  // como está — o usuário continua logado com o token que já tinha, em
+  // vez de ser expulso por um problema temporário que não tem nada a
+  // ver com o token dele ser válido ou não.
   try{
-    const res = await fetch(API_BASE + '/auth/me', { headers: authHeaders() });
-    if(!res.ok) throw new Error('unauthorized');
+    const res = await _fetchWithRetry(API_BASE + '/auth/me', { headers: authHeaders() });
+    if(res && (res.status === 401 || res.status === 403)){
+      localStorage.removeItem('riseup_token');
+      return null; // rejeição de auth de verdade — aí sim desloga
+    }
+    if(!res || !res.ok){
+      return 'keep'; // falha de rede/servidor, não de auth — mantém a sessão atual
+    }
     const u = await res.json();
     localStorage.setItem('riseup_user', JSON.stringify({name:u.name, email:u.email}));
     return u;
   }catch(e){
-    localStorage.removeItem('riseup_token');
-    return null;
+    return 'keep'; // idem — erro de rede não é motivo pra deslogar
   }
 }
 async function checkAuth(){
   if(window.__oauthReturnHandled) return; // idem — não redireciona nem verifica nada nessa aba
   if(!AUTH_TOKEN){ location.href = 'app.html'; return; }
   const u = await verifyAuth();
-  if(!u){ location.href = 'app.html'; return; }
+  if(u === null){ location.href = 'app.html'; return; } // só desloga em rejeição de auth confirmada
+  if(u === 'keep'){
+    // Não conseguiu confirmar (rede/servidor) — mantém a sessão e usa o
+    // que já tinha salvo de nome/email, sem forçar logout.
+    const cached = JSON.parse(localStorage.getItem('riseup_user') || 'null');
+    const el = document.getElementById('topUser');
+    if(el && cached) el.textContent = '// ' + (cached.name || cached.email);
+    return;
+  }
   const el = document.getElementById('topUser');
   if(el) el.textContent = '// ' + (u.name || u.email);
 }
