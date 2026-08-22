@@ -2630,6 +2630,19 @@ async function connRenderAccountMounts(workspaceId, backendStatus){
     });
     return;
   }
+  // Bug real corrigido nesta sessão: trocar de workspace rapidamente (ou
+  // uma chamada de campLoadWorkspaces() disparada por troca de aba ainda
+  // em andamento quando o usuário já escolheu outro workspace na mão)
+  // podia deixar duas consultas "correndo" ao mesmo tempo — se a do
+  // workspace ANTIGO (sem conexão, por exemplo) terminasse DEPOIS da do
+  // workspace novo, ela sobrescrevia a tela por último, mostrando
+  // "conexão pendente" pro workspace certo só porque a resposta errada
+  // chegou atrasada. Trava: sempre que for escrever na tela, confere se
+  // o seletor ainda está no mesmo workspace que esta chamada começou —
+  // se mudou, essa chamada é obsoleta e desiste silenciosamente (uma
+  // chamada mais nova já está cuidando da renderização certa).
+  const _isStale = () => document.getElementById('campWorkspaceSelect')?.value !== workspaceId;
+  if(_isStale()) return;
   // Uma chamada por plataforma só (não por mount — Meta tem 3 mounts mas
   // usa a mesma resposta de /connect/accounts/meta).
   const accountsCache = {};
@@ -2646,6 +2659,7 @@ async function connRenderAccountMounts(workspaceId, backendStatus){
   }
 
   for(const m of _CONN_ACCOUNT_MOUNTS){
+    if(_isStale()) return; // outro workspace já foi selecionado — abandona o resto do loop
     const el = document.getElementById(m.mountId);
     if(!el) continue;
     const isConnected = backendStatus ? !!backendStatus[m.platform] : false;
@@ -2654,6 +2668,7 @@ async function connRenderAccountMounts(workspaceId, backendStatus){
       continue;
     }
     const data = await fetchAccountsOnce(m.platform);
+    if(_isStale()) return; // idem — o fetch acima pode ter demorado o suficiente pra ficar obsoleto
     if(!data){
       el.innerHTML = _pendingHtml;
       continue;
@@ -3023,6 +3038,10 @@ async function campOnWorkspaceChange(){
     const res = await fetch(API_BASE + '/connect/status?workspace_id=' + encodeURIComponent(workspaceId), { headers: authHeaders() });
     if(res.ok) backendStatus = await res.json();
   }catch(e){ /* connRenderAccountMounts já trata backendStatus null como tudo pendente */ }
+  // Mesma trava de obsolescência de connRenderAccountMounts — se o
+  // usuário já trocou de workspace de novo enquanto esse fetch estava em
+  // andamento, essa chamada é descartada (a mais nova já cuida disso).
+  if(sel.value !== workspaceId) return;
   connRenderAccountMounts(workspaceId, backendStatus);
 }
 
