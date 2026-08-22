@@ -2622,6 +2622,26 @@ const _pendingHtml = '<span style="font-family:var(--mono);font-size:9px;color:v
 // precisar buscar de novo no backend toda vez que a Página muda.
 let _metaAccountsCache = null;
 
+// Bug real corrigido nesta sessão: às vezes aparecia "conexão pendente"
+// mesmo com a conexão certinha — falha de rede passageira (Cloud Run
+// "acordando" de cold start, timeout pontual) fazia o fetch falhar uma
+// vez só, e o código já desistia direto, sem tentar de novo. Helper
+// pequeno de retry: tenta 1 vez extra depois de uma pausa curta antes
+// de desistir de verdade. Usado nos dois fetches que alimentam os
+// mounts de conta/página (status da conexão + lista de contas).
+async function _fetchWithRetry(url, options, retries = 1, delayMs = 700){
+  for(let attempt = 0; attempt <= retries; attempt++){
+    try{
+      const res = await fetch(url, options);
+      if(res.ok) return res;
+      if(attempt === retries) return res; // última tentativa — devolve mesmo sem ok, quem chamou decide
+    }catch(e){
+      if(attempt === retries) throw e;
+    }
+    await new Promise(r => setTimeout(r, delayMs));
+  }
+}
+
 async function connRenderAccountMounts(workspaceId, backendStatus){
   if(!workspaceId){
     _CONN_ACCOUNT_MOUNTS.forEach(m => {
@@ -2649,8 +2669,8 @@ async function connRenderAccountMounts(workspaceId, backendStatus){
   async function fetchAccountsOnce(platform){
     if(platform in accountsCache) return accountsCache[platform];
     try{
-      const res = await fetch(API_BASE + '/connect/accounts/' + platform + '?workspace_id=' + encodeURIComponent(workspaceId), { headers: authHeaders() });
-      accountsCache[platform] = res.ok ? await res.json() : null;
+      const res = await _fetchWithRetry(API_BASE + '/connect/accounts/' + platform + '?workspace_id=' + encodeURIComponent(workspaceId), { headers: authHeaders() });
+      accountsCache[platform] = (res && res.ok) ? await res.json() : null;
     }catch(e){
       accountsCache[platform] = null;
     }
@@ -3017,6 +3037,13 @@ async function campLoadWorkspaces(){
     ).join('');
     if(prev && list.some(w => w.workspace_id === prev)) sel.value = prev;
     if(btn) btn.disabled = false;
+    // Carrega a conta/página salva pro workspace automaticamente — sem
+    // clique manual (pedido do Leonardo: workspace e conta/página são
+    // independentes, mas a exibição da conta/página certa pro workspace
+    // escolhido tem que ser automática). Robustecido nesta sessão com
+    // trava de obsolescência (ver connRenderAccountMounts) + retry em
+    // falha de rede passageira (ver _fetchWithRetry) — os dois bugs
+    // reais que causavam "conexão pendente" por engano.
     await campOnWorkspaceChange();
   }catch(e){
     sel.innerHTML = '<option value="">Falha ao carregar workspaces</option>';
@@ -3028,19 +3055,21 @@ async function campLoadWorkspaces(){
 // Meta×3, TikTok) foram movidos da aba Conexões pra cá, junto do botão de
 // rodar o pipeline (pedido do Leonardo: "ali [Conexões] é exclusivo pra
 // conexões mesmo"). Reaproveita connRenderAccountMounts, que já existia
-// pra isso — só troca quem chama.
+// pra isso — só troca quem chama. Dispara automaticamente quando o
+// workspace muda (sem clique manual) — robustecido com trava de
+// obsolescência + retry, ver connRenderAccountMounts/_fetchWithRetry.
 async function campOnWorkspaceChange(){
   const sel = document.getElementById('campWorkspaceSelect');
   const workspaceId = sel ? sel.value : '';
   if(!workspaceId){ connRenderAccountMounts(null); return; }
   let backendStatus = null;
   try{
-    const res = await fetch(API_BASE + '/connect/status?workspace_id=' + encodeURIComponent(workspaceId), { headers: authHeaders() });
-    if(res.ok) backendStatus = await res.json();
+    const res = await _fetchWithRetry(API_BASE + '/connect/status?workspace_id=' + encodeURIComponent(workspaceId), { headers: authHeaders() });
+    if(res && res.ok) backendStatus = await res.json();
   }catch(e){ /* connRenderAccountMounts já trata backendStatus null como tudo pendente */ }
-  // Mesma trava de obsolescência de connRenderAccountMounts — se o
-  // usuário já trocou de workspace de novo enquanto esse fetch estava em
-  // andamento, essa chamada é descartada (a mais nova já cuida disso).
+  // Trava de obsolescência — se o usuário já trocou de workspace de novo
+  // enquanto esse fetch estava em andamento, essa chamada é descartada (a
+  // mais nova já cuida disso).
   if(sel.value !== workspaceId) return;
   connRenderAccountMounts(workspaceId, backendStatus);
 }
