@@ -1029,6 +1029,44 @@
   </div>
 </div>
 <script>
+// ── RETORNO DE OAUTH (aba nova aberta por connectPlatform()) ──
+// Bug real corrigido nesta sessão (pedido do Leonardo): depois de
+// conectar uma plataforma, o backend redireciona a ABA NOVA (a que o
+// window.open() abriu) pra "operations.html?platform=X&status=connected"
+// — isso carregava o app INTEIRO de novo nessa aba nova, em vez de só
+// avisar a aba original (onde o usuário realmente estava) que a conexão
+// mudou. Agora: se essa página abriu como a aba de OAuth (tem
+// window.opener) E veio com esses query params, ela só avisa a aba
+// original via window.opener.onOAuthConnected() e se fecha sozinha —
+// não carrega mais nada do app aqui. Roda ANTES de qualquer outra coisa
+// no arquivo, de propósito (não precisa esperar o DOM nem o resto do
+// script rodar).
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const platform = params.get('platform');
+  const status = params.get('status');
+  if(status !== 'connected' || !platform) return;
+  if(!window.opener || window.opener.closed){
+    // Sem aba original pra avisar (ex: alguém abriu esse link direto,
+    // ou a aba original foi fechada nesse meio tempo) — deixa cair no
+    // fluxo normal do app em vez de fechar sozinha sem avisar ninguém.
+    return;
+  }
+  try{
+    if(typeof window.opener.onOAuthConnected === 'function'){
+      window.opener.onOAuthConnected(platform);
+    }
+    window.opener.focus();
+  }catch(e){ /* cross-origin ou opener já não responde mais — segue igual pra fechar */ }
+  document.title = 'Conectado';
+  document.documentElement.innerHTML = '<body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#888;background:#0d0d0d">Conectado — fechando esta aba...</body>';
+  window.close();
+  // Se o navegador bloquear window.close() (alguns bloqueiam fechar aba
+  // que não foi 100% aberta por script, dependendo da configuração), pelo
+  // menos a aba já mostra "Conectado" em vez de recarregar o app inteiro.
+  window.__oauthReturnHandled = true;
+})();
+
 // ── DATA ──
 const PACING=[
   {metric:'Investimento',cur:'R$284k',tgt:'R$310k',pct:91.6,expected:77,unit:'R$'},
@@ -1846,6 +1884,10 @@ function switchTab(id, el){
   document.getElementById('tab-'+id).classList.add('active');
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
   el.classList.add('on');
+  // Salva a aba ativa — pedido do Leonardo: um F5/refresh da página não
+  // deve voltar sempre pro Overview, deve manter o usuário onde estava.
+  // Restaurado no window.addEventListener('load') abaixo.
+  try{ localStorage.setItem('riseup_active_tab', id); }catch(e){}
   if(id === 'campanhas') campLoadWorkspaces();
   if(id === 'desdobrador') desdLoadWorkspaces();
   if(id === 'criativos') loadPendingFromBackend();
@@ -2001,16 +2043,20 @@ function desdParseSize(sizeStr){
 async function desdLoadWorkspaces(){
   const sel = document.getElementById('desdWorkspaceSelect');
   if(!sel) return;
+  // Mesmo bug/fix de campLoadWorkspaces: preserva a seleção atual em vez
+  // de sempre pular pro primeiro workspace da lista ao recarregar.
+  const prev = sel.value || desdWorkspaceId;
   sel.innerHTML = '<option value="">Carregando...</option>';
   try{
     const res = await fetch(API_BASE + '/plan/workspaces', { headers: authHeaders() });
     if(!res.ok) throw new Error('sem acesso ao backend');
     const list = await res.json();
-    if(!list.length){ sel.innerHTML = '<option value="">Nenhum workspace encontrado</option>'; return; }
+    if(!list.length){ sel.innerHTML = '<option value="">Nenhum workspace encontrado</option>'; desdWorkspaceId = ''; return; }
     sel.innerHTML = list.map(w =>
       '<option value="' + w.workspace_id + '">' + _escHtml(w.client_name || w.workspace_id) + '</option>'
     ).join('');
-    if(!desdWorkspaceId) desdWorkspaceId = sel.value;
+    if(prev && list.some(w => w.workspace_id === prev)) sel.value = prev;
+    desdWorkspaceId = sel.value;
     await desdLoadQueue();
   }catch(e){
     sel.innerHTML = '<option value="">Falha ao carregar workspaces</option>';
@@ -2380,6 +2426,7 @@ async function desdSubmit(){
 }
 // ── INIT ──
 window.addEventListener('load',()=>{
+  if(window.__oauthReturnHandled) return; // aba de retorno de OAuth já se fechou/vai fechar — não roda o app aqui
   renderPacing();
   renderCamps();
   renderCreatives();
@@ -2402,6 +2449,14 @@ window.addEventListener('load',()=>{
     initCharts();
   }, 80);
   setupChartResize();
+  // Restaura a aba ativa de antes do refresh — pedido do Leonardo: um
+  // F5 não deve voltar sempre pro Overview, deve manter onde estava (ver
+  // switchTab(), que salva a cada troca). Sem isso, o padrão do HTML
+  // ("Overview" já vem com .active/.on marcados) sempre vencia.
+  try{
+    const savedTab = localStorage.getItem('riseup_active_tab');
+    if(savedTab && savedTab !== 'dashboard') switchTabById(savedTab);
+  }catch(e){}
 });
 
 function desdSetupDropzone(){
@@ -2456,6 +2511,7 @@ async function verifyAuth(){
   }
 }
 async function checkAuth(){
+  if(window.__oauthReturnHandled) return; // idem — não redireciona nem verifica nada nessa aba
   if(!AUTH_TOKEN){ location.href = 'app.html'; return; }
   const u = await verifyAuth();
   if(!u){ location.href = 'app.html'; return; }
@@ -2698,6 +2754,20 @@ function connectPlatform(name, key) {
   window.open(url, '_blank');
 }
 
+// Chamado pela ABA DE OAUTH (via window.opener) depois de conectar uma
+// plataforma com sucesso — ver o bloco no topo do arquivo. Atualiza só o
+// que mudou aqui na aba ORIGINAL (onde o usuário realmente clicou
+// "Conectar"), sem precisar recarregar nada. Nova nesta sessão.
+function onOAuthConnected(platform){
+  // Reaproveita os refreshes que já existem — cada um já é no-op se o
+  // elemento não estiver na tela (usuário podia estar em outra aba do
+  // app quando clicou "Conectar").
+  if(document.getElementById('connWorkspaceSelect')) renderConns();
+  if(document.getElementById('campWorkspaceSelect')) campOnWorkspaceChange();
+  const label = { google_ads: 'Google Ads', meta: 'Meta Ads', tiktok: 'TikTok Ads' }[platform] || platform;
+  toast('✓ ' + label + ' conectado', 'ok');
+}
+
 function connOnWorkspaceChange(){
   renderConns();
 }
@@ -2910,6 +2980,12 @@ async function campLoadWorkspaces(){
   const sel = document.getElementById('campWorkspaceSelect');
   const btn = document.getElementById('campRunBtn');
   if(!sel) return;
+  // Bug real corrigido nesta sessão: perdia a seleção atual toda vez que
+  // recarregava (pulava pro primeiro workspace da lista sempre) —
+  // parecia que "as conexões caíam" quando na real o seletor tinha
+  // silenciosamente trocado de workspace por baixo dos panos. Mesmo
+  // padrão de preservar `prev` que connLoadWorkspaceSelect já usava.
+  const prev = sel.value;
   sel.innerHTML = '<option value="">Carregando...</option>';
   if(btn) btn.disabled = true;
   try{
@@ -2924,6 +3000,7 @@ async function campLoadWorkspaces(){
     sel.innerHTML = list.map(w =>
       '<option value="' + w.workspace_id + '">' + _escHtml(w.client_name || w.workspace_id) + '</option>'
     ).join('');
+    if(prev && list.some(w => w.workspace_id === prev)) sel.value = prev;
     if(btn) btn.disabled = false;
     await campOnWorkspaceChange();
   }catch(e){
@@ -3009,6 +3086,22 @@ function campRenderRunResult(data){
   el.innerHTML = html;
 }
 
+// Bug real corrigido nesta sessão: criar ou excluir um plano de mídia só
+// atualizava a lista da própria aba Planilha — os seletores de
+// Campanhas ("Rodar Pipeline"), Conexões e Desdobrador ficavam
+// desatualizados até o usuário trocar de aba manualmente (e trocar de
+// aba tinha o bug próprio corrigido acima, de perder a seleção atual).
+// Chamado depois de planProvision()/planDeleteConfirm() terem sucesso.
+// Só atualiza os seletores que existem na tela AGORA (o painel lateral
+// de Planilha pode estar aberto por cima de qualquer aba, então nem
+// sempre os três elementos estão no DOM ativo ao mesmo tempo — os
+// getElementById simplesmente dão null nesse caso, sem erro).
+async function refreshAllWorkspaceSelectors(){
+  if(document.getElementById('campWorkspaceSelect')) await campLoadWorkspaces();
+  if(document.getElementById('connWorkspaceSelect')){ connWorkspacesLoaded = false; await renderConns(); }
+  if(document.getElementById('desdWorkspaceSelect')) await desdLoadWorkspaces();
+}
+
 async function planProvision(){
   const nameEl = document.getElementById('planClientName');
   const emailEl = document.getElementById('planClientEmail');
@@ -3066,6 +3159,7 @@ async function planProvision(){
       pendingTab.close();
     }
     await planLoadWorkspaces();
+    await refreshAllWorkspaceSelectors();
   }catch(e){
     if(pendingTab) pendingTab.close();
     toast('✕ ' + (e.message || 'Falha ao criar o plano de mídia'), 'er');
@@ -3136,6 +3230,7 @@ async function planDeleteConfirm(){
     planWorkspaces = planWorkspaces.filter(w => w.workspace_id !== workspaceId);
     renderPlanWorkspaceList();
     toast('✓ Plano de mídia excluído', 'ok');
+    await refreshAllWorkspaceSelectors();
   }catch(e){
     toast('✕ ' + (e.message || 'Não foi possível excluir agora'), 'er');
   }
