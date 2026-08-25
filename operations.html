@@ -660,6 +660,7 @@
 
         <div class="desd-step-lbl" style="margin-top:0">Call to Action</div>
         <div class="fg"><label class="fl">Texto do botão (deixe vazio pra não ter CTA)</label><input class="fi" id="desdCtaText" value="Saiba mais" oninput="desdOnCtaInputsChanged()"></div>
+        <div id="desdCtaCharHint" style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin:-8px 0 8px"></div>
         <div class="fg"><label class="fl">Cor de fundo do CTA</label><input class="fi" type="color" id="desdCtaBg" value="#0d0d0d" oninput="desdOnCtaInputsChanged()" style="padding:4px;height:36px"></div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:8px;line-height:1.6">// sempre na parte inferior, largura total, 15% da altura — desenhado por código (não pela IA), garante posição/cor exatas</div>
 
@@ -2099,8 +2100,29 @@ function desdToggleQueueRow(rowId){
   desdState.chosenVariantIndex = null;
   renderDesdQueue();
   desdRenderSelectedSummary();
+  desdRenderCtaCharHint();
   desdRenderAiVariantGrid();
   desdUpdateSubmitButtonState();
+}
+
+// Novo nesta sessão (pedido do Leonardo) — mostra o limite de caracteres
+// do CTA (creative_max_char, vem da aba de specs da planilha via
+// ARRAYFORMULA) baseado na PRIMEIRA linha marcada, só como orientação
+// visual — a validação de verdade é sempre no backend (/submit), que
+// confere linha por linha (podem ter limites diferentes se você marcar
+// linhas de formatos diferentes no mesmo envio).
+function desdRenderCtaCharHint(){
+  const el = document.getElementById('desdCtaCharHint');
+  if(!el) return;
+  const first = DESD_QUEUE.find(r => desdState.selectedRowIds.has(r.row_id));
+  const maxChar = first ? parseInt(first.creative_max_char, 10) : NaN;
+  if(!first || isNaN(maxChar)){
+    el.textContent = '';
+    return;
+  }
+  const cur = (document.getElementById('desdCtaText').value || '').length;
+  el.textContent = `${cur} / ${maxChar} caracteres (limite da linha "${first.campaign_name}")`;
+  el.style.color = cur > maxChar ? 'var(--danger)' : 'var(--ink-muted)';
 }
 
 function desdRenderSelectedSummary(){
@@ -2162,6 +2184,7 @@ async function desdUploadKvToBackend(file){
 function desdOnCtaInputsChanged(){
   desdState.ctaText = document.getElementById('desdCtaText').value;
   desdState.ctaColor = document.getElementById('desdCtaBg').value;
+  desdRenderCtaCharHint();
   desdRenderAiVariantGrid(); // redesenha só o overlay do CTA nas variações já geradas, sem chamar a IA de novo
 }
 
