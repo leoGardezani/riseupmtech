@@ -600,7 +600,7 @@
   <!-- ── DESDOBRADOR DE PEÇAS ── -->
   <div class="tab-page" id="tab-desdobrador">
     <div class="section-title">Desdobrador de Peças</div>
-    <div class="section-sub">Um KV vira todos os formatos — posicione headline e CTA, escolha o motion e envie pra aprovação</div>
+    <div class="section-sub">Um KV vira todos os formatos — a IA recompõe a cena pra cada tamanho, você escreve o que quiser mudar e define o CTA</div>
 
     <!-- Workspace do desdobrador -->
     <div class="tbox" style="margin-bottom:20px">
@@ -626,67 +626,42 @@
     </div>
 
     <div class="desd-layout">
-      <!-- COLUNA ESQUERDA: canvas + KV -->
+      <!-- COLUNA ESQUERDA: KV + geração via IA -->
       <div class="desd-col">
         <div class="desd-step-lbl">1. KV de origem</div>
         <div class="uz" id="desdDropzone" style="margin-bottom:16px" onclick="document.getElementById('desdFileInput').click()">
           <div class="uz-icon">🖼️</div>
           <div class="uz-text"><strong id="desdUzText">Clique ou arraste o KV</strong></div>
-          <div class="uz-hint">.jpg .png — vira o fundo de todos os formatos</div>
+          <div class="uz-hint">.jpg .png — a IA recompõe esse KV pra cada formato</div>
         </div>
         <input type="file" id="desdFileInput" accept="image/png,image/jpeg" style="display:none" onchange="desdOnFileSelected(event)">
-
-        <div class="desd-step-lbl">2. Editor de posição — headline e CTA</div>
-        <div class="desd-canvas-wrap">
-          <div class="desd-canvas" id="desdCanvas" style="width:420px;height:420px">
-            <div class="desd-empty" id="desdCanvasEmpty">Envie um KV acima<br>pra começar a posicionar os elementos</div>
-          </div>
+        <div class="desd-canvas-wrap" id="desdKvPreviewWrap" style="display:none">
+          <img id="desdKvPreviewImg" style="max-width:100%;max-height:220px;display:block;margin:0 auto">
         </div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);text-align:center;margin-bottom:16px">// arraste os elementos dentro do quadro — a posição em % se aplica a todos os formatos gerados</div>
 
-        <div class="desd-step-lbl">3. Peças a gerar</div>
-        <div style="font-size:12px;color:var(--ink-mid);margin-bottom:10px;line-height:1.6">O formato de cada peça vem da própria linha de material-request — marque acima quais linhas da fila este KV vai atender.</div>
+        <div class="desd-step-lbl">2. Peças a gerar</div>
+        <div style="font-size:12px;color:var(--ink-mid);margin-bottom:10px;line-height:1.6">O formato de cada peça vem da própria linha de material-request — marque acima quais linhas da fila este KV vai atender. A pré-visualização por IA usa o formato da primeira linha marcada.</div>
         <div id="desdSelectedRowsSummary" style="margin-bottom:8px"></div>
 
-        <div class="desd-step-lbl">4. Motion (opcional)</div>
-        <div class="desd-toggle-row">
-          <div class="desd-toggle" id="desdMotionToggle" onclick="desdToggleMotion()"></div>
-          <span style="font-size:12px;color:var(--ink-soft)">Gerar como versão animada (HTML5) em vez de estático — aplica a todas as linhas marcadas</span>
-        </div>
-        <div class="desd-motion-grid" id="desdMotionGrid" style="display:none"></div>
-
-        <div class="desd-step-lbl">5. Preview por peça</div>
-        <button class="bt-btn ghost" style="margin-bottom:12px" onclick="desdRenderAllPreviews()">↻ Atualizar previews</button>
-        <div class="desd-preview-grid" id="desdPreviewGrid"></div>
+        <div class="desd-step-lbl">3. Gerar variações com IA</div>
+        <button class="btn-full" id="desdGenerateBtn" onclick="desdGenerateAiVariants()">✦ Gerar variações com IA</button>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:6px;line-height:1.6">// pode levar 1-2 min (gera 4 variações via Gemini) — escolha uma abaixo antes de enviar pra aprovação</div>
+        <div id="desdAiStatus" style="margin-top:10px"></div>
+        <div class="desd-preview-grid" id="desdAiVariantGrid" style="margin-top:12px"></div>
       </div>
 
-      <!-- COLUNA DIREITA: elementos + metadata -->
+      <!-- COLUNA DIREITA: prompt + CTA + metadata -->
       <div class="desd-col">
-        <div class="desd-step-lbl">Headline</div>
-        <div class="fg"><label class="fl">Texto</label><textarea class="fi" id="desdHeadlineText" rows="2" style="resize:vertical" oninput="desdUpdateFromInputs()">Nova coleção chegou — aproveite o lançamento</textarea></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="fg"><label class="fl">Cor do texto</label><input class="fi" type="color" id="desdHeadlineColor" value="#ffffff" oninput="desdUpdateFromInputs()" style="padding:4px;height:36px"></div>
-          <div class="fg"><label class="fl">Tam. fonte (% altura)</label><input class="fi" type="number" id="desdHeadlineSize" value="9" min="3" max="20" oninput="desdUpdateFromInputs()"></div>
-        </div>
-        <div class="fg"><label class="fl">Alinhamento</label>
-          <select class="fs_" id="desdHeadlineAlign" onchange="desdUpdateFromInputs()">
-            <option value="left">Esquerda</option><option value="center">Centro</option><option value="right">Direita</option>
-          </select>
-        </div>
+        <div class="desd-step-lbl" style="margin-top:0">Prompt — o que a IA deve fazer</div>
+        <div class="fg"><label class="fl">Características desejadas (texto livre)</label><textarea class="fi" id="desdPromptText" rows="4" style="resize:vertical" placeholder="ex: adicione o texto 'Nova coleção chegou', tom vibrante, paleta azul e branco, deixe o produto em destaque à esquerda">Nova coleção chegou — aproveite o lançamento</textarea></div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:8px;line-height:1.6">// pode incluir headline, tom, paleta de cor, o que priorizar na composição — a IA recebe isso junto com o KV</div>
 
         <div class="divider" style="margin:20px 0"></div>
 
         <div class="desd-step-lbl" style="margin-top:0">Call to Action</div>
-        <div class="fg"><label class="fl">Texto do botão</label><input class="fi" id="desdCtaText" value="Saiba mais" oninput="desdUpdateFromInputs()"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="fg"><label class="fl">Cor de fundo</label><input class="fi" type="color" id="desdCtaBg" value="#0d0d0d" oninput="desdUpdateFromInputs()" style="padding:4px;height:36px"></div>
-          <div class="fg"><label class="fl">Cor do texto</label><input class="fi" type="color" id="desdCtaColor" value="#ffffff" oninput="desdUpdateFromInputs()" style="padding:4px;height:36px"></div>
-        </div>
-        <div class="fg"><label class="fl">Formato</label>
-          <select class="fs_" id="desdCtaShape" onchange="desdUpdateFromInputs()">
-            <option value="pill">Pílula</option><option value="rect">Retângulo</option>
-          </select>
-        </div>
+        <div class="fg"><label class="fl">Texto do botão (deixe vazio pra não ter CTA)</label><input class="fi" id="desdCtaText" value="Saiba mais" oninput="desdOnCtaInputsChanged()"></div>
+        <div class="fg"><label class="fl">Cor de fundo do CTA</label><input class="fi" type="color" id="desdCtaBg" value="#0d0d0d" oninput="desdOnCtaInputsChanged()" style="padding:4px;height:36px"></div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:8px;line-height:1.6">// sempre na parte inferior, largura total, 15% da altura — desenhado por código (não pela IA), garante posição/cor exatas</div>
 
         <div class="divider" style="margin:20px 0"></div>
 
@@ -694,8 +669,8 @@
         <div class="fg"><label class="fl">Campanha</label><input class="fi" id="desdCampaignName" placeholder="ex: Awareness Q1"></div>
         <div class="fg"><label class="fl">Marca</label><input class="fi" id="desdBrand" placeholder="ex: Produto A"></div>
 
-        <button class="btn-full" style="margin-top:8px" onclick="desdSubmit()">Enviar para Aprovação →</button>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px;line-height:1.6">// envia pro backend real (/desdobrador/submit) e alimenta a fila real de Aguardando Aprovação (/desdobrador/pending)</div>
+        <button class="btn-full" style="margin-top:8px" id="desdSubmitBtn" onclick="desdSubmit()" disabled>Enviar para Aprovação →</button>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px;line-height:1.6">// escolha uma variação gerada à esquerda antes de enviar. Envia pro backend real (/desdobrador/submit) e alimenta a fila real de Aguardando Aprovação (/desdobrador/pending)</div>
       </div>
     </div>
   </div>
@@ -1997,39 +1972,36 @@ function setupChartResize(){
   document.querySelectorAll('.chart-canvas-wrap').forEach(el=>obs.observe(el));
 }
 // ── DESDOBRADOR DE PEÇAS ──
-// Espelha services/creative_engine.py (backend) — ver desdobrador-arquitetura.md.
-// A fila (DESD_QUEUE) agora vem 100% de GET /desdobrador/queue (esta
-// sessão — antes era um array mock fixo). O upload do KV, o submit e o
-// preview local (Canvas API, mesmo algoritmo de cover-fit+wrap do Pillow)
-// continuam como antes; o preview local é só uma aproximação visual
-// enquanto o usuário mexe no editor — o resultado final de verdade é
-// sempre gerado no backend em /desdobrador/submit.
+// Espelha api/creative_deploy.py + services/creative_ai_engine.py (backend)
+// — ver desdobrador-arquitetura.md. A fila (DESD_QUEUE) vem 100% de
+// GET /desdobrador/queue.
+//
+// Reescrito nesta sessão (pedido do Leonardo): tirado o posicionamento
+// manual de headline/CTA arrastável — agora é a IA (Gemini, via
+// POST /desdobrador/ai-preview) que recompõe o KV inteiro pro formato
+// pedido, a partir de um prompt livre. O usuário escolhe uma das
+// variações geradas, define só o texto/cor do CTA (sempre embaixo,
+// largura total, 15% de altura — desenhado por código depois, nunca pela
+// IA, pra garantir posição/cor exatas), e envia pra aprovação.
 const API_BASE = document.querySelector('#rp-config .fi[value*="southamerica-east1"]')?.value
   || 'https://riseup-backend-509219529113.southamerica-east1.run.app';
 
-const DESD_MOTION_TEMPLATES = [
-  {id:'zoom_kv',         name:'Zoom suave no KV',            desc:'Ken Burns leve + CTA com fade-in atrasado.'},
-  {id:'slide_headline',  name:'Headline desliza + CTA pulsa', desc:'Título entra da esquerda, CTA pulsa em loop.'},
-  {id:'fade_cascade',    name:'Cascata de fade',              desc:'KV, headline e CTA entram em sequência.'},
-  {id:'pulse_only',      name:'Estático + CTA pulsando',      desc:'Só o botão anima — bom pra remarketing.'},
-];
 // Fila real de material-request "ready to setup" sem creative_name ainda —
-// carregada de GET /desdobrador/queue (esta sessão). Cada item tem:
-// row_id, campaign_name, brand, source, creative_type, creative_size,
+// carregada de GET /desdobrador/queue. Cada item tem: row_id,
+// campaign_name, brand, source, creative_type, creative_size,
 // creative_width, creative_title, creative_description, request_date,
-// delivery_date. Antes disto era um array mock fixo (DESD_QUEUE).
+// delivery_date.
 let DESD_QUEUE = [];
 let desdWorkspaceId = '';
 
 let desdState = {
-  kvDataUrl: null,
-  kvImage: null,
-  blobPath: null,   // preenchido se o upload real pro backend funcionar
-  headline: {text:'Nova coleção chegou — aproveite o lançamento', xPct:8, yPct:10, maxWidthPct:84, fontSizePct:9, color:'#ffffff', align:'left'},
-  cta: {text:'Saiba mais', xPct:8, yPct:78, widthPct:44, heightPct:12, bg:'#0d0d0d', color:'#ffffff', shape:'pill'},
+  kvDataUrl: null,     // preview local (FileReader) — só pra mostrar o KV enviado
+  blobPath: null,       // preenchido se o upload real pro backend funcionar — obrigatório pra gerar/enviar
   selectedRowIds: new Set(),
-  motionEnabled: false,
-  motionTemplateId: 'zoom_kv',
+  aiVariants: [],       // [{index, data_base64 (SEM CTA), error}] — vem de /ai-preview
+  chosenVariantIndex: null,
+  ctaText: 'Saiba mais',
+  ctaColor: '#0d0d0d',
 };
 
 function desdParseSize(sizeStr){
@@ -2090,7 +2062,6 @@ async function desdLoadQueue(){
   }
   renderDesdQueue();
   desdRenderSelectedSummary();
-  desdRenderAllPreviews();
 }
 
 function renderDesdQueue(){
@@ -2121,9 +2092,15 @@ function desdToggleQueueRow(rowId){
     document.getElementById('desdCampaignName').value = first.campaign_name;
     document.getElementById('desdBrand').value = first.brand;
   }
+  // Trocar quais linhas estão marcadas muda o formato de referência da
+  // pré-visualização por IA (usa a primeira linha marcada) — variações já
+  // geradas ficam obsoletas, força gerar de novo pra evitar confusão.
+  desdState.aiVariants = [];
+  desdState.chosenVariantIndex = null;
   renderDesdQueue();
   desdRenderSelectedSummary();
-  desdRenderAllPreviews();
+  desdRenderAiVariantGrid();
+  desdUpdateSubmitButtonState();
 }
 
 function desdRenderSelectedSummary(){
@@ -2149,20 +2126,23 @@ function desdOnFileSelected(evt){
   const reader = new FileReader();
   reader.onload = () => {
     desdState.kvDataUrl = reader.result;
-    const img = new Image();
-    img.onload = () => {
-      desdState.kvImage = img;
-      document.getElementById('desdUzText').textContent = file.name;
-      desdInitCanvas();
-      desdRenderAllPreviews();
-      desdUploadKvToBackend(file); // tentativa best-effort, não bloqueia o fluxo local
-    };
-    img.src = reader.result;
+    document.getElementById('desdUzText').textContent = file.name;
+    const wrap = document.getElementById('desdKvPreviewWrap');
+    const img = document.getElementById('desdKvPreviewImg');
+    if(wrap && img){ img.src = reader.result; wrap.style.display = 'block'; }
+    // Trocar o KV invalida qualquer variação já gerada com o KV anterior.
+    desdState.aiVariants = [];
+    desdState.chosenVariantIndex = null;
+    renderDesdQueue();
+    desdRenderAiVariantGrid();
+    desdUpdateSubmitButtonState();
+    desdUploadKvToBackend(file);
   };
   reader.readAsDataURL(file);
 }
 
 async function desdUploadKvToBackend(file){
+  const statusEl = document.getElementById('desdAiStatus');
   try{
     const form = new FormData();
     form.append('file', file);
@@ -2172,230 +2152,135 @@ async function desdUploadKvToBackend(file){
     desdState.blobPath = data.blob_path;
   }catch(e){
     desdState.blobPath = null;
-    toast('✕ Falha ao subir o KV pro backend — sem blob_path, o envio pra aprovação vai falhar', 'er');
+    toast('✕ Falha ao subir o KV pro backend — sem blob_path, não dá pra gerar variações nem enviar pra aprovação', 'er');
   }
 }
 
-// ── Canvas de edição (headline + CTA arrastáveis) ──
-function desdInitCanvas(){
-  const canvas = document.getElementById('desdCanvas');
-  const empty = document.getElementById('desdCanvasEmpty');
-  canvas.style.backgroundImage = `url(${desdState.kvDataUrl})`;
-  canvas.style.backgroundSize = 'cover';
-  canvas.style.backgroundPosition = 'center';
-  if(empty) empty.remove();
-
-  if(!document.getElementById('desdElHeadline')){
-    const h = document.createElement('div');
-    h.className = 'desd-el desd-el-headline';
-    h.id = 'desdElHeadline';
-    canvas.appendChild(h);
-    desdMakeDraggable(h, desdState.headline, canvas);
-
-    const c = document.createElement('div');
-    c.className = 'desd-el desd-el-cta';
-    c.id = 'desdElCta';
-    canvas.appendChild(c);
-    desdMakeDraggable(c, desdState.cta, canvas);
-  }
-  desdSyncCanvasElements();
+// ── CTA (texto + cor) — sempre embaixo, largura total, 15% de altura;
+// desenhado por código (Pillow no backend, Canvas aqui só pro preview),
+// nunca pela IA — garante posição/cor exatas. ──
+function desdOnCtaInputsChanged(){
+  desdState.ctaText = document.getElementById('desdCtaText').value;
+  desdState.ctaColor = document.getElementById('desdCtaBg').value;
+  desdRenderAiVariantGrid(); // redesenha só o overlay do CTA nas variações já geradas, sem chamar a IA de novo
 }
 
-function desdMakeDraggable(el, stateObj, canvas){
-  let dragging = false;
-  el.addEventListener('pointerdown', (e) => {
-    dragging = true;
-    el.classList.add('dragging');
-    el.setPointerCapture(e.pointerId);
-    e.preventDefault();
-  });
-  el.addEventListener('pointermove', (e) => {
-    if(!dragging) return;
-    const rect = canvas.getBoundingClientRect();
-    let xPct = ((e.clientX - rect.left) / rect.width) * 100;
-    let yPct = ((e.clientY - rect.top) / rect.height) * 100;
-    stateObj.xPct = Math.max(0, Math.min(100, +xPct.toFixed(1)));
-    stateObj.yPct = Math.max(0, Math.min(100, +yPct.toFixed(1)));
-    desdSyncCanvasElements();
-  });
-  el.addEventListener('pointerup', () => { dragging = false; el.classList.remove('dragging'); });
-  el.addEventListener('pointercancel', () => { dragging = false; el.classList.remove('dragging'); });
-}
-
-function desdSyncCanvasElements(){
-  const canvas = document.getElementById('desdCanvas');
-  if(!canvas || !desdState.kvImage) return;
-  const h = document.getElementById('desdElHeadline');
-  const c = document.getElementById('desdElCta');
-  const hl = desdState.headline, cta = desdState.cta;
-
-  if(h){
-    h.textContent = hl.text;
-    h.style.left = hl.xPct + '%';
-    h.style.top = hl.yPct + '%';
-    h.style.maxWidth = hl.maxWidthPct + '%';
-    h.style.fontSize = 'calc(' + hl.fontSizePct + '% * 4.2)'; // aproximação visual no editor (canvas de preview é que segue o % exato)
-    h.style.color = hl.color;
-    h.style.textAlign = hl.align;
-  }
-  if(c){
-    c.textContent = cta.text;
-    c.style.left = cta.xPct + '%';
-    c.style.top = cta.yPct + '%';
-    c.style.width = cta.widthPct + '%';
-    c.style.height = cta.heightPct + '%';
-    c.style.background = cta.bg;
-    c.style.color = cta.color;
-    c.style.borderRadius = cta.shape === 'pill' ? '999px' : '8px';
-  }
-}
-
-function desdUpdateFromInputs(){
-  desdState.headline.text = document.getElementById('desdHeadlineText').value;
-  desdState.headline.color = document.getElementById('desdHeadlineColor').value;
-  desdState.headline.fontSizePct = +document.getElementById('desdHeadlineSize').value || 9;
-  desdState.headline.align = document.getElementById('desdHeadlineAlign').value;
-  desdState.cta.text = document.getElementById('desdCtaText').value;
-  desdState.cta.bg = document.getElementById('desdCtaBg').value;
-  desdState.cta.color = document.getElementById('desdCtaColor').value;
-  desdState.cta.shape = document.getElementById('desdCtaShape').value;
-  desdSyncCanvasElements();
-  desdRenderAllPreviews();
-}
-
-// ── Motion ──
-function desdToggleMotion(){
-  desdState.motionEnabled = !desdState.motionEnabled;
-  document.getElementById('desdMotionToggle').classList.toggle('on', desdState.motionEnabled);
-  document.getElementById('desdMotionGrid').style.display = desdState.motionEnabled ? 'grid' : 'none';
-  if(desdState.motionEnabled) desdRenderMotionGrid();
-}
-
-function desdRenderMotionGrid(){
-  const el = document.getElementById('desdMotionGrid');
-  el.innerHTML = DESD_MOTION_TEMPLATES.map(t => `
-    <div class="desd-motion-card${desdState.motionTemplateId===t.id?' on':''}" onclick="desdSelectMotion('${t.id}')">
-      <div class="desd-motion-name">${t.name}</div>
-      <div class="desd-motion-desc">${t.desc}</div>
-    </div>`).join('');
-}
-
-function desdSelectMotion(id){
-  desdState.motionTemplateId = id;
-  desdRenderMotionGrid();
-}
-
-// ── Render de preview (Canvas API — mesmo algoritmo do Pillow no backend) ──
-function desdWrapText(ctx, text, maxWidth){
-  const words = text.split(' ');
-  const lines = [];
-  let current = '';
-  words.forEach(word => {
-    const trial = (current + ' ' + word).trim();
-    if(ctx.measureText(trial).width <= maxWidth || !current) current = trial;
-    else { lines.push(current); current = word; }
-  });
-  if(current) lines.push(current);
-  return lines;
-}
-
-function desdRoundRectPath(ctx, x, y, w, h, r){
-  r = Math.min(r, w/2, h/2);
-  ctx.beginPath();
-  ctx.moveTo(x+r, y);
-  ctx.arcTo(x+w, y, x+w, y+h, r);
-  ctx.arcTo(x+w, y+h, x, y+h, r);
-  ctx.arcTo(x, y+h, x, y, r);
-  ctx.arcTo(x, y, x+w, y, r);
-  ctx.closePath();
-}
-
-function desdDrawCoverFit(ctx, img, w, h){
-  const srcAspect = img.width / img.height;
-  const dstAspect = w / h;
-  let sx, sy, sw, sh;
-  if(srcAspect > dstAspect){
-    sh = img.height; sw = sh * dstAspect; sx = (img.width - sw) / 2; sy = 0;
-  } else {
-    sw = img.width; sh = sw / dstAspect; sx = 0; sy = (img.height - sh) / 2;
-  }
-  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
-}
-
-function desdDrawHeadline(ctx, w, h, el){
-  if(!el.text || !el.text.trim()) return;
-  const fontSize = Math.max(8, Math.round(h * el.fontSizePct / 100));
+function desdDrawCtaBarOnCanvas(ctx, w, h, text, color){
+  if(!text || !text.trim()) return;
+  const barH = h * 0.15;
+  const y0 = h - barH;
+  ctx.fillStyle = color || '#0d0d0d';
+  ctx.fillRect(0, y0, w, barH);
+  const fontSize = Math.max(8, Math.round(barH * 0.42));
   ctx.font = `700 ${fontSize}px Arial, Helvetica, sans-serif`;
-  ctx.textBaseline = 'top';
-  const x = w * el.xPct / 100;
-  const y = h * el.yPct / 100;
-  const maxWidth = w * el.maxWidthPct / 100;
-  const lines = desdWrapText(ctx, el.text, maxWidth);
-  const lineHeight = fontSize * 1.2;
-  lines.forEach((line, i) => {
-    const lw = ctx.measureText(line).width;
-    let lx = x;
-    if(el.align === 'center') lx = x + (maxWidth - lw) / 2;
-    else if(el.align === 'right') lx = x + (maxWidth - lw);
-    ctx.fillStyle = 'rgba(0,0,0,.45)';
-    ctx.fillText(line, lx + 1, y + i * lineHeight + 1);
-    ctx.fillStyle = el.color;
-    ctx.fillText(line, lx, y + i * lineHeight);
-  });
-}
-
-function desdDrawCta(ctx, w, h, el){
-  if(!el.text || !el.text.trim()) return;
-  const x0 = w * el.xPct / 100, y0 = h * el.yPct / 100;
-  const bw = w * el.widthPct / 100, bh = h * el.heightPct / 100;
-  const r = el.shape === 'pill' ? bh / 2 : bh * 0.12;
-  ctx.fillStyle = el.bg;
-  desdRoundRectPath(ctx, x0, y0, bw, bh, r);
-  ctx.fill();
-  const fontSize = Math.max(8, Math.round(bh * 0.42));
-  ctx.font = `700 ${fontSize}px Arial, Helvetica, sans-serif`;
-  ctx.fillStyle = el.color;
+  ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(el.text, x0 + bw / 2, y0 + bh / 2 + 1);
+  ctx.fillText(text, w / 2, y0 + barH / 2 + 1);
   ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
 }
 
-function desdRenderFormatToCanvas(canvasEl, w, h){
-  canvasEl.width = w;
-  canvasEl.height = h;
-  const ctx = canvasEl.getContext('2d');
-  ctx.clearRect(0, 0, w, h);
-  if(desdState.kvImage) desdDrawCoverFit(ctx, desdState.kvImage, w, h);
-  else { ctx.fillStyle = '#0d0d0d'; ctx.fillRect(0, 0, w, h); }
-  desdDrawHeadline(ctx, w, h, desdState.headline);
-  desdDrawCta(ctx, w, h, desdState.cta);
+// ── Geração via IA (POST /desdobrador/ai-preview) — NÃO persiste nada,
+// só gera N variações (sem CTA) pro usuário escolher. ──
+async function desdGenerateAiVariants(){
+  const statusEl = document.getElementById('desdAiStatus');
+  const btn = document.getElementById('desdGenerateBtn');
+  if(!desdState.blobPath){ toast('Envie um KV antes de gerar variações', 'er'); return; }
+  const rows = DESD_QUEUE.filter(r => desdState.selectedRowIds.has(r.row_id));
+  if(!rows.length){ toast('Marque ao menos uma linha da fila (define o formato da pré-visualização)', 'er'); return; }
+
+  const refRow = rows[0];
+  const promptText = document.getElementById('desdPromptText').value || '';
+
+  if(btn){ btn.disabled = true; btn.textContent = 'Gerando (pode levar 1-2 min)...'; }
+  if(statusEl) statusEl.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Chamando a IA — até 4 variações, uma de cada vez...</div>';
+  desdState.aiVariants = [];
+  desdState.chosenVariantIndex = null;
+  desdRenderAiVariantGrid();
+  desdUpdateSubmitButtonState();
+
+  try{
+    const res = await fetch(API_BASE + '/desdobrador/ai-preview', {
+      method: 'POST',
+      headers: Object.assign({'Content-Type': 'application/json'}, authHeaders()),
+      body: JSON.stringify({
+        blob_path: desdState.blobPath,
+        row_id: refRow.row_id,
+        brand_instructions: promptText,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.detail || 'backend recusou a geração');
+    desdState.aiVariants = data.variants || [];
+    const ok = data.total_ok || 0;
+    if(statusEl){
+      statusEl.innerHTML = ok
+        ? `<div style="font-family:var(--mono);font-size:10px;color:var(--success)">✓ ${ok} de ${data.total} variação(ões) geradas — escolha uma abaixo</div>`
+        : `<div style="font-family:var(--mono);font-size:10px;color:var(--danger)">Nenhuma variação gerou com sucesso — ver erros abaixo</div>`;
+    }
+  }catch(e){
+    toast('✕ ' + (e.message || 'Falha ao gerar variações'), 'er');
+    if(statusEl) statusEl.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--danger)">Falha ao gerar — tente de novo</div>';
+  }
+
+  if(btn){ btn.disabled = false; btn.textContent = '✦ Gerar variações com IA'; }
+  desdRenderAiVariantGrid();
 }
 
-function desdRenderAllPreviews(){
-  const grid = document.getElementById('desdPreviewGrid');
+function desdRenderAiVariantGrid(){
+  const grid = document.getElementById('desdAiVariantGrid');
   if(!grid) return;
-  const rows = DESD_QUEUE.filter(r => desdState.selectedRowIds.has(r.row_id));
-  if(!rows.length){
-    grid.innerHTML = '<div style="grid-column:1/-1;padding:24px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-muted)">Marque ao menos uma linha na fila acima</div>';
+  if(!desdState.aiVariants.length){
+    grid.innerHTML = '';
     return;
   }
-  grid.innerHTML = rows.map(r => `
-    <div class="desd-preview-card">
-      <canvas id="desdPrev_${r.row_id}"></canvas>
-      <div class="desd-preview-lbl">${_escHtml(r.campaign_name)} · ${_escHtml(r.creative_size)}</div>
+  grid.innerHTML = desdState.aiVariants.map(v => `
+    <div class="desd-preview-card desd-ai-variant-card" data-idx="${v.index}" onclick="desdChooseVariant(${v.index})" style="cursor:${v.data_base64 ? 'pointer' : 'default'};border:2px solid ${desdState.chosenVariantIndex===v.index?'var(--ink)':'transparent'}">
+      ${v.data_base64
+        ? `<canvas id="desdAiVariant_${v.index}"></canvas>`
+        : `<div style="aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:var(--bg3);color:var(--danger);font-family:var(--mono);font-size:9px;padding:10px;text-align:center">${_escHtml(v.error || 'falhou')}</div>`}
+      <div class="desd-preview-lbl">Variação ${v.index + 1}${desdState.chosenVariantIndex===v.index ? ' · escolhida ✓' : ''}</div>
     </div>`).join('');
-  rows.forEach(r => {
-    const {w, h} = desdParseSize(r.creative_size);
-    desdRenderFormatToCanvas(document.getElementById('desdPrev_' + r.row_id), w, h);
+
+  desdState.aiVariants.forEach(v => {
+    if(!v.data_base64) return;
+    const canvas = document.getElementById('desdAiVariant_' + v.index);
+    if(!canvas) return;
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      // CTA desenhado só pra PREVIEW aqui via Canvas — o que vai pro
+      // /submit é o data_base64 SEM CTA (v.data_base64), o backend desenha
+      // o CTA de verdade na hora (ver desdSubmit).
+      desdDrawCtaBarOnCanvas(ctx, img.width, img.height, desdState.ctaText, desdState.ctaColor);
+    };
+    img.src = 'data:image/png;base64,' + v.data_base64;
   });
+}
+
+function desdChooseVariant(idx){
+  const v = desdState.aiVariants.find(x => x.index === idx);
+  if(!v || !v.data_base64) return; // não dá pra escolher uma que falhou
+  desdState.chosenVariantIndex = idx;
+  desdRenderAiVariantGrid();
+  desdUpdateSubmitButtonState();
+}
+
+function desdUpdateSubmitButtonState(){
+  const btn = document.getElementById('desdSubmitBtn');
+  if(!btn) return;
+  btn.disabled = desdState.chosenVariantIndex === null || !desdState.selectedRowIds.size;
 }
 
 // ── Envio pra aprovação — 100% backend real (POST /desdobrador/submit) ──
 async function desdSubmit(){
-  if(!desdState.kvImage){ toast('Envie um KV antes de enviar pra aprovação', 'er'); return; }
   const rows = DESD_QUEUE.filter(r => desdState.selectedRowIds.has(r.row_id));
   if(!rows.length){ toast('Marque ao menos uma linha da fila pra atender', 'er'); return; }
-  if(!desdState.blobPath){ toast('KV ainda não confirmado no backend — aguarde o upload terminar ou tente selecionar o arquivo de novo', 'er'); return; }
+  if(desdState.chosenVariantIndex === null){ toast('Escolha uma variação gerada pela IA antes de enviar', 'er'); return; }
+  const chosen = desdState.aiVariants.find(v => v.index === desdState.chosenVariantIndex);
+  if(!chosen || !chosen.data_base64){ toast('Variação escolhida não está mais disponível — gere de novo', 'er'); return; }
 
   const rowIds = rows.map(r => r.row_id);
 
@@ -2406,9 +2291,10 @@ async function desdSubmit(){
       body: JSON.stringify({
         blob_path: desdState.blobPath,
         row_ids: rowIds,
-        headline: desdState.headline.text ? {text: desdState.headline.text, x_pct: desdState.headline.xPct, y_pct: desdState.headline.yPct, max_width_pct: desdState.headline.maxWidthPct, font_size_pct: desdState.headline.fontSizePct, color: desdState.headline.color, align: desdState.headline.align} : null,
-        cta: desdState.cta.text ? {text: desdState.cta.text, x_pct: desdState.cta.xPct, y_pct: desdState.cta.yPct, width_pct: desdState.cta.widthPct, height_pct: desdState.cta.heightPct, bg_color: desdState.cta.bg, text_color: desdState.cta.color, shape: desdState.cta.shape} : null,
-        motion_template_id: desdState.motionEnabled ? desdState.motionTemplateId : null,
+        ai_variant_base64: chosen.data_base64,
+        ai_content_type: 'image/png',
+        ai_cta_text: desdState.ctaText || '',
+        ai_cta_color: desdState.ctaColor || '#0d0d0d',
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -2419,7 +2305,11 @@ async function desdSubmit(){
     // localmente, pra não ficar dessincronizado se algo tiver falhado
     // parcialmente no backend.
     rowIds.forEach(rid => desdState.selectedRowIds.delete(rid));
+    desdState.aiVariants = [];
+    desdState.chosenVariantIndex = null;
     await desdLoadQueue();
+    desdRenderAiVariantGrid();
+    desdUpdateSubmitButtonState();
   }catch(e){
     toast('✕ ' + (e.message || 'Falha ao enviar pra aprovação'), 'er');
   }
@@ -2438,7 +2328,7 @@ window.addEventListener('load',()=>{
   renderAudHeatmap();
   renderAudCards();
   desdRenderSelectedSummary();
-  desdRenderAllPreviews();
+  desdUpdateSubmitButtonState();
   desdSetupDropzone();
   // small timeout ensures DOM is painted before Chart.js measures canvas
   setTimeout(()=>{
