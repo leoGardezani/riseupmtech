@@ -2043,16 +2043,20 @@ function desdOnWorkspaceChange(){
 }
 
 // GET /desdobrador/queue — linhas reais de material-request "ready to
-// setup" ainda sem creative_name. O endpoint não filtra por workspace hoje
-// (ver nota em desdobrador-arquitetura.md: "não filtra por client_id/
-// workspace ainda"), então o seletor de workspace acima serve por
-// enquanto só pra deixar explícito qual planilha vai receber o
-// creative_name gravado em /submit — a fila em si é global.
+// setup" ainda sem creative_name. Fix desta sessão: BUG real — o
+// endpoint não filtrava por workspace (misturava linhas de todos os
+// workspaces, mesma tabela BQ compartilhada) — agora exige
+// workspace_id explícito, mesmo padrão de /campaigns/run.
 async function desdLoadQueue(){
   const tbody = document.getElementById('desdQueueTable');
+  if(!desdWorkspaceId){
+    DESD_QUEUE = [];
+    if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-muted);font-family:var(--mono);font-size:11px;padding:20px">Selecione um workspace acima</td></tr>';
+    return;
+  }
   if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-muted);font-family:var(--mono);font-size:11px;padding:20px">Carregando fila...</td></tr>';
   try{
-    const res = await fetch(API_BASE + '/desdobrador/queue', { headers: authHeaders() });
+    const res = await fetch(API_BASE + '/desdobrador/queue?workspace_id=' + encodeURIComponent(desdWorkspaceId), { headers: authHeaders() });
     if(!res.ok) throw new Error('backend indisponível');
     const data = await res.json();
     DESD_QUEUE = data.queue || [];
