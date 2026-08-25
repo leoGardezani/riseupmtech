@@ -2169,12 +2169,16 @@ async function desdUploadKvToBackend(file){
     const form = new FormData();
     form.append('file', file);
     const res = await fetch(API_BASE + '/desdobrador/kv', {method:'POST', headers: authHeaders(), body: form});
-    if(!res.ok) throw new Error('backend indisponível');
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.detail || ('HTTP ' + res.status));
     desdState.blobPath = data.blob_path;
   }catch(e){
     desdState.blobPath = null;
-    toast('✕ Falha ao subir o KV pro backend — sem blob_path, não dá pra gerar variações nem enviar pra aprovação', 'er');
+    // Fix desta sessão: bug real — antes mostrava uma mensagem genérica
+    // fixa, sem o motivo de verdade (ex: bucket do GCS não existe,
+    // permissão negada pra service account, etc.), o que impedia
+    // diagnosticar o erro real na hora.
+    toast('✕ Falha ao subir o KV: ' + (e.message || 'erro desconhecido'), 'er');
   }
 }
 
