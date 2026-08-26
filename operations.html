@@ -777,6 +777,42 @@
       </div>
       <div style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink-muted)" id="repo-count"></div>
     </div>
+    <!-- Upload Direto — novo nesta sessão -->
+    <div class="collapsible" id="coll-upload" style="margin-bottom:20px">
+      <div class="coll-header open" onclick="toggleColl('upload')">
+        <div>
+          <div class="coll-title">Upload Direto</div>
+          <div class="coll-meta">criativo já pronto por fora — vídeo, ou qualquer arquivo, sem passar pela IA</div>
+        </div>
+        <span class="coll-arrow">▼</span>
+      </div>
+      <div class="coll-body open">
+        <div style="font-size:13px;color:var(--ink-mid);margin:12px 0 16px;line-height:1.6">
+          Pra quando o criativo já está pronto (ex: vídeo editado externamente — o TikTok em particular é essencialmente uma plataforma de vídeo, e a geração via IA só produz peça estática). Sobe o arquivo do jeito que está, sem nenhum processamento, e manda direto pra fila de aprovação abaixo.
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px">
+          <div class="fg" style="flex:1;margin-bottom:0"><label class="fl">Workspace</label><select class="fs_" id="upfWorkspaceSelect" onchange="upfOnWorkspaceChange()"><option value="">Carregando...</option></select></div>
+        </div>
+        <table><thead><tr>
+          <th></th><th>Campanha</th><th>Marca</th><th>Plataforma</th><th>Formato pedido</th><th>Entrega</th>
+        </tr></thead>
+        <tbody id="upfQueueTable"></tbody></table>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+          <div>
+            <div class="uz" id="upfDropzone" onclick="document.getElementById('upfFileInput').click()">
+              <div class="uz-icon">📁</div>
+              <div class="uz-text"><strong id="upfUzText">Clique ou arraste o arquivo pronto</strong></div>
+              <div class="uz-hint">vídeo, imagem — qualquer formato que a plataforma aceite</div>
+            </div>
+            <input type="file" id="upfFileInput" style="display:none" onchange="upfOnFileSelected(event)">
+          </div>
+          <div>
+            <div class="fg"><label class="fl">Nome do criativo <span style="color:var(--danger)">*</span></label><input class="fi" id="upfCreativeName" placeholder="ex: tiktok_video_lancamento" oninput="upfUpdateSubmitButtonState()"></div>
+            <button class="btn-full" id="upfSubmitBtn" onclick="upfSubmit()" disabled>Enviar para Aprovação →</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Pending Approval -->
     <div class="collapsible" id="coll-pending" style="margin-bottom:20px;border-color:#f59e0b">
       <div class="coll-header open" onclick="toggleColl('pending')" style="border-left:3px solid #f59e0b">
@@ -1867,7 +1903,7 @@ function switchTab(id, el){
   try{ localStorage.setItem('riseup_active_tab', id); }catch(e){}
   if(id === 'campanhas') campLoadWorkspaces();
   if(id === 'desdobrador') desdLoadWorkspaces();
-  if(id === 'criativos') loadPendingFromBackend();
+  if(id === 'criativos'){ loadPendingFromBackend(); upfLoadWorkspaces(); }
   if(!chartsInited.has(id)){
     chartsInited.add(id);
     setTimeout(() => initChartsForTab(id), 60);
@@ -2370,6 +2406,7 @@ window.addEventListener('load',()=>{
   desdRenderSelectedSummary();
   desdUpdateSubmitButtonState();
   desdSetupDropzone();
+  upfSetupDropzone();
   // small timeout ensures DOM is painted before Chart.js measures canvas
   setTimeout(()=>{
     btRender();
@@ -2406,6 +2443,158 @@ function desdSetupDropzone(){
     desdOnFileSelected({target:{files:[file]}});
   });
 }
+// ── UPLOAD DIRETO (novo nesta sessão) ──────────────────────────────────
+// Espelha o padrão da fila do Desdobrador, mas com include_media=true (a
+// query já exclui vídeo/áudio por padrão pro fluxo de IA — aqui é
+// justamente o oposto, o motivo de existir essa área) e sem geração
+// nenhuma: o arquivo escolhido é enviado tal como está pra
+// POST /desdobrador/upload-finished.
+let UPF_QUEUE = [];
+let upfWorkspaceId = '';
+let upfSelectedRowIds = new Set();
+let upfFile = null;
+
+async function upfLoadWorkspaces(){
+  const sel = document.getElementById('upfWorkspaceSelect');
+  if(!sel) return;
+  const prev = sel.value || upfWorkspaceId;
+  sel.innerHTML = '<option value="">Carregando...</option>';
+  try{
+    const res = await fetch(API_BASE + '/plan/workspaces', { headers: authHeaders() });
+    if(!res.ok) throw new Error('sem acesso ao backend');
+    const list = await res.json();
+    if(!list.length){ sel.innerHTML = '<option value="">Nenhum workspace encontrado</option>'; upfWorkspaceId = ''; return; }
+    sel.innerHTML = list.map(w =>
+      '<option value="' + w.workspace_id + '">' + _escHtml(w.client_name || w.workspace_id) + '</option>'
+    ).join('');
+    if(prev && list.some(w => w.workspace_id === prev)) sel.value = prev;
+    upfWorkspaceId = sel.value;
+    await upfLoadQueue();
+  }catch(e){
+    sel.innerHTML = '<option value="">Falha ao carregar workspaces</option>';
+  }
+}
+
+function upfOnWorkspaceChange(){
+  const sel = document.getElementById('upfWorkspaceSelect');
+  upfWorkspaceId = sel ? sel.value : '';
+  upfLoadQueue();
+}
+
+async function upfLoadQueue(){
+  const tbody = document.getElementById('upfQueueTable');
+  if(!upfWorkspaceId){
+    UPF_QUEUE = [];
+    if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-muted);font-family:var(--mono);font-size:11px;padding:20px">Selecione um workspace acima</td></tr>';
+    return;
+  }
+  if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-muted);font-family:var(--mono);font-size:11px;padding:20px">Carregando fila...</td></tr>';
+  try{
+    const res = await fetch(API_BASE + '/desdobrador/queue?workspace_id=' + encodeURIComponent(upfWorkspaceId) + '&include_media=true', { headers: authHeaders() });
+    if(!res.ok) throw new Error('backend indisponível');
+    const data = await res.json();
+    UPF_QUEUE = data.queue || [];
+  }catch(e){
+    UPF_QUEUE = [];
+    if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--danger);font-family:var(--mono);font-size:11px;padding:20px">Não foi possível carregar a fila — verifique login/conexão.</td></tr>';
+    return;
+  }
+  renderUpfQueue();
+}
+
+function renderUpfQueue(){
+  const tbody = document.getElementById('upfQueueTable');
+  if(!tbody) return;
+  if(!UPF_QUEUE.length){
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-muted);font-family:var(--mono);font-size:11px;padding:20px">Fila vazia — nada pendente de criativo neste workspace</td></tr>';
+    return;
+  }
+  tbody.innerHTML = UPF_QUEUE.map(r => `
+    <tr class="desd-queue-row${upfSelectedRowIds.has(r.row_id)?' active':''}" onclick="upfToggleQueueRow('${r.row_id}')">
+      <td><input type="checkbox" class="desd-queue-check" ${upfSelectedRowIds.has(r.row_id)?'checked':''} onclick="event.stopPropagation();upfToggleQueueRow('${r.row_id}')"></td>
+      <td class="td-bold">${_escHtml(r.campaign_name)}</td>
+      <td class="td-mono">${_escHtml(r.brand)}</td>
+      <td class="td-mono">${_escHtml(r.source)}</td>
+      <td class="td-mono">${_escHtml(r.creative_size)}</td>
+      <td class="td-mono">${_escHtml(r.delivery_date || '')}</td>
+    </tr>`).join('');
+}
+
+function upfToggleQueueRow(rowId){
+  if(upfSelectedRowIds.has(rowId)) upfSelectedRowIds.delete(rowId);
+  else upfSelectedRowIds.add(rowId);
+  renderUpfQueue();
+  upfUpdateSubmitButtonState();
+}
+
+function upfOnFileSelected(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  upfFile = file;
+  document.getElementById('upfUzText').textContent = file.name;
+  upfUpdateSubmitButtonState();
+}
+
+function upfUpdateSubmitButtonState(){
+  const btn = document.getElementById('upfSubmitBtn');
+  if(!btn) return;
+  const nameEl = document.getElementById('upfCreativeName');
+  const hasName = nameEl && nameEl.value.trim().length > 0;
+  btn.disabled = !upfFile || !hasName || !upfSelectedRowIds.size;
+}
+
+async function upfSubmit(){
+  if(!upfFile){ toast('Selecione um arquivo antes de enviar', 'er'); return; }
+  const rowIds = Array.from(upfSelectedRowIds);
+  if(!rowIds.length){ toast('Marque ao menos uma linha da fila pra atender', 'er'); return; }
+  const creativeName = (document.getElementById('upfCreativeName').value || '').trim();
+  if(!creativeName){ toast('Informe um nome pro criativo antes de enviar', 'er'); return; }
+
+  const btn = document.getElementById('upfSubmitBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
+  try{
+    const form = new FormData();
+    form.append('file', upfFile);
+    form.append('row_ids', JSON.stringify(rowIds));
+    form.append('creative_name', creativeName);
+    const res = await fetch(API_BASE + '/desdobrador/upload-finished', {
+      method: 'POST', headers: authHeaders(), body: form,
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.detail || 'backend recusou o upload');
+    toast('✓ ' + (data.total || rowIds.length) + ' peça(s) enviada(s) — na fila real de Aguardando Aprovação', 'ok');
+    upfFile = null;
+    upfSelectedRowIds = new Set();
+    document.getElementById('upfCreativeName').value = '';
+    document.getElementById('upfUzText').textContent = 'Clique ou arraste o arquivo pronto';
+    document.getElementById('upfFileInput').value = '';
+    await upfLoadQueue();
+    loadPendingFromBackend(); // a peça enviada já aparece na fila de aprovação
+  }catch(e){
+    toast('✕ ' + (e.message || 'Falha ao enviar pra aprovação'), 'er');
+  }
+  if(btn){ btn.textContent = 'Enviar para Aprovação →'; }
+  upfUpdateSubmitButtonState();
+}
+
+function upfSetupDropzone(){
+  const zone = document.getElementById('upfDropzone');
+  const input = document.getElementById('upfFileInput');
+  if(!zone) return;
+  ['dragenter','dragover'].forEach(evt => zone.addEventListener(evt, e => {
+    e.preventDefault(); e.stopPropagation(); zone.style.borderColor = 'var(--ink)';
+  }));
+  ['dragleave','drop'].forEach(evt => zone.addEventListener(evt, e => {
+    e.preventDefault(); e.stopPropagation(); zone.style.borderColor = '';
+  }));
+  zone.addEventListener('drop', e => {
+    const file = e.dataTransfer.files[0];
+    if(!file) return;
+    input.files = e.dataTransfer.files;
+    upfOnFileSelected({target:{files:[file]}});
+  });
+}
+
 // ── CONEXÕES + USUÁRIOS (v2.6 — RBAC analista/editor/admin) ──
 // Integrado nesta sessão a partir de claude/conexoes-usuarios.js. Redeclara
 // renderConns/renderUsers (chamadas em openRpPage() acima mas nunca antes
