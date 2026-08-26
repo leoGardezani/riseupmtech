@@ -2280,10 +2280,17 @@ async function desdGenerateAiVariants(){
     if(!res.ok) throw new Error(data.detail || 'backend recusou a geração');
     desdState.aiVariants = data.variants || [];
     const ok = data.total_ok || 0;
+    // Novo nesta sessão (pedido do Leonardo) — mostra os tokens reais
+    // gastos nesta chamada (vem do próprio Gemini, response.usage_metadata).
+    // Hoje é $0 (free tier), mas já fica visível pra quando migrar pra
+    // billing/Vertex.
+    const tk = data.tokens_used || {};
+    const tokensLine = tk.total ? `<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:4px">${tk.prompt || 0} tokens de prompt + ${tk.output || 0} de saída = ${tk.total} no total</div>` : '';
     if(statusEl){
-      statusEl.innerHTML = ok
+      statusEl.innerHTML = (ok
         ? `<div style="font-family:var(--mono);font-size:10px;color:var(--success)">✓ ${ok} de ${data.total} variação(ões) geradas — escolha uma abaixo</div>`
-        : `<div style="font-family:var(--mono);font-size:10px;color:var(--danger)">Nenhuma variação gerou com sucesso — ver erros abaixo</div>`;
+        : `<div style="font-family:var(--mono);font-size:10px;color:var(--danger)">Nenhuma variação gerou com sucesso — ver erros abaixo</div>`)
+        + tokensLine;
     }
   }catch(e){
     toast('✕ ' + (e.message || 'Falha ao gerar variações'), 'er');
