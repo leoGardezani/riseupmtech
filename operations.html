@@ -667,11 +667,12 @@
         <div class="divider" style="margin:20px 0"></div>
 
         <div class="desd-step-lbl" style="margin-top:0">Vínculo da peça</div>
+        <div class="fg"><label class="fl">Nome do criativo <span style="color:var(--danger)">*</span></label><input class="fi" id="desdCreativeName" placeholder="ex: awareness_q1_lancamento" oninput="desdUpdateSubmitButtonState()"></div>
         <div class="fg"><label class="fl">Campanha</label><input class="fi" id="desdCampaignName" placeholder="ex: Awareness Q1"></div>
         <div class="fg"><label class="fl">Marca</label><input class="fi" id="desdBrand" placeholder="ex: Produto A"></div>
 
         <button class="btn-full" style="margin-top:8px" id="desdSubmitBtn" onclick="desdSubmit()" disabled>Enviar para Aprovação →</button>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px;line-height:1.6">// escolha uma variação gerada à esquerda antes de enviar. Envia pro backend real (/desdobrador/submit) e alimenta a fila real de Aguardando Aprovação (/desdobrador/pending)</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px;line-height:1.6">// escolha uma variação gerada à esquerda e dê um nome ao criativo antes de enviar. Envia pro backend real (/desdobrador/submit) e alimenta a fila real de Aguardando Aprovação (/desdobrador/pending)</div>
       </div>
     </div>
   </div>
@@ -2302,7 +2303,9 @@ function desdChooseVariant(idx){
 function desdUpdateSubmitButtonState(){
   const btn = document.getElementById('desdSubmitBtn');
   if(!btn) return;
-  btn.disabled = desdState.chosenVariantIndex === null || !desdState.selectedRowIds.size;
+  const nameEl = document.getElementById('desdCreativeName');
+  const hasName = nameEl && nameEl.value.trim().length > 0;
+  btn.disabled = desdState.chosenVariantIndex === null || !desdState.selectedRowIds.size || !hasName;
 }
 
 // ── Envio pra aprovação — 100% backend real (POST /desdobrador/submit) ──
@@ -2312,6 +2315,10 @@ async function desdSubmit(){
   if(desdState.chosenVariantIndex === null){ toast('Escolha uma variação gerada pela IA antes de enviar', 'er'); return; }
   const chosen = desdState.aiVariants.find(v => v.index === desdState.chosenVariantIndex);
   if(!chosen || !chosen.data_base64){ toast('Variação escolhida não está mais disponível — gere de novo', 'er'); return; }
+  // Novo nesta sessão (pedido do Leonardo) — nome do criativo agora é
+  // obrigatório e escolhido pela pessoa, não gerado sozinho.
+  const creativeName = (document.getElementById('desdCreativeName').value || '').trim();
+  if(!creativeName){ toast('Informe um nome pro criativo antes de enviar', 'er'); return; }
 
   const rowIds = rows.map(r => r.row_id);
 
@@ -2322,6 +2329,7 @@ async function desdSubmit(){
       body: JSON.stringify({
         blob_path: desdState.blobPath,
         row_ids: rowIds,
+        creative_name: creativeName,
         ai_variant_base64: chosen.data_base64,
         ai_content_type: 'image/png',
         ai_cta_text: desdState.ctaText || '',
@@ -2338,6 +2346,7 @@ async function desdSubmit(){
     rowIds.forEach(rid => desdState.selectedRowIds.delete(rid));
     desdState.aiVariants = [];
     desdState.chosenVariantIndex = null;
+    document.getElementById('desdCreativeName').value = '';
     await desdLoadQueue();
     desdRenderAiVariantGrid();
     desdUpdateSubmitButtonState();
