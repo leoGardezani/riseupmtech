@@ -2777,7 +2777,14 @@ async function connSyncWorkspace(){
     });
     const data = await res.json().catch(() => ({}));
     if(!res.ok) throw new Error(data.detail || 'falha ao sincronizar');
-    toast('✓ Sincronizado com o BigQuery', 'ok');
+    // Fix desta sessão (pedido do Leonardo) — antes mostrava só "✓
+    // Sincronizado" genérico, sem confirmar se algo de fato mudou. Agora
+    // mostra as contagens reais que o backend já devolve
+    // (run_full_sync), pra confirmar visualmente que o sync rodou de
+    // verdade e o que ele encontrou.
+    const mr = data.bq_material_request_upserted ?? data.material_request_rows ?? '?';
+    const imp = data.bq_implementation_upserted ?? data.implementation_rows ?? '?';
+    toast(`✓ Sincronizado — ${mr} linha(s) de material-request, ${imp} de implementation`, 'ok');
   }catch(e){
     toast('✕ ' + (e.message || 'Não foi possível sincronizar agora'), 'er');
   }
