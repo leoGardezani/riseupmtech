@@ -620,7 +620,7 @@
         <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// linhas de material-request sem criativo</span>
       </div>
       <table><thead><tr>
-        <th></th><th>Campanha</th><th>Marca</th><th>Plataforma</th><th>Formato pedido</th><th>Entrega</th>
+        <th><input type="checkbox" class="desd-queue-check" id="desdSelectAllCheckbox" onchange="desdToggleSelectAll(this.checked)" title="Selecionar tudo"></th><th>Campanha</th><th>Marca</th><th>Plataforma</th><th>Formato pedido</th><th>Entrega</th>
       </tr></thead>
       <tbody id="desdQueueTable"></tbody></table>
     </div>
@@ -794,7 +794,7 @@
           <div class="fg" style="flex:1;margin-bottom:0"><label class="fl">Workspace</label><select class="fs_" id="upfWorkspaceSelect" onchange="upfOnWorkspaceChange()"><option value="">Carregando...</option></select></div>
         </div>
         <table><thead><tr>
-          <th></th><th>Campanha</th><th>Marca</th><th>Plataforma</th><th>Formato pedido</th><th>Entrega</th>
+          <th><input type="checkbox" class="desd-queue-check" id="upfSelectAllCheckbox" onchange="upfToggleSelectAll(this.checked)" title="Selecionar tudo"></th><th>Campanha</th><th>Marca</th><th>Plataforma</th><th>Formato pedido</th><th>Entrega</th>
         </tr></thead>
         <tbody id="upfQueueTable"></tbody></table>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
@@ -825,6 +825,16 @@
       <div class="coll-body open">
         <div style="font-size:13px;color:var(--ink-mid);margin:12px 0 16px;line-height:1.6">
           Criativos gerados pelo Desdobrador aguardando revisão. Ao aprovar, o backend sobe o ad de verdade na plataforma (Google/Meta/TikTok) e o status vira "implemented"; ao reprovar, vira "creative_rejected".
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border)">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
+            <input type="checkbox" id="pendingSelectAllCheckbox" onchange="pendingToggleSelectAll(this.checked)"> Selecionar tudo
+          </label>
+          <span id="pendingSelectedCount" style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">0 selecionado(s)</span>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="btn-sm" id="pendingBulkApproveBtn" onclick="pendingBulkApprove()" disabled>✓ Aprovar selecionados</button>
+            <button class="btn-sm ghost" id="pendingBulkRejectBtn" onclick="pendingBulkReject()" disabled style="color:var(--danger);border-color:#fecaca">✕ Reprovar selecionados</button>
+          </div>
         </div>
         <div class="repo-grid" id="pendingGrid"></div>
       </div>
@@ -1546,8 +1556,12 @@ function renderPending(){
   const cnt = document.getElementById('pending-count');
   if(!grid) return;
   if(cnt) cnt.textContent = PENDING_ASSETS.length + ' aguardando';
+  // Novo nesta sessão (pedido do Leonardo) — remove da seleção qualquer
+  // id que não existe mais na lista (ex: depois de recarregar a fila).
+  pendingSelectedIds = new Set([...pendingSelectedIds].filter(id => PENDING_ASSETS.some(a => a.id === id)));
   if(!PENDING_ASSETS.length){
     grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-muted)">Nada aguardando aprovação agora</div>';
+    pendingUpdateBulkButtons();
     return;
   }
   grid.innerHTML = '';
@@ -1559,6 +1573,9 @@ function renderPending(){
     const imgStyle = a.type === 'audio' ? 'filter:grayscale(1);opacity:.5;' : '';
     div.innerHTML =
       '<div class="repo-thumb-wrap">'
+      + '<label style="position:absolute;top:8px;left:8px;z-index:2;background:rgba(13,13,13,.6);padding:4px;display:flex;cursor:pointer">'
+      + '<input type="checkbox" ' + (pendingSelectedIds.has(a.id) ? 'checked' : '') + ' onclick="event.stopPropagation();pendingToggleCardSelect(\'' + _escJsAttr(a.id) + '\',this.checked)">'
+      + '</label>'
       + '<img class="repo-thumb" src="' + a.img + '" alt="' + _escHtml(a.name) + '" loading="lazy" style="' + imgStyle + '" onerror="this.style.background=\'var(--bg3)\';this.src=\'\'">'
       + '<div class="type-tag">' + typeIcon(a.type) + ' ' + typeLabel(a.type) + '</div>'
       + '<div style="position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;padding:3px 8px;background:#f59e0b;color:#fff">⏳ Pendente</div>'
@@ -1573,7 +1590,72 @@ function renderPending(){
       + '</div></div>';
     grid.appendChild(div);
   });
+  pendingUpdateBulkButtons();
 }
+// ── Seleção + ações em massa (novo nesta sessão, pedido do Leonardo) ──
+let pendingSelectedIds = new Set();
+
+function pendingToggleSelectAll(checked){
+  pendingSelectedIds = checked ? new Set(PENDING_ASSETS.map(a => a.id)) : new Set();
+  renderPending();
+}
+
+function pendingToggleCardSelect(id, checked){
+  if(checked) pendingSelectedIds.add(id);
+  else pendingSelectedIds.delete(id);
+  pendingUpdateBulkButtons();
+  const allCb = document.getElementById('pendingSelectAllCheckbox');
+  if(allCb) allCb.checked = PENDING_ASSETS.length > 0 && pendingSelectedIds.size === PENDING_ASSETS.length;
+}
+
+function pendingUpdateBulkButtons(){
+  const n = pendingSelectedIds.size;
+  const cntEl = document.getElementById('pendingSelectedCount');
+  if(cntEl) cntEl.textContent = n + ' selecionado(s)';
+  const approveBtn = document.getElementById('pendingBulkApproveBtn');
+  const rejectBtn = document.getElementById('pendingBulkRejectBtn');
+  if(approveBtn) approveBtn.disabled = n === 0;
+  if(rejectBtn) rejectBtn.disabled = n === 0;
+  const allCb = document.getElementById('pendingSelectAllCheckbox');
+  if(allCb) allCb.checked = PENDING_ASSETS.length > 0 && n === PENDING_ASSETS.length;
+}
+
+async function pendingBulkApprove(){
+  const ids = [...pendingSelectedIds];
+  if(!ids.length) return;
+  if(!confirm(`Aprovar ${ids.length} peça(s) selecionada(s)? Isso sobe o ad de verdade em cada plataforma.`)) return;
+  let ok = 0, fail = 0;
+  for(const id of ids){
+    try{
+      const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(id) + '/approve', { method: 'POST', headers: authHeaders() });
+      if(res.ok) ok++; else fail++;
+    }catch(e){ fail++; }
+  }
+  toast(`✓ ${ok} aprovada(s)` + (fail ? `, ✕ ${fail} falhou(aram)` : ''), fail ? 'er' : 'ok');
+  pendingSelectedIds = new Set();
+  loadPendingFromBackend();
+}
+
+async function pendingBulkReject(){
+  const ids = [...pendingSelectedIds];
+  if(!ids.length) return;
+  if(!confirm(`Reprovar ${ids.length} peça(s) selecionada(s)?`)) return;
+  let ok = 0, fail = 0;
+  for(const id of ids){
+    try{
+      const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(id) + '/reject', {
+        method: 'POST',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+        body: JSON.stringify({ reason: '' }),
+      });
+      if(res.ok) ok++; else fail++;
+    }catch(e){ fail++; }
+  }
+  toast(`✕ ${ok} reprovada(s)` + (fail ? `, ${fail} falhou(aram)` : ''), 'er');
+  pendingSelectedIds = new Set();
+  loadPendingFromBackend();
+}
+
 async function approveAsset(rowId){
   try{
     const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(rowId) + '/approve', {
@@ -2109,6 +2191,8 @@ async function desdLoadQueue(){
 function renderDesdQueue(){
   const tbody = document.getElementById('desdQueueTable');
   if(!tbody) return;
+  const allCb = document.getElementById('desdSelectAllCheckbox');
+  if(allCb) allCb.checked = DESD_QUEUE.length > 0 && DESD_QUEUE.every(r => desdState.selectedRowIds.has(r.row_id));
   if(!DESD_QUEUE.length){
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-muted);font-family:var(--mono);font-size:11px;padding:20px">Fila vazia — todas as peças pendentes já foram desdobradas</td></tr>';
     return;
@@ -2122,6 +2206,25 @@ function renderDesdQueue(){
       <td class="td-mono">${_escHtml(r.creative_size)}</td>
       <td class="td-mono">${_escHtml(r.delivery_date || '')}</td>
     </tr>`).join('');
+}
+
+// Novo nesta sessão (pedido do Leonardo) — checkbox "selecionar tudo" no
+// cabeçalho da fila.
+function desdToggleSelectAll(checked){
+  if(checked) DESD_QUEUE.forEach(r => desdState.selectedRowIds.add(r.row_id));
+  else desdState.selectedRowIds.clear();
+  const first = DESD_QUEUE.find(r => desdState.selectedRowIds.has(r.row_id));
+  if(first){
+    document.getElementById('desdCampaignName').value = first.campaign_name;
+    document.getElementById('desdBrand').value = first.brand;
+  }
+  desdState.aiVariants = [];
+  desdState.chosenVariantIndex = null;
+  renderDesdQueue();
+  desdRenderSelectedSummary();
+  desdRenderCtaCharHint();
+  desdRenderAiVariantGrid();
+  desdUpdateSubmitButtonState();
 }
 
 function desdToggleQueueRow(rowId){
@@ -2512,6 +2615,8 @@ async function upfLoadQueue(){
 function renderUpfQueue(){
   const tbody = document.getElementById('upfQueueTable');
   if(!tbody) return;
+  const allCb = document.getElementById('upfSelectAllCheckbox');
+  if(allCb) allCb.checked = UPF_QUEUE.length > 0 && UPF_QUEUE.every(r => upfSelectedRowIds.has(r.row_id));
   if(!UPF_QUEUE.length){
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-muted);font-family:var(--mono);font-size:11px;padding:20px">Fila vazia — nada pendente de criativo neste workspace</td></tr>';
     return;
@@ -2525,6 +2630,14 @@ function renderUpfQueue(){
       <td class="td-mono">${_escHtml(r.creative_size)}</td>
       <td class="td-mono">${_escHtml(r.delivery_date || '')}</td>
     </tr>`).join('');
+}
+
+// Novo nesta sessão (pedido do Leonardo) — checkbox "selecionar tudo".
+function upfToggleSelectAll(checked){
+  if(checked) UPF_QUEUE.forEach(r => upfSelectedRowIds.add(r.row_id));
+  else upfSelectedRowIds.clear();
+  renderUpfQueue();
+  upfUpdateSubmitButtonState();
 }
 
 function upfToggleQueueRow(rowId){
