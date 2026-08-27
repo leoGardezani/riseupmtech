@@ -927,6 +927,7 @@
         <div style="font-size:13px;color:var(--ink-mid);margin:12px 0 16px;line-height:1.6">
           Criativos gerados pelo Desdobrador aguardando revisão. Ao aprovar, o backend sobe o ad de verdade na plataforma (Google/Meta/TikTok) e o status vira "implemented"; ao reprovar, vira "creative_rejected".
         </div>
+        <div class="fg" style="max-width:360px;margin-bottom:16px"><label class="fl">Workspace</label><select class="fs_" id="pendWorkspaceSelect" onchange="pendOnWorkspaceChange()"><option value="">Carregando...</option></select></div>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border)">
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
             <input type="checkbox" id="pendingSelectAllCheckbox" onchange="pendingToggleSelectAll(this.checked)"> Selecionar tudo
@@ -1681,20 +1682,50 @@ function renderRepo(assets){
 // existia aqui antes (esta sessão, a pedido do Leonardo).
 // Fix desta sessão: BUG real — não filtrava por workspace (lia a tabela
 // implementation inteira, multi-tenant, misturando a fila de aprovação
-// de TODOS os workspaces). Agora exige workspace_id — reaproveita
-// upfWorkspaceId (seletor já existente nesta mesma aba, seção "Upload
-// direto") em vez de criar um seletor novo. ──
+// de TODOS os workspaces). Agora exige workspace_id, com seletor PRÓPRIO
+// (pendWorkspaceId) — pedido explícito do Leonardo: reaproveitar o
+// seletor de "Upload direto" silenciosamente confundia, sem deixar claro
+// que a fila estava filtrada por aquele workspace. ──
+let pendWorkspaceId = '';
+
+async function pendLoadWorkspaces(){
+  const sel = document.getElementById('pendWorkspaceSelect');
+  if(!sel) return;
+  const prev = sel.value || pendWorkspaceId;
+  sel.innerHTML = '<option value="">Carregando...</option>';
+  try{
+    const res = await fetch(API_BASE + '/plan/workspaces', { headers: authHeaders() });
+    if(!res.ok) throw new Error('sem acesso ao backend');
+    const list = await res.json();
+    if(!list.length){ sel.innerHTML = '<option value="">Nenhum workspace encontrado</option>'; pendWorkspaceId = ''; return; }
+    sel.innerHTML = list.map(w =>
+      '<option value="' + w.workspace_id + '">' + _escHtml(w.client_name || w.workspace_id) + '</option>'
+    ).join('');
+    if(prev && list.some(w => w.workspace_id === prev)) sel.value = prev;
+    pendWorkspaceId = sel.value;
+    await loadPendingFromBackend();
+  }catch(e){
+    sel.innerHTML = '<option value="">Falha ao carregar workspaces</option>';
+  }
+}
+
+function pendOnWorkspaceChange(){
+  const sel = document.getElementById('pendWorkspaceSelect');
+  pendWorkspaceId = sel ? sel.value : '';
+  loadPendingFromBackend();
+}
+
 async function loadPendingFromBackend(){
   const grid = document.getElementById('pendingGrid');
-  if(!upfWorkspaceId){
+  if(!pendWorkspaceId){
     PENDING_ASSETS = [];
-    if(grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-muted)">Selecione um workspace acima (seção "Upload direto")</div>';
+    if(grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-muted)">Selecione um workspace acima</div>';
     renderPending();
     return;
   }
   if(grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-muted)">Carregando fila de aprovação...</div>';
   try{
-    const res = await fetch(API_BASE + '/desdobrador/pending?workspace_id=' + encodeURIComponent(upfWorkspaceId), { headers: authHeaders() });
+    const res = await fetch(API_BASE + '/desdobrador/pending?workspace_id=' + encodeURIComponent(pendWorkspaceId), { headers: authHeaders() });
     if(!res.ok) throw new Error('backend indisponível');
     const data = await res.json();
     // Mapeia a forma real (row_id, campaign_name, brand, source,
@@ -1803,7 +1834,7 @@ async function pendingBulkApprove(){
   let ok = 0, fail = 0;
   for(const id of ids){
     try{
-      const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(id) + '/approve?workspace_id=' + encodeURIComponent(upfWorkspaceId), { method: 'POST', headers: authHeaders() });
+      const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(id) + '/approve?workspace_id=' + encodeURIComponent(pendWorkspaceId), { method: 'POST', headers: authHeaders() });
       if(res.ok) ok++; else fail++;
     }catch(e){ fail++; }
   }
@@ -1826,7 +1857,7 @@ async function pendingBulkReject(){
       const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(id) + '/reject', {
         method: 'POST',
         headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
-        body: JSON.stringify({ reason: '', workspace_id: upfWorkspaceId }),
+        body: JSON.stringify({ reason: '', workspace_id: pendWorkspaceId }),
       });
       if(res.ok) ok++; else fail++;
     }catch(e){ fail++; }
@@ -1841,7 +1872,7 @@ async function approveAsset(rowId, btnEl){
   // individual do card, igual ao dos botões em massa.
   if(btnEl){ btnEl.disabled = true; btnEl.textContent = 'Aprovando...'; }
   try{
-    const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(rowId) + '/approve?workspace_id=' + encodeURIComponent(upfWorkspaceId), {
+    const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(rowId) + '/approve?workspace_id=' + encodeURIComponent(pendWorkspaceId), {
       method: 'POST', headers: authHeaders(),
     });
     const data = await res.json().catch(() => ({}));
@@ -1859,7 +1890,7 @@ async function rejectAsset(rowId, btnEl){
     const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(rowId) + '/reject', {
       method: 'POST',
       headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
-      body: JSON.stringify({ reason: '', workspace_id: upfWorkspaceId }),
+      body: JSON.stringify({ reason: '', workspace_id: pendWorkspaceId }),
     });
     if(!res.ok){ const err = await res.json().catch(() => ({})); throw new Error(err.detail || 'falha ao reprovar'); }
     toast('✕ Peça reprovada', 'er');
@@ -2170,14 +2201,7 @@ function switchTab(id, el){
   try{ localStorage.setItem('riseup_active_tab', id); }catch(e){}
   if(id === 'campanhas') campLoadWorkspaces();
   if(id === 'desdobrador') desdLoadWorkspaces();
-  // Fix desta sessão: loadPendingFromBackend() agora precisa de
-  // workspace_id (bug real corrigido — antes lia a fila de aprovação de
-  // TODOS os workspaces misturada). upfWorkspaceId é reaproveitado (é o
-  // seletor que já existe nesta mesma aba, seção "Upload direto") em vez
-  // de criar um seletor novo — por isso agora espera upfLoadWorkspaces()
-  // resolver o workspace_id ANTES de chamar loadPendingFromBackend()
-  // (antes rodavam em paralelo, sem ordem garantida).
-  if(id === 'criativos'){ upfLoadWorkspaces(); }
+  if(id === 'criativos'){ pendLoadWorkspaces(); upfLoadWorkspaces(); }
   if(id === 'audiencias') renderAudCreatedTable();
   if(!chartsInited.has(id)){
     chartsInited.add(id);
@@ -2793,11 +2817,6 @@ async function upfLoadWorkspaces(){
     if(prev && list.some(w => w.workspace_id === prev)) sel.value = prev;
     upfWorkspaceId = sel.value;
     await upfLoadQueue();
-    // Fix desta sessão: Aguardando Aprovação (loadPendingFromBackend)
-    // reaproveita este mesmo seletor de workspace (é a única aba que já
-    // tem um, dentro de tab-criativos) — chamado aqui, depois de
-    // upfWorkspaceId já estar resolvido, pra garantir a ordem certa.
-    loadPendingFromBackend();
   }catch(e){
     sel.innerHTML = '<option value="">Falha ao carregar workspaces</option>';
   }
@@ -2807,7 +2826,6 @@ function upfOnWorkspaceChange(){
   const sel = document.getElementById('upfWorkspaceSelect');
   upfWorkspaceId = sel ? sel.value : '';
   upfLoadQueue();
-  loadPendingFromBackend();
 }
 
 async function upfLoadQueue(){
