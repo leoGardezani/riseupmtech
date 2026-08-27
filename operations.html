@@ -3296,7 +3296,20 @@ async function connLoadTiktokIdentities(workspaceId, advertiserId){
     if(!data) throw new Error('falha ao carregar identidades');
     const identities = data.identities || [];
     if(!identities.length){
-      el.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">nenhuma identidade encontrada nessa conta</span>';
+      // Fix desta sessão (pedido do Leonardo): /identity/get/ pode estar
+      // bloqueado por permissão de escopo do app no TikTok for
+      // Developers, então a lista vem vazia mesmo com identidade
+      // configurada — nesse caso mostra a que já está salva (se tiver, a
+      // aprovação de anúncio já usa ela direto, sem depender dessa lista)
+      // e oferece criar uma nova direto (POST /identity/create/,
+      // contorna o bloqueio de leitura via uma ação de escrita).
+      const savedNote = data.selected
+        ? '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-mid);margin-bottom:6px">já configurada: <span class="td-mono">' + _escHtml(data.selected) + '</span> (lista bloqueada por permissão, mas a aprovação já usa essa)</div>'
+        : '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:6px">nenhuma identidade encontrada (ou lista bloqueada por permissão)</div>';
+      el.innerHTML = savedNote
+        + '<input class="fi" id="tiktokIdentityName-' + workspaceId + '" placeholder="Nome de exibição (ex: Rise Up)" style="font-size:10px;padding:6px 8px;margin-bottom:4px;width:100%">'
+        + '<input type="file" id="tiktokIdentityAvatar-' + workspaceId + '" accept="image/png,image/jpeg" style="font-size:9px;margin-bottom:4px;width:100%">'
+        + '<button class="btn-sm" style="width:100%" onclick="connCreateTiktokIdentity(\'' + workspaceId + '\')">+ Criar identidade</button>';
       return;
     }
     const selectedVal = data.selected;
@@ -3331,6 +3344,34 @@ async function connSaveTiktokIdentity(workspaceId, selectEl){
     toast('✕ ' + (e.message || 'Não foi possível salvar a identidade'), 'er');
   }
   selectEl.disabled = false;
+}
+
+// Cria uma identidade TikTok nova (avatar + nome) direto pela API,
+// contornando /identity/get/ bloqueado por permissão — pedido do
+// Leonardo nesta sessão. Já salva como selecionada pro workspace
+// automaticamente (o backend faz isso no mesmo passo).
+async function connCreateTiktokIdentity(workspaceId){
+  const nameEl = document.getElementById('tiktokIdentityName-' + workspaceId);
+  const fileEl = document.getElementById('tiktokIdentityAvatar-' + workspaceId);
+  const displayName = (nameEl && nameEl.value || '').trim();
+  const file = fileEl && fileEl.files[0];
+  if(!displayName){ toast('Informe um nome de exibição', 'er'); return; }
+  if(!file){ toast('Selecione uma imagem de avatar', 'er'); return; }
+
+  const form = new FormData();
+  form.append('display_name', displayName);
+  form.append('file', file);
+  try{
+    const res = await fetch(API_BASE + '/connect/accounts/tiktok/identities/create?workspace_id=' + encodeURIComponent(workspaceId), {
+      method: 'POST', headers: authHeaders(), body: form,
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.detail || 'falha ao criar identidade');
+    toast('✓ Identidade "' + displayName + '" criada e selecionada', 'ok');
+    await connLoadTiktokIdentities(workspaceId, document.getElementById('acctSel-acctMount-tiktok')?.value);
+  }catch(e){
+    toast('✕ ' + (e.message || 'Não foi possível criar a identidade'), 'er');
+  }
 }
 
 // Página do Facebook mudou — salva a seleção (igual antes) E re-renderiza
