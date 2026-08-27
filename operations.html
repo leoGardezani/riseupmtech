@@ -938,6 +938,7 @@
             <button class="btn-sm ghost" id="pendingBulkRejectBtn" onclick="pendingBulkReject()" disabled style="color:var(--danger);border-color:#fecaca">✕ Reprovar selecionados</button>
           </div>
         </div>
+        <div id="pendingRunResult" style="margin-bottom:16px"></div>
         <div class="repo-grid" id="pendingGrid"></div>
       </div>
     </div>
@@ -1831,16 +1832,47 @@ async function pendingBulkApprove(){
   // está em andamento, igual já existia no upfSubmit/desdSubmit.
   const btn = document.getElementById('pendingBulkApproveBtn');
   if(btn){ btn.disabled = true; btn.textContent = 'Aprovando...'; }
-  let ok = 0, fail = 0;
+  // Fix desta sessão (pedido do Leonardo): antes só contava ok/fail, sem
+  // dizer em qual ferramenta/plataforma cada peça subiu (ou falhou) —
+  // agora coleta o detalhe de cada uma (mesmo padrão do campRunResult,
+  // usado em Campanhas) e mostra abaixo dos botões.
+  const created = [], errors = [];
   for(const id of ids){
+    const asset = PENDING_ASSETS.find(a => a.id === id);
+    const label = (asset && asset.name) || id;
     try{
       const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(id) + '/approve?workspace_id=' + encodeURIComponent(pendWorkspaceId), { method: 'POST', headers: authHeaders() });
-      if(res.ok) ok++; else fail++;
-    }catch(e){ fail++; }
+      const data = await res.json().catch(() => ({}));
+      if(res.ok){
+        created.push({ name: label, source: data.source || (asset && asset.plat) || '—', platform_ad_id: data.platform_ad_id || '—' });
+      }else{
+        errors.push({ name: label, error: data.detail || ('HTTP ' + res.status) });
+      }
+    }catch(e){ errors.push({ name: label, error: e.message || 'falha de rede' }); }
   }
-  toast(`✓ ${ok} aprovada(s)` + (fail ? `, ✕ ${fail} falhou(aram)` : ''), fail ? 'er' : 'ok');
+  renderPendingRunResult(created, errors);
+  toast(`✓ ${created.length} aprovada(s)` + (errors.length ? `, ✕ ${errors.length} falhou(aram)` : ''), errors.length ? 'er' : 'ok');
   pendingSelectedIds = new Set();
   loadPendingFromBackend(); // já reseta o texto do botão via pendingUpdateBulkButtons()
+}
+
+function renderPendingRunResult(created, errors){
+  const el = document.getElementById('pendingRunResult');
+  if(!el) return;
+  let html = '';
+  if(created.length){
+    html += '<div style="margin-bottom:10px">'
+      + '<div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--success);margin-bottom:4px">✓ Subiram</div>'
+      + created.map(c => '<div style="font-size:12px;padding:4px 0">' + _escHtml(c.name) + ' — <span style="text-transform:uppercase">' + _escHtml(c.source) + '</span> — ad_id <span class="td-mono">' + _escHtml(c.platform_ad_id) + '</span></div>').join('')
+      + '</div>';
+  }
+  if(errors.length){
+    html += '<div>'
+      + '<div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--danger);margin-bottom:4px">✕ Erros</div>'
+      + errors.map(e => '<div style="font-size:12px;padding:4px 0;color:var(--danger)">' + _escHtml(e.name) + ' — ' + _escHtml(e.error) + '</div>').join('')
+      + '</div>';
+  }
+  el.innerHTML = html;
 }
 
 async function pendingBulkReject(){
@@ -1877,7 +1909,7 @@ async function approveAsset(rowId, btnEl){
     });
     const data = await res.json().catch(() => ({}));
     if(!res.ok) throw new Error(data.detail || 'falha ao aprovar');
-    toast('✓ Ad criado na plataforma (' + (data.platform_ad_id || '—') + ') — status "implemented"', 'ok');
+    toast('✓ [' + (data.source || '?').toUpperCase() + '] Ad criado (' + (data.platform_ad_id || '—') + ') — status "implemented"', 'ok');
   }catch(e){
     toast('✕ ' + (e.message || 'Não foi possível aprovar'), 'er');
   }
