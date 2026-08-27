@@ -1585,8 +1585,8 @@ function renderPending(){
       + '<div class="repo-meta">' + _escHtml(a.plat) + ' · ' + _escHtml(a.camp) + '</div>'
       + '<div class="repo-tags">' + a.tags.map(t => '<span class="repo-tag">' + _escHtml(t) + '</span>').join('') + '</div>'
       + '<div style="display:flex;gap:6px;margin-top:12px">'
-      + '<button onclick="approveAsset(\'' + _escJsAttr(a.id) + '\')" style="flex:1;padding:8px;background:var(--ink);color:#fff;border:none;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">✓ Aprovar</button>'
-      + '<button onclick="rejectAsset(\'' + _escJsAttr(a.id) + '\')" style="flex:1;padding:8px;background:transparent;color:var(--danger);border:1px solid #fecaca;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">✕ Reprovar</button>'
+      + '<button onclick="approveAsset(\'' + _escJsAttr(a.id) + '\', this)" style="flex:1;padding:8px;background:var(--ink);color:#fff;border:none;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">✓ Aprovar</button>'
+      + '<button onclick="rejectAsset(\'' + _escJsAttr(a.id) + '\', this)" style="flex:1;padding:8px;background:transparent;color:var(--danger);border:1px solid #fecaca;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">✕ Reprovar</button>'
       + '</div></div>';
     grid.appendChild(div);
   });
@@ -1614,8 +1614,8 @@ function pendingUpdateBulkButtons(){
   if(cntEl) cntEl.textContent = n + ' selecionado(s)';
   const approveBtn = document.getElementById('pendingBulkApproveBtn');
   const rejectBtn = document.getElementById('pendingBulkRejectBtn');
-  if(approveBtn) approveBtn.disabled = n === 0;
-  if(rejectBtn) rejectBtn.disabled = n === 0;
+  if(approveBtn){ approveBtn.disabled = n === 0; approveBtn.textContent = '✓ Aprovar selecionados'; }
+  if(rejectBtn){ rejectBtn.disabled = n === 0; rejectBtn.textContent = '✕ Reprovar selecionados'; }
   const allCb = document.getElementById('pendingSelectAllCheckbox');
   if(allCb) allCb.checked = PENDING_ASSETS.length > 0 && n === PENDING_ASSETS.length;
 }
@@ -1624,6 +1624,10 @@ async function pendingBulkApprove(){
   const ids = [...pendingSelectedIds];
   if(!ids.length) return;
   if(!confirm(`Aprovar ${ids.length} peça(s) selecionada(s)? Isso sobe o ad de verdade em cada plataforma.`)) return;
+  // Fix desta sessão (pedido do Leonardo) — feedback visual de que a ação
+  // está em andamento, igual já existia no upfSubmit/desdSubmit.
+  const btn = document.getElementById('pendingBulkApproveBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Aprovando...'; }
   let ok = 0, fail = 0;
   for(const id of ids){
     try{
@@ -1633,13 +1637,17 @@ async function pendingBulkApprove(){
   }
   toast(`✓ ${ok} aprovada(s)` + (fail ? `, ✕ ${fail} falhou(aram)` : ''), fail ? 'er' : 'ok');
   pendingSelectedIds = new Set();
-  loadPendingFromBackend();
+  loadPendingFromBackend(); // já reseta o texto do botão via pendingUpdateBulkButtons()
 }
 
 async function pendingBulkReject(){
   const ids = [...pendingSelectedIds];
   if(!ids.length) return;
   if(!confirm(`Reprovar ${ids.length} peça(s) selecionada(s)?`)) return;
+  // Fix desta sessão (pedido do Leonardo) — mesmo feedback visual do
+  // aprovar em massa.
+  const btn = document.getElementById('pendingBulkRejectBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Reprovando...'; }
   let ok = 0, fail = 0;
   for(const id of ids){
     try{
@@ -1653,10 +1661,13 @@ async function pendingBulkReject(){
   }
   toast(`✕ ${ok} reprovada(s)` + (fail ? `, ${fail} falhou(aram)` : ''), 'er');
   pendingSelectedIds = new Set();
-  loadPendingFromBackend();
+  loadPendingFromBackend(); // já reseta o texto do botão via pendingUpdateBulkButtons()
 }
 
-async function approveAsset(rowId){
+async function approveAsset(rowId, btnEl){
+  // Fix desta sessão (pedido do Leonardo) — feedback visual no botão
+  // individual do card, igual ao dos botões em massa.
+  if(btnEl){ btnEl.disabled = true; btnEl.textContent = 'Aprovando...'; }
   try{
     const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(rowId) + '/approve', {
       method: 'POST', headers: authHeaders(),
@@ -1667,9 +1678,11 @@ async function approveAsset(rowId){
   }catch(e){
     toast('✕ ' + (e.message || 'Não foi possível aprovar'), 'er');
   }
-  loadPendingFromBackend();
+  loadPendingFromBackend(); // recarrega o card (ou some da lista se deu certo) — não precisa reverter o texto manualmente
 }
-async function rejectAsset(rowId){
+async function rejectAsset(rowId, btnEl){
+  // Fix desta sessão (pedido do Leonardo) — mesmo feedback visual.
+  if(btnEl){ btnEl.disabled = true; btnEl.textContent = 'Reprovando...'; }
   try{
     const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(rowId) + '/reject', {
       method: 'POST',
@@ -2458,6 +2471,12 @@ function desdUpdateSubmitButtonState(){
 async function desdSubmit(){
   const rows = DESD_QUEUE.filter(r => desdState.selectedRowIds.has(r.row_id));
   if(!rows.length){ toast('Marque ao menos uma linha da fila pra atender', 'er'); return; }
+  // Fix desta sessão (pedido do Leonardo) — mensagem específica quando
+  // NENHUMA variação foi gerada ainda (antes caía direto no mesmo aviso
+  // de "escolha uma variação", que não deixava claro que era pra gerar
+  // primeiro — dava a entender que já existiam variações prontas pra
+  // escolher, quando na real nem foi clicado em "Gerar variações com IA").
+  if(!desdState.aiVariants.length){ toast('Você precisa gerar as peças com IA antes de enviar para aprovação', 'er'); return; }
   if(desdState.chosenVariantIndex === null){ toast('Escolha uma variação gerada pela IA antes de enviar', 'er'); return; }
   const chosen = desdState.aiVariants.find(v => v.index === desdState.chosenVariantIndex);
   if(!chosen || !chosen.data_base64){ toast('Variação escolhida não está mais disponível — gere de novo', 'er'); return; }
@@ -2467,6 +2486,13 @@ async function desdSubmit(){
   if(!creativeName){ toast('Informe um nome pro criativo antes de enviar', 'er'); return; }
 
   const rowIds = rows.map(r => r.row_id);
+
+  // Fix desta sessão (pedido do Leonardo) — feedback visual "Enviando..."
+  // no botão enquanto a requisição está em andamento (o /submit pode
+  // levar alguns segundos: processa a imagem, faz upload pro GCS, grava
+  // na planilha e propaga pro BigQuery).
+  const btn = document.getElementById('desdSubmitBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
 
   try{
     const res = await fetch(API_BASE + '/desdobrador/submit', {
@@ -2495,10 +2521,13 @@ async function desdSubmit(){
     document.getElementById('desdCreativeName').value = '';
     await desdLoadQueue();
     desdRenderAiVariantGrid();
-    desdUpdateSubmitButtonState();
   }catch(e){
     toast('✕ ' + (e.message || 'Falha ao enviar pra aprovação'), 'er');
   }
+  // Restaura o texto do botão sempre (sucesso ou erro) — o estado
+  // disabled/enabled real é recalculado por desdUpdateSubmitButtonState.
+  if(btn) btn.textContent = 'Enviar para Aprovação →';
+  desdUpdateSubmitButtonState();
 }
 // ── INIT ──
 window.addEventListener('load',()=>{
