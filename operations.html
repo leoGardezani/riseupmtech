@@ -1678,12 +1678,23 @@ function renderRepo(assets){
 }
 // ── PENDING (Aguardando Aprovação) — 100% real: GET /desdobrador/pending +
 // POST /desdobrador/{row_id}/approve|reject. Substituiu o array mock que
-// existia aqui antes (esta sessão, a pedido do Leonardo). ──
+// existia aqui antes (esta sessão, a pedido do Leonardo).
+// Fix desta sessão: BUG real — não filtrava por workspace (lia a tabela
+// implementation inteira, multi-tenant, misturando a fila de aprovação
+// de TODOS os workspaces). Agora exige workspace_id — reaproveita
+// upfWorkspaceId (seletor já existente nesta mesma aba, seção "Upload
+// direto") em vez de criar um seletor novo. ──
 async function loadPendingFromBackend(){
   const grid = document.getElementById('pendingGrid');
+  if(!upfWorkspaceId){
+    PENDING_ASSETS = [];
+    if(grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-muted)">Selecione um workspace acima (seção "Upload direto")</div>';
+    renderPending();
+    return;
+  }
   if(grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-muted)">Carregando fila de aprovação...</div>';
   try{
-    const res = await fetch(API_BASE + '/desdobrador/pending', { headers: authHeaders() });
+    const res = await fetch(API_BASE + '/desdobrador/pending?workspace_id=' + encodeURIComponent(upfWorkspaceId), { headers: authHeaders() });
     if(!res.ok) throw new Error('backend indisponível');
     const data = await res.json();
     // Mapeia a forma real (row_id, campaign_name, brand, source,
@@ -1792,7 +1803,7 @@ async function pendingBulkApprove(){
   let ok = 0, fail = 0;
   for(const id of ids){
     try{
-      const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(id) + '/approve', { method: 'POST', headers: authHeaders() });
+      const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(id) + '/approve?workspace_id=' + encodeURIComponent(upfWorkspaceId), { method: 'POST', headers: authHeaders() });
       if(res.ok) ok++; else fail++;
     }catch(e){ fail++; }
   }
@@ -1815,7 +1826,7 @@ async function pendingBulkReject(){
       const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(id) + '/reject', {
         method: 'POST',
         headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
-        body: JSON.stringify({ reason: '' }),
+        body: JSON.stringify({ reason: '', workspace_id: upfWorkspaceId }),
       });
       if(res.ok) ok++; else fail++;
     }catch(e){ fail++; }
@@ -1830,7 +1841,7 @@ async function approveAsset(rowId, btnEl){
   // individual do card, igual ao dos botões em massa.
   if(btnEl){ btnEl.disabled = true; btnEl.textContent = 'Aprovando...'; }
   try{
-    const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(rowId) + '/approve', {
+    const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(rowId) + '/approve?workspace_id=' + encodeURIComponent(upfWorkspaceId), {
       method: 'POST', headers: authHeaders(),
     });
     const data = await res.json().catch(() => ({}));
@@ -1848,7 +1859,7 @@ async function rejectAsset(rowId, btnEl){
     const res = await fetch(API_BASE + '/desdobrador/' + encodeURIComponent(rowId) + '/reject', {
       method: 'POST',
       headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
-      body: JSON.stringify({ reason: '' }),
+      body: JSON.stringify({ reason: '', workspace_id: upfWorkspaceId }),
     });
     if(!res.ok){ const err = await res.json().catch(() => ({})); throw new Error(err.detail || 'falha ao reprovar'); }
     toast('✕ Peça reprovada', 'er');
@@ -2159,7 +2170,14 @@ function switchTab(id, el){
   try{ localStorage.setItem('riseup_active_tab', id); }catch(e){}
   if(id === 'campanhas') campLoadWorkspaces();
   if(id === 'desdobrador') desdLoadWorkspaces();
-  if(id === 'criativos'){ loadPendingFromBackend(); upfLoadWorkspaces(); }
+  // Fix desta sessão: loadPendingFromBackend() agora precisa de
+  // workspace_id (bug real corrigido — antes lia a fila de aprovação de
+  // TODOS os workspaces misturada). upfWorkspaceId é reaproveitado (é o
+  // seletor que já existe nesta mesma aba, seção "Upload direto") em vez
+  // de criar um seletor novo — por isso agora espera upfLoadWorkspaces()
+  // resolver o workspace_id ANTES de chamar loadPendingFromBackend()
+  // (antes rodavam em paralelo, sem ordem garantida).
+  if(id === 'criativos'){ upfLoadWorkspaces(); }
   if(id === 'audiencias') renderAudCreatedTable();
   if(!chartsInited.has(id)){
     chartsInited.add(id);
@@ -2487,6 +2505,7 @@ async function desdUploadKvToBackend(file){
   try{
     const form = new FormData();
     form.append('file', file);
+    form.append('workspace_id', desdWorkspaceId);
     const res = await fetch(API_BASE + '/desdobrador/kv', {method:'POST', headers: authHeaders(), body: form});
     const data = await res.json().catch(() => ({}));
     if(!res.ok) throw new Error(data.detail || ('HTTP ' + res.status));
@@ -2551,6 +2570,7 @@ async function desdGenerateAiVariants(){
       body: JSON.stringify({
         blob_path: desdState.blobPath,
         row_id: refRow.row_id,
+        workspace_id: desdWorkspaceId,
         brand_instructions: promptText,
       }),
     });
@@ -2663,6 +2683,7 @@ async function desdSubmit(){
       body: JSON.stringify({
         blob_path: desdState.blobPath,
         row_ids: rowIds,
+        workspace_id: desdWorkspaceId,
         creative_name: creativeName,
         ai_variant_base64: chosen.data_base64,
         ai_content_type: 'image/png',
@@ -2772,6 +2793,11 @@ async function upfLoadWorkspaces(){
     if(prev && list.some(w => w.workspace_id === prev)) sel.value = prev;
     upfWorkspaceId = sel.value;
     await upfLoadQueue();
+    // Fix desta sessão: Aguardando Aprovação (loadPendingFromBackend)
+    // reaproveita este mesmo seletor de workspace (é a única aba que já
+    // tem um, dentro de tab-criativos) — chamado aqui, depois de
+    // upfWorkspaceId já estar resolvido, pra garantir a ordem certa.
+    loadPendingFromBackend();
   }catch(e){
     sel.innerHTML = '<option value="">Falha ao carregar workspaces</option>';
   }
@@ -2781,6 +2807,7 @@ function upfOnWorkspaceChange(){
   const sel = document.getElementById('upfWorkspaceSelect');
   upfWorkspaceId = sel ? sel.value : '';
   upfLoadQueue();
+  loadPendingFromBackend();
 }
 
 async function upfLoadQueue(){
@@ -2869,6 +2896,7 @@ async function upfSubmit(){
     form.append('file', upfFile);
     form.append('row_ids', JSON.stringify(rowIds));
     form.append('creative_name', creativeName);
+    form.append('workspace_id', upfWorkspaceId);
     const res = await fetch(API_BASE + '/desdobrador/upload-finished', {
       method: 'POST', headers: authHeaders(), body: form,
     });
