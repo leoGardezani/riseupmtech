@@ -385,6 +385,7 @@
     <button class="tab-btn on" onclick="switchTab('dashboard',this)">Overview</button>
     <button class="tab-btn" onclick="switchTab('campanhas',this)">Campanhas</button>
     <button class="tab-btn" onclick="switchTab('desdobrador',this)">Desdobrador</button>
+    <button class="tab-btn" onclick="switchTab('audiencias',this)">Audiências</button>
     <button class="tab-btn" onclick="switchTab('status',this)">Status</button>
     <button class="tab-btn" onclick="switchTab('criativos',this)">Criativos</button>
     <button class="tab-btn" onclick="switchTab('bigtable',this)">Big Table</button>
@@ -676,9 +677,109 @@
       </div>
     </div>
   </div>
+  <!-- ── AUDIÊNCIAS (MOCK — só visual, sem integração real ainda) ── -->
+  <div class="tab-page" id="tab-audiencias">
+    <div class="section-title">Audiências</div>
+    <div class="section-sub">A IA traduz uma descrição livre em audiência implementável — Google Ads, Meta Ads, TikTok Ads e Search, de uma vez só</div>
+    <div style="background:#fef9c3;border:1px solid #fde68a;padding:10px 14px;margin-bottom:20px;font-family:var(--mono);font-size:10px;color:#854d0e;letter-spacing:.04em">// MOCK — só visual por enquanto, ainda não chama nenhum backend real. Serve pra validar o desenho antes de implementar de verdade.</div>
+
+    <!-- Gerar nova audiência -->
+    <div class="tbox" style="margin-bottom:24px">
+      <div class="tbox-head">
+        <div class="tbox-title">Gerar Nova Audiência</div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// 1 prompt → audiência pras 3 plataformas + keywords de Search</span>
+      </div>
+      <div style="padding:16px 20px">
+        <div style="max-width:360px;margin-bottom:14px">
+          <label class="fl">Workspace</label>
+          <select class="fs_" id="audWorkspaceSelect"><option>Produto A Ltda</option><option>Produto B Ltda</option></select>
+        </div>
+        <div class="fg">
+          <label class="fl">Descrição da audiência (prompt livre)</label>
+          <textarea class="fi" id="audPromptText" rows="3" style="resize:vertical" placeholder="ex: mulheres 25-40 anos, interessadas em skincare natural, alta renda, moram em capitais">Mulheres 25-40 anos, interessadas em skincare natural, alta renda, moram em capitais do Brasil</textarea>
+        </div>
+        <button class="btn-full" id="audGenerateBtn" onclick="audGenerateMock()" style="max-width:280px">✦ Gerar audiência com IA</button>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px;line-height:1.6">// a IA sugere sinais/interesses por plataforma + keywords de Search — nada é criado ainda nesse passo, só a sugestão</div>
+      </div>
+    </div>
+
+    <!-- Resultado da geração — escondido até "gerar" -->
+    <div class="tbox" id="audResultBox" style="display:none;margin-bottom:24px;border-color:var(--ink)">
+      <div class="tbox-head">
+        <div class="tbox-title">Sugestão da IA</div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// revise antes de aprovar — nada foi criado nas plataformas ainda</span>
+      </div>
+      <div style="padding:20px">
+        <div class="fg" style="max-width:420px">
+          <label class="fl">Nome da audiência <span style="color:var(--danger)">*</span></label>
+          <input class="fi" id="audNameInput" value="skincare_natural_mulheres_capitais">
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin:-8px 0 18px;line-height:1.6">// esse nome vai pra coluna "audience" do plano de mídia e pra uma linha nova na aba "audiences"</div>
+
+        <div class="desd-format-group-lbl" style="margin-top:0">Google Ads — Custom Segment (sinais)</div>
+        <div class="repo-tags" style="margin-bottom:16px">
+          <span class="repo-tag">skincare natural</span><span class="repo-tag">cosméticos veganos</span>
+          <span class="repo-tag">rotina de beleza</span><span class="repo-tag">sephora.com.br</span>
+          <span class="repo-tag">natura.com.br</span>
+        </div>
+
+        <div class="desd-format-group-lbl">Meta Ads — Interesses (Detailed Targeting)</div>
+        <div class="repo-tags" style="margin-bottom:16px">
+          <span class="repo-tag">Cosméticos naturais</span><span class="repo-tag">Beleza e bem-estar</span>
+          <span class="repo-tag">Compras de luxo</span><span class="repo-tag">Skincare</span>
+        </div>
+
+        <div class="desd-format-group-lbl">TikTok Ads — Interesses/Comportamentos</div>
+        <div class="repo-tags" style="margin-bottom:16px">
+          <span class="repo-tag">Beleza</span><span class="repo-tag">Cuidados com a pele</span>
+          <span class="repo-tag">Estilo de vida saudável</span>
+        </div>
+
+        <div class="desd-format-group-lbl">Search — Palavras-chave sugeridas</div>
+        <div class="repo-tags" style="margin-bottom:16px">
+          <span class="repo-tag">skincare natural</span><span class="repo-tag">cosmético vegano</span>
+          <span class="repo-tag">creme facial orgânico</span><span class="repo-tag">rotina skincare</span>
+          <span class="repo-tag">produtos de beleza natural</span>
+        </div>
+
+        <div class="pacing-grid" style="margin:20px 0 4px">
+          <div class="pacing-card" style="padding:14px 16px">
+            <div class="kpi-lbl">Universo estimado</div>
+            <div class="kpi-val" style="font-size:20px">2,8M</div>
+          </div>
+          <div class="pacing-card" style="padding:14px 16px">
+            <div class="kpi-lbl">Plataformas</div>
+            <div class="kpi-val" style="font-size:20px">3 + Search</div>
+          </div>
+          <div class="pacing-card" style="padding:14px 16px">
+            <div class="kpi-lbl">Status</div>
+            <div style="margin-top:4px"><span class="badge b-y">Aguardando aprovação</span></div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:18px">
+          <button class="btn-sm" style="padding:10px 20px;font-size:10px" onclick="audApproveMock()">✓ Aprovar e criar nas plataformas</button>
+          <button class="btn-sm ghost" style="padding:10px 20px;font-size:10px;color:var(--danger);border-color:#fecaca" onclick="audDiscardMock()">✕ Descartar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audiências já criadas -->
+    <div class="tbox">
+      <div class="tbox-head">
+        <div class="tbox-title">Audiências Criadas</div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// espelha a aba "audiences" da planilha — alcance/freq./impressões/cobertura vêm por fórmula, não da IA</span>
+      </div>
+      <table><thead><tr>
+        <th>Audiência</th><th>Plataformas</th><th>Universo</th><th>Alcance</th><th>Freq.</th><th>Impressões</th><th>Cobertura</th><th>Criada</th>
+      </tr></thead>
+      <tbody id="audCreatedTable"></tbody></table>
+    </div>
+  </div>
   <!-- ── STATUS / GANTT ── -->
   <div class="tab-page" id="tab-status">
     <div class="section-title">Linha do Tempo de Implementação</div>
+
     <div class="section-sub">Visualização estilo Gantt — 30 dias correntes</div>
     <div class="gantt-wrap" id="ganttWrap"></div>
     <!-- Status summary -->
@@ -1166,6 +1267,66 @@ const USERS=[
   {name:'Ana Souza',email:'ana@riseupmtech.com',role:'Aprovador'},
   {name:'Carlos Lima',email:'carlos@riseupmtech.com',role:'Leitura'},
 ];
+// ── AUDIÊNCIAS (MOCK — só visual, pedido do Leonardo pra validar o
+// desenho antes de implementar de verdade. Nenhuma chamada real aqui —
+// audGenerateMock/audApproveMock só simulam o fluxo com setTimeout. ──
+const AUD_CREATED_MOCK = [
+  {name:'remarketing_carrinho_abandonado', plats:'Google Ads · Meta · TikTok', universo:'180k', alcance:'142k', freq:'2,3', imp:'890k', cobertura:'79%', criada:'20 Ago'},
+  {name:'interesse_tecnologia_b2b', plats:'Google Ads · Meta', universo:'2,4M', alcance:'1,1M', freq:'1,8', imp:'2,0M', cobertura:'46%', criada:'18 Ago'},
+  {name:'lookalike_clientes_gold', plats:'Meta · TikTok', universo:'480k', alcance:'310k', freq:'2,1', imp:'650k', cobertura:'65%', criada:'12 Ago'},
+];
+function renderAudCreatedTable(){
+  const tbody = document.getElementById('audCreatedTable');
+  if(!tbody) return;
+  tbody.innerHTML = AUD_CREATED_MOCK.map(a => `
+    <tr>
+      <td class="td-bold">${a.name}</td>
+      <td class="td-mono">${a.plats}</td>
+      <td class="td-mono">${a.universo}</td>
+      <td class="td-mono">${a.alcance}</td>
+      <td class="td-mono">${a.freq}</td>
+      <td class="td-mono">${a.imp}</td>
+      <td class="td-mono">${a.cobertura}</td>
+      <td class="td-mono" style="color:var(--ink-muted)">${a.criada}</td>
+    </tr>`).join('');
+}
+function audGenerateMock(){
+  const btn = document.getElementById('audGenerateBtn');
+  const box = document.getElementById('audResultBox');
+  const promptText = (document.getElementById('audPromptText').value || '').trim();
+  if(!promptText){ toast('Descreva a audiência antes de gerar', 'er'); return; }
+  btn.disabled = true; btn.textContent = 'Gerando (mock)...';
+  box.style.display = 'none';
+  setTimeout(() => {
+    btn.disabled = false; btn.textContent = '✦ Gerar audiência com IA';
+    box.style.display = 'block';
+    box.scrollIntoView({behavior:'smooth', block:'nearest'});
+    toast('✓ Sugestão gerada (mock) — revise antes de aprovar', 'ok');
+  }, 900);
+}
+function audApproveMock(){
+  const name = (document.getElementById('audNameInput').value || '').trim();
+  if(!name){ toast('Dê um nome pra audiência antes de aprovar', 'er'); return; }
+  const btns = document.querySelectorAll('#audResultBox .btn-sm');
+  btns.forEach(b => b.disabled = true);
+  if(btns[0]) btns[0].textContent = 'Criando nas plataformas...';
+  setTimeout(() => {
+    AUD_CREATED_MOCK.unshift({
+      name, plats:'Google Ads · Meta · TikTok · Search',
+      universo:'2,8M', alcance:'—', freq:'—', imp:'—', cobertura:'—', criada:'agora',
+    });
+    document.getElementById('audResultBox').style.display = 'none';
+    document.getElementById('audPromptText').value = '';
+    renderAudCreatedTable();
+    toast('✓ Audiência "' + name + '" criada nas plataformas (mock) — alcance/freq./cobertura ainda vêm zerados até a fórmula calcular', 'ok');
+    btns.forEach(b => b.disabled = false);
+    if(btns[0]) btns[0].textContent = '✓ Aprovar e criar nas plataformas';
+  }, 1100);
+}
+function audDiscardMock(){
+  document.getElementById('audResultBox').style.display = 'none';
+  toast('Sugestão descartada', '');
+}
 // ── TABS ──
 function togglePanel(){
   const p=document.getElementById('rPanel'),o=document.getElementById('overlay'),m=document.getElementById('main');
@@ -1999,6 +2160,7 @@ function switchTab(id, el){
   if(id === 'campanhas') campLoadWorkspaces();
   if(id === 'desdobrador') desdLoadWorkspaces();
   if(id === 'criativos'){ loadPendingFromBackend(); upfLoadWorkspaces(); }
+  if(id === 'audiencias') renderAudCreatedTable();
   if(!chartsInited.has(id)){
     chartsInited.add(id);
     setTimeout(() => initChartsForTab(id), 60);
@@ -2540,6 +2702,7 @@ window.addEventListener('load',()=>{
   renderStatus();
   renderGantt();
   renderRepo(REPO_ASSETS); // já atualiza repo-count e repo-count-header
+  renderAudCreatedTable();
   renderAudHeatmap();
   renderAudCards();
   desdRenderSelectedSummary();
