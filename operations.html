@@ -442,7 +442,8 @@
         <div style="flex:1;min-width:100px"><label class="fl">Meta — Conta</label><div id="acctMount-meta-ad_account_id"></div></div>
         <div style="flex:1;min-width:100px"><label class="fl">Meta — Página FB</label><div id="acctMount-meta-page_id"></div></div>
         <div style="flex:1;min-width:100px"><label class="fl">Meta — Instagram</label><div id="acctMount-meta-instagram_account_id"></div></div>
-        <div style="flex:1;min-width:100px"><label class="fl">TikTok</label><div id="acctMount-tiktok"></div></div>
+        <div style="flex:1;min-width:100px"><label class="fl">TikTok — Conta</label><div id="acctMount-tiktok"></div></div>
+        <div style="flex:1;min-width:100px"><label class="fl">TikTok — Perfil/Identidade</label><div id="acctMount-tiktok-identity_id"></div></div>
       </div>
       <div style="padding:4px 20px 16px">
         <button class="bt-btn" id="campRunBtn" onclick="campRunPipeline()" disabled>▶ Rodar Campanhas</button>
@@ -3249,6 +3250,8 @@ async function connRenderAccountMounts(workspaceId, backendStatus){
     const selectId = 'acctSel-' + m.mountId;
     const onchangeCall = m.field === 'page_id'
       ? 'connOnMetaPageChange(\'' + workspaceId + '\',this)'
+      : (m.platform === 'tiktok' && m.mountId === 'acctMount-tiktok')
+      ? 'connOnTiktokAdvertiserChange(\'' + workspaceId + '\',this)'
       : 'connSaveAccountSelection(\'' + m.platform + '\',' + (m.field ? "'" + m.field + "'" : 'null') + ',\'' + workspaceId + '\',this.value,this)';
     el.innerHTML = '<select class="fs_" id="' + selectId + '" style="font-size:10px;padding:6px 22px 6px 8px" '
       + 'onchange="' + onchangeCall + '">'
@@ -3256,6 +3259,78 @@ async function connRenderAccountMounts(workspaceId, backendStatus){
       + accounts.map(a => '<option value="' + a.id + '"' + (a.id === selectedVal ? ' selected' : '') + '>' + _escHtml(a.name || a.id) + '</option>').join('')
       + '</select>';
   }
+  // TikTok — carrega o seletor de Perfil/Identidade depois do loop
+  // principal, já que ele usa uma fonte de dados diferente (GET
+  // /connect/accounts/tiktok/identities, chamada dinâmica na API do
+  // TikTok, não o que veio estático em fetchAccountsOnce('tiktok')).
+  // Mesma ideia do Instagram do Meta (depende de outra seleção primeiro),
+  // pedido do Leonardo nesta sessão.
+  if(backendStatus && backendStatus.tiktok && !_isStale()){
+    const tiktokData = await fetchAccountsOnce('tiktok');
+    const advertiserId = (tiktokData && tiktokData.selected || {}).advertiser_id
+      || document.getElementById('acctSel-acctMount-tiktok')?.value || null;
+    await connLoadTiktokIdentities(workspaceId, advertiserId);
+  }
+}
+
+// Advertiser TikTok mudou — salva a seleção (igual antes) E recarrega o
+// seletor de Perfil/Identidade, filtrado pro advertiser novo (mesma ideia
+// do connOnMetaPageChange, mas a lista de identidades é buscada ao vivo
+// na API do TikTok, não filtrada de uma lista já carregada).
+async function connOnTiktokAdvertiserChange(workspaceId, selectEl){
+  await connSaveAccountSelection('tiktok', 'advertiser_id', workspaceId, selectEl.value, selectEl);
+  await connLoadTiktokIdentities(workspaceId, selectEl.value);
+}
+
+async function connLoadTiktokIdentities(workspaceId, advertiserId){
+  const el = document.getElementById('acctMount-tiktok-identity_id');
+  if(!el) return;
+  if(!advertiserId){
+    el.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">selecione a conta TikTok primeiro</span>';
+    return;
+  }
+  el.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">carregando…</span>';
+  try{
+    const res = await _fetchWithRetry(API_BASE + '/connect/accounts/tiktok/identities?workspace_id=' + encodeURIComponent(workspaceId), { headers: authHeaders() });
+    const data = (res && res.ok) ? await res.json() : null;
+    if(!data) throw new Error('falha ao carregar identidades');
+    const identities = data.identities || [];
+    if(!identities.length){
+      el.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">nenhuma identidade encontrada nessa conta</span>';
+      return;
+    }
+    const selectedVal = data.selected;
+    el.innerHTML = '<select class="fs_" id="acctSel-acctMount-tiktok-identity_id" style="font-size:10px;padding:6px 22px 6px 8px" '
+      + 'onchange="connSaveTiktokIdentity(\'' + workspaceId + '\',this)">'
+      + '<option value="">Selecione…</option>'
+      + identities.map(i => '<option value="' + i.id + '" data-identity-type="' + _escHtml(i.identity_type) + '"' + (i.id === selectedVal ? ' selected' : '') + '>' + _escHtml(i.name || i.id) + '</option>').join('')
+      + '</select>';
+  }catch(e){
+    el.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">falha ao carregar identidades</span>';
+  }
+}
+
+// Salvar identidade TikTok — precisa mandar identity_type junto (cada
+// <option> já carrega o próprio identity_type num data-attribute, vindo
+// direto do GET /connect/accounts/tiktok/identities).
+async function connSaveTiktokIdentity(workspaceId, selectEl){
+  const identityId = selectEl.value;
+  if(!identityId) return;
+  const identityType = selectEl.selectedOptions[0]?.dataset.identityType || 'CUSTOMIZED_USER';
+  selectEl.disabled = true;
+  try{
+    const res = await fetch(API_BASE + '/connect/accounts/tiktok/select?workspace_id=' + encodeURIComponent(workspaceId), {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+      body: JSON.stringify({ account_id: identityId, field: 'identity_id', identity_type: identityType }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.detail || 'falha ao salvar');
+    toast('✓ Identidade selecionada', 'ok');
+  }catch(e){
+    toast('✕ ' + (e.message || 'Não foi possível salvar a identidade'), 'er');
+  }
+  selectEl.disabled = false;
 }
 
 // Página do Facebook mudou — salva a seleção (igual antes) E re-renderiza
