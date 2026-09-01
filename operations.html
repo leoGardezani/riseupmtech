@@ -3584,26 +3584,41 @@ async function connLoadTiktokIdentities(workspaceId, advertiserId){
     el.innerHTML = '<select class="fs_" id="acctSel-acctMount-tiktok-identity_id" style="font-size:10px;padding:6px 22px 6px 8px" '
       + 'onchange="connSaveTiktokIdentity(\'' + workspaceId + '\',this)">'
       + '<option value="">Selecione…</option>'
-      + identities.map(i => '<option value="' + i.id + '" data-identity-type="' + _escHtml(i.identity_type) + '"' + (i.id === selectedVal ? ' selected' : '') + '>' + _escHtml(i.name || i.id) + '</option>').join('')
+      + identities.map(i => '<option value="' + i.id + '" data-identity-type="' + _escHtml(i.identity_type) + '" data-identity-bc-id="' + _escHtml(i.identity_authorized_bc_id || '') + '"' + (i.id === selectedVal ? ' selected' : '') + '>' + _escHtml(i.name || i.id) + '</option>').join('')
       + '</select>';
   }catch(e){
     el.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">falha ao carregar identidades</span>';
   }
 }
 
-// Salvar identidade TikTok — precisa mandar identity_type junto (cada
-// <option> já carrega o próprio identity_type num data-attribute, vindo
-// direto do GET /connect/accounts/tiktok/identities).
+// Salvar identidade TikTok — precisa mandar identity_type E
+// identity_authorized_bc_id juntos (cada <option> já carrega os dois num
+// data-attribute, vindo direto do GET /connect/accounts/tiktok/identities).
+//
+// BUG REAL corrigido nesta sessão, achado ao vivo (pedido do Leonardo:
+// "escolhi o perfil no seletor e não deveria precisar digitar nada no
+// Console"): esta função só mandava identity_type, NUNCA
+// identity_authorized_bc_id — mesmo o backend já sabendo lidar com isso
+// desde uma sessão anterior. Resultado: escolher a identidade pela tela
+// parecia funcionar (toast de sucesso), mas o approve de peça TikTok
+// continuava rejeitando com "Custom identities are no longer supported"
+// porque o campo obrigatório pra identity_type=BC_AUTH_TT nunca chegava
+// salvo — só funcionava mesmo digitando o fetch manual no Console. Agora
+// a tela sozinha já resolve isso, sem precisar de mais nenhum comando manual.
 async function connSaveTiktokIdentity(workspaceId, selectEl){
   const identityId = selectEl.value;
   if(!identityId) return;
-  const identityType = selectEl.selectedOptions[0]?.dataset.identityType || 'CUSTOMIZED_USER';
+  const opt = selectEl.selectedOptions[0];
+  const identityType = opt?.dataset.identityType || 'CUSTOMIZED_USER';
+  const identityAuthorizedBcId = opt?.dataset.identityBcId || '';
   selectEl.disabled = true;
   try{
+    const body = { account_id: identityId, field: 'identity_id', identity_type: identityType };
+    if(identityType === 'BC_AUTH_TT' && identityAuthorizedBcId) body.identity_authorized_bc_id = identityAuthorizedBcId;
     const res = await fetch(API_BASE + '/connect/accounts/tiktok/select?workspace_id=' + encodeURIComponent(workspaceId), {
       method: 'POST',
       headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
-      body: JSON.stringify({ account_id: identityId, field: 'identity_id', identity_type: identityType }),
+      body: JSON.stringify(body),
     });
     const data = await res.json().catch(() => ({}));
     if(!res.ok) throw new Error(data.detail || 'falha ao salvar');
