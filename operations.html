@@ -642,14 +642,21 @@
         </div>
 
         <div class="desd-step-lbl">2. Peças a gerar</div>
-        <div style="font-size:12px;color:var(--ink-mid);margin-bottom:10px;line-height:1.6">O formato de cada peça vem da própria linha de material-request — marque acima quais linhas da fila este KV vai atender. A pré-visualização por IA usa o formato da primeira linha marcada.</div>
+        <div style="font-size:12px;color:var(--ink-mid);margin-bottom:10px;line-height:1.6">O formato de cada peça vem da própria linha de material-request — marque acima quais linhas da fila este KV vai atender. Linhas idênticas (mesma campanha+plataforma+meio+tipo, repetidas pela coluna <code>volume</code> do media-plan) formam um grupo e recebem uma variação DIFERENTE cada uma automaticamente.</div>
         <div id="desdSelectedRowsSummary" style="margin-bottom:8px"></div>
+        <div id="desdGroupsSummary" style="margin-bottom:8px"></div>
+
+        <div class="desd-step-lbl">Duração do vídeo <span style="font-weight:400;color:var(--ink-muted);font-size:11px">(só linhas TikTok — TikTok não aceita mais imagem estática)</span></div>
+        <div style="display:flex;gap:16px;margin-bottom:10px;font-size:12px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="desdDuration" value="6" checked onchange="desdState.durationSeconds=6"> 6s</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="desdDuration" value="15" onchange="desdState.durationSeconds=15"> 15s <span style="color:var(--ink-muted);font-size:10px">(não testado ainda contra a API real)</span></label>
+        </div>
 
         <div class="desd-step-lbl">3. Gerar variações com IA</div>
         <button class="btn-full" id="desdGenerateBtn" onclick="desdGenerateAiVariants()">✦ Gerar variações com IA</button>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:6px;line-height:1.6">// pode levar 1-2 min (gera 4 variações via Gemini) — escolha uma abaixo antes de enviar pra aprovação</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:6px;line-height:1.6">// pode levar 1-2 min por grupo (imagem via Gemini, vídeo via Veo pro TikTok) — cada grupo recebe sua própria leva de variações, uma por linha</div>
         <div id="desdAiStatus" style="margin-top:10px"></div>
-        <div class="desd-preview-grid" id="desdAiVariantGrid" style="margin-top:12px"></div>
+        <div id="desdAiGroupsContainer" style="margin-top:12px"></div>
       </div>
 
       <!-- COLUNA DIREITA: prompt + CTA + metadata -->
@@ -2368,11 +2375,48 @@ let desdState = {
   kvDataUrl: null,     // preview local (FileReader) — só pra mostrar o KV enviado
   blobPath: null,       // preenchido se o upload real pro backend funcionar — obrigatório pra gerar/enviar
   selectedRowIds: new Set(),
-  aiVariants: [],       // [{index, data_base64 (SEM CTA), error}] — vem de /ai-preview
-  chosenVariantIndex: null,
+  // Fix desta sessão (pedido do Leonardo, resolve o bug de "duas peças
+  // duplicadas quando seleciona uma variação"): `aiVariants`/
+  // `chosenVariantIndex` (globais, um valor só pro lote inteiro) viraram
+  // `groups` — um objeto por chave de grupo (mesma campanha+source+
+  // medium+creative_type; ver desdGroupKey). Cada grupo tem sua própria
+  // leva de variações (uma por linha do grupo) e sua própria atribuição
+  // linha→variação, em vez de uma escolha única aplicada a tudo.
+  // Formato de cada entrada: { rowIds: [...], kind: 'image'|'video',
+  // variants: [...], assignments: {row_id: variantIndex} }
+  groups: {},
+  durationSeconds: 6,  // só usado pros grupos TikTok — seletor 6s/15s na UI
   ctaText: 'Saiba mais',
   ctaColor: '#0d0d0d',
 };
+
+// Chave de agrupamento — os mesmos 4 campos que já formam o row_id (ver
+// generate_row_id em services/row_id.py): linhas idênticas nesses 4
+// campos são o MESMO slot de formato, repetido N vezes pela coluna
+// `volume` do media-plan (ver _explode_media_plans em plan_sync.py), e
+// precisam de N variações DIFERENTES da IA — não a mesma peça repetida.
+function desdGroupKey(row){
+  return [row.campaign_name, row.source, row.medium, row.creative_type].join('|');
+}
+
+// Agrupa as linhas atualmente marcadas na fila pela chave acima. Retorna
+// um array de {key, rows, isTikTok} — um item por grupo distinto entre as
+// linhas selecionadas (normalmente só 1 grupo, mas o desdobrador permite
+// marcar linhas de formatos/plataformas diferentes juntas no mesmo KV).
+function desdComputeGroups(){
+  const rows = DESD_QUEUE.filter(r => desdState.selectedRowIds.has(r.row_id));
+  const byKey = {};
+  rows.forEach(r => {
+    const key = desdGroupKey(r);
+    if(!byKey[key]) byKey[key] = [];
+    byKey[key].push(r);
+  });
+  return Object.keys(byKey).map(key => ({
+    key,
+    rows: byKey[key],
+    isTikTok: (byKey[key][0].source || '').trim().toLowerCase() === 'tiktok',
+  }));
+}
 
 function desdParseSize(sizeStr){
   const m = /(\d+)\s*[x×X]\s*(\d+)/.exec(sizeStr || '');
@@ -2468,8 +2512,7 @@ function desdToggleSelectAll(checked){
     document.getElementById('desdCampaignName').value = first.campaign_name;
     document.getElementById('desdBrand').value = first.brand;
   }
-  desdState.aiVariants = [];
-  desdState.chosenVariantIndex = null;
+  desdState.groups = {};
   renderDesdQueue();
   desdRenderSelectedSummary();
   desdRenderCtaCharHint();
@@ -2490,8 +2533,7 @@ function desdToggleQueueRow(rowId){
   // Trocar quais linhas estão marcadas muda o formato de referência da
   // pré-visualização por IA (usa a primeira linha marcada) — variações já
   // geradas ficam obsoletas, força gerar de novo pra evitar confusão.
-  desdState.aiVariants = [];
-  desdState.chosenVariantIndex = null;
+  desdState.groups = {};
   renderDesdQueue();
   desdRenderSelectedSummary();
   desdRenderCtaCharHint();
@@ -2547,8 +2589,7 @@ function desdOnFileSelected(evt){
     const img = document.getElementById('desdKvPreviewImg');
     if(wrap && img){ img.src = reader.result; wrap.style.display = 'block'; }
     // Trocar o KV invalida qualquer variação já gerada com o KV anterior.
-    desdState.aiVariants = [];
-    desdState.chosenVariantIndex = null;
+    desdState.groups = {};
     renderDesdQueue();
     desdRenderAiVariantGrid();
     desdUpdateSubmitButtonState();
@@ -2602,99 +2643,170 @@ function desdDrawCtaBarOnCanvas(ctx, w, h, text, color){
 }
 
 // ── Geração via IA (POST /desdobrador/ai-preview) — NÃO persiste nada,
-// só gera N variações (sem CTA) pro usuário escolher. ──
+// só gera variações (sem CTA) pro usuário revisar/ajustar por linha. ──
+// Fix desta sessão (pedido do Leonardo, resolve o bug de "duas peças
+// duplicadas quando seleciona uma variação"): antes chamava /ai-preview
+// UMA vez pro lote inteiro (usando a primeira linha marcada como
+// referência de formato) e aplicava a MESMA variação escolhida em todas
+// as linhas selecionadas. Agora chama /ai-preview UMA VEZ POR GRUPO (ver
+// desdComputeGroups) — linhas idênticas em campanha+source+medium+
+// creative_type (repetidas pela coluna `volume` do media-plan) formam um
+// grupo e recebem N variações DIFERENTES (N = tamanho do grupo),
+// distribuídas uma por linha automaticamente.
 async function desdGenerateAiVariants(){
   const statusEl = document.getElementById('desdAiStatus');
   const btn = document.getElementById('desdGenerateBtn');
   if(!desdState.blobPath){ toast('Envie um KV antes de gerar variações', 'er'); return; }
-  const rows = DESD_QUEUE.filter(r => desdState.selectedRowIds.has(r.row_id));
-  if(!rows.length){ toast('Marque ao menos uma linha da fila (define o formato da pré-visualização)', 'er'); return; }
+  const groups = desdComputeGroups();
+  if(!groups.length){ toast('Marque ao menos uma linha da fila (define o(s) formato(s) da pré-visualização)', 'er'); return; }
 
-  const refRow = rows[0];
   const promptText = document.getElementById('desdPromptText').value || '';
-
-  if(btn){ btn.disabled = true; btn.textContent = 'Gerando (pode levar 1-2 min)...'; }
-  if(statusEl) statusEl.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Chamando a IA — até 4 variações, uma de cada vez...</div>';
-  desdState.aiVariants = [];
-  desdState.chosenVariantIndex = null;
+  if(btn){ btn.disabled = true; btn.textContent = 'Gerando (pode levar 1-2 min por grupo)...'; }
+  desdState.groups = {};
   desdRenderAiVariantGrid();
   desdUpdateSubmitButtonState();
 
-  try{
-    const res = await fetch(API_BASE + '/desdobrador/ai-preview', {
-      method: 'POST',
-      headers: Object.assign({'Content-Type': 'application/json'}, authHeaders()),
-      body: JSON.stringify({
+  let okGroups = 0;
+  let failMsgs = [];
+
+  for(const group of groups){
+    if(statusEl) statusEl.innerHTML = `<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Grupo "${_escHtml(group.rows[0].campaign_name)}" (${group.rows.length} linha(s)${group.isTikTok ? ', vídeo TikTok' : ''}) — chamando a IA...</div>`;
+    try{
+      const body = {
         blob_path: desdState.blobPath,
-        row_id: refRow.row_id,
+        row_ids: group.rows.map(r => r.row_id),
         workspace_id: desdWorkspaceId,
         brand_instructions: promptText,
-      }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if(!res.ok) throw new Error(data.detail || 'backend recusou a geração');
-    desdState.aiVariants = data.variants || [];
-    const ok = data.total_ok || 0;
-    // Novo nesta sessão (pedido do Leonardo) — mostra os tokens reais
-    // gastos nesta chamada (vem do próprio Gemini, response.usage_metadata).
-    // Hoje é $0 (free tier), mas já fica visível pra quando migrar pra
-    // billing/Vertex.
-    const tk = data.tokens_used || {};
-    const tokensLine = tk.total ? `<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:4px">${tk.prompt || 0} tokens de prompt + ${tk.output || 0} de saída = ${tk.total} no total</div>` : '';
-    if(statusEl){
-      statusEl.innerHTML = (ok
-        ? `<div style="font-family:var(--mono);font-size:10px;color:var(--success)">✓ ${ok} de ${data.total} variação(ões) geradas — escolha uma abaixo</div>`
-        : `<div style="font-family:var(--mono);font-size:10px;color:var(--danger)">Nenhuma variação gerou com sucesso — ver erros abaixo</div>`)
-        + tokensLine;
+      };
+      if(group.isTikTok) body.duration_seconds = desdState.durationSeconds || 6;
+
+      const res = await fetch(API_BASE + '/desdobrador/ai-preview', {
+        method: 'POST',
+        headers: Object.assign({'Content-Type': 'application/json'}, authHeaders()),
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok) throw new Error(data.detail || 'backend recusou a geração');
+
+      const variants = data.variants || [];
+      // Auto-atribuição sequencial: variação i vai pra linha i do grupo,
+      // ciclando se vieram menos variações OK do que linhas (ex: alguma
+      // falhou). O usuário pode reatribuir manualmente pelo seletor de
+      // cada linha depois (ver desdAssignVariantToRow).
+      const okVariants = variants.filter(v => v.data_base64);
+      const assignments = {};
+      group.rows.forEach((row, i) => {
+        if(okVariants.length) assignments[row.row_id] = okVariants[i % okVariants.length].index;
+      });
+
+      desdState.groups[group.key] = {
+        rows: group.rows,
+        isTikTok: group.isTikTok,
+        kind: data.kind || (group.isTikTok ? 'video' : 'image'),
+        durationSeconds: data.duration_seconds || null,
+        variants,
+        assignments,
+      };
+      if(okVariants.length) okGroups++;
+      else failMsgs.push(`"${group.rows[0].campaign_name}": nenhuma variação gerou com sucesso`);
+    }catch(e){
+      failMsgs.push(`"${group.rows[0].campaign_name}": ${e.message || 'falha ao gerar'}`);
+      desdState.groups[group.key] = { rows: group.rows, isTikTok: group.isTikTok, kind: group.isTikTok ? 'video' : 'image', variants: [], assignments: {} };
     }
-  }catch(e){
-    toast('✕ ' + (e.message || 'Falha ao gerar variações'), 'er');
-    if(statusEl) statusEl.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--danger)">Falha ao gerar — tente de novo</div>';
+    desdRenderAiVariantGrid();
+  }
+
+  if(statusEl){
+    statusEl.innerHTML = (okGroups === groups.length
+      ? `<div style="font-family:var(--mono);font-size:10px;color:var(--success)">✓ ${okGroups} de ${groups.length} grupo(s) gerado(s) com sucesso — revise a atribuição de cada linha abaixo</div>`
+      : `<div style="font-family:var(--mono);font-size:10px;color:var(--danger)">${okGroups} de ${groups.length} grupo(s) OK. ${_escHtml(failMsgs.join(' | '))}</div>`);
   }
 
   if(btn){ btn.disabled = false; btn.textContent = '✦ Gerar variações com IA'; }
-  desdRenderAiVariantGrid();
+  desdUpdateSubmitButtonState();
 }
 
+// Renderiza um bloco por grupo: grid de variações (imagem via Canvas+CTA
+// preview, ou vídeo via <video> nativo pra grupos TikTok) + a lista de
+// linhas do grupo, cada uma com um <select> mostrando/permitindo trocar
+// qual variação está atribuída a ela.
 function desdRenderAiVariantGrid(){
-  const grid = document.getElementById('desdAiVariantGrid');
-  if(!grid) return;
-  if(!desdState.aiVariants.length){
-    grid.innerHTML = '';
-    return;
-  }
-  grid.innerHTML = desdState.aiVariants.map(v => `
-    <div class="desd-preview-card desd-ai-variant-card" data-idx="${v.index}" onclick="desdChooseVariant(${v.index})" style="cursor:${v.data_base64 ? 'pointer' : 'default'};border:2px solid ${desdState.chosenVariantIndex===v.index?'var(--ink)':'transparent'}">
-      ${v.data_base64
-        ? `<canvas id="desdAiVariant_${v.index}"></canvas>`
-        : `<div style="aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:var(--bg3);color:var(--danger);font-family:var(--mono);font-size:9px;padding:10px;text-align:center">${_escHtml(v.error || 'falhou')}</div>`}
-      <div class="desd-preview-lbl">Variação ${v.index + 1}${desdState.chosenVariantIndex===v.index ? ' · escolhida ✓' : ''}</div>
-    </div>`).join('');
+  const container = document.getElementById('desdAiGroupsContainer');
+  if(!container) return;
+  const keys = Object.keys(desdState.groups);
+  if(!keys.length){ container.innerHTML = ''; return; }
 
-  desdState.aiVariants.forEach(v => {
-    if(!v.data_base64) return;
-    const canvas = document.getElementById('desdAiVariant_' + v.index);
-    if(!canvas) return;
-    const img = new Image();
-    img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      // CTA desenhado só pra PREVIEW aqui via Canvas — o que vai pro
-      // /submit é o data_base64 SEM CTA (v.data_base64), o backend desenha
-      // o CTA de verdade na hora (ver desdSubmit).
-      desdDrawCtaBarOnCanvas(ctx, img.width, img.height, desdState.ctaText, desdState.ctaColor);
-    };
-    img.src = 'data:image/png;base64,' + v.data_base64;
+  container.innerHTML = keys.map(key => {
+    const g = desdState.groups[key];
+    const isVideo = g.kind === 'video';
+    const cardsHtml = g.variants.map(v => {
+      if(!v.data_base64){
+        return `<div class="desd-preview-card" style="aspect-ratio:${isVideo?'9/16':'1/1'};display:flex;align-items:center;justify-content:center;background:var(--bg3);color:var(--danger);font-family:var(--mono);font-size:9px;padding:10px;text-align:center">${_escHtml(v.error || 'falhou')}</div>`;
+      }
+      if(isVideo){
+        return `<div class="desd-preview-card" data-key="${_escHtml(key)}" data-idx="${v.index}">
+          <video src="data:video/mp4;base64,${v.data_base64}" controls muted loop style="width:100%;aspect-ratio:9/16;background:#000"></video>
+          <div class="desd-preview-lbl">Variação ${v.index + 1}${g.durationSeconds ? ' · ' + g.durationSeconds + 's' : ''}</div>
+        </div>`;
+      }
+      return `<div class="desd-preview-card" data-key="${_escHtml(key)}" data-idx="${v.index}">
+        <canvas id="desdAiVariant_${_escHtml(key)}_${v.index}"></canvas>
+        <div class="desd-preview-lbl">Variação ${v.index + 1}</div>
+      </div>`;
+    }).join('');
+
+    const rowsHtml = g.rows.map(row => {
+      const okVariants = g.variants.filter(v => v.data_base64);
+      const optionsHtml = okVariants.map(v =>
+        `<option value="${v.index}" ${g.assignments[row.row_id] === v.index ? 'selected' : ''}>Variação ${v.index + 1}</option>`
+      ).join('');
+      return `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--line)">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-mid)">${_escHtml(row.campaign_name)} · ${_escHtml(row.creative_size || '')}</span>
+        ${okVariants.length
+          ? `<select class="fs_" style="font-size:10px;padding:4px 8px" onchange="desdAssignVariantToRow('${_escHtml(key)}','${row.row_id}', parseInt(this.value,10))">${optionsHtml}</select>`
+          : `<span style="font-family:var(--mono);font-size:9px;color:var(--danger)">sem variação disponível</span>`}
+      </div>`;
+    }).join('');
+
+    return `<div class="tbox" style="margin-bottom:16px">
+      <div class="tbox-head">
+        <div class="tbox-title">${_escHtml(g.rows[0].campaign_name)} · ${_escHtml(g.rows[0].source)}${isVideo ? ' · vídeo' : ''} · ${g.rows.length} linha(s)</div>
+      </div>
+      <div class="desd-preview-grid" style="padding:12px 20px 0">${cardsHtml}</div>
+      <div style="padding:4px 20px 14px">${rowsHtml}</div>
+    </div>`;
+  }).join('');
+
+  // Desenha as variações de IMAGEM nos canvas (com overlay de CTA só pra
+  // preview local — o CTA real é desenhado no backend, no /submit). Vídeo
+  // já tocou direto via <video src="data:...">, não precisa de canvas.
+  keys.forEach(key => {
+    const g = desdState.groups[key];
+    if(g.kind === 'video') return;
+    g.variants.forEach(v => {
+      if(!v.data_base64) return;
+      const canvas = document.getElementById(`desdAiVariant_${key}_${v.index}`);
+      if(!canvas) return;
+      const img = new Image();
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        desdDrawCtaBarOnCanvas(ctx, img.width, img.height, desdState.ctaText, desdState.ctaColor);
+      };
+      img.src = 'data:image/png;base64,' + v.data_base64;
+    });
   });
 }
 
-function desdChooseVariant(idx){
-  const v = desdState.aiVariants.find(x => x.index === idx);
-  if(!v || !v.data_base64) return; // não dá pra escolher uma que falhou
-  desdState.chosenVariantIndex = idx;
-  desdRenderAiVariantGrid();
+// Troca manualmente qual variação está atribuída a uma linha específica
+// dentro de um grupo — chamado pelo <select> de cada linha em
+// desdRenderAiVariantGrid.
+function desdAssignVariantToRow(groupKey, rowId, variantIndex){
+  const g = desdState.groups[groupKey];
+  if(!g) return;
+  g.assignments[rowId] = variantIndex;
   desdUpdateSubmitButtonState();
 }
 
@@ -2703,33 +2815,44 @@ function desdUpdateSubmitButtonState(){
   if(!btn) return;
   const nameEl = document.getElementById('desdCreativeName');
   const hasName = nameEl && nameEl.value.trim().length > 0;
-  btn.disabled = desdState.chosenVariantIndex === null || !desdState.selectedRowIds.size || !hasName;
+  const keys = Object.keys(desdState.groups);
+  // Só habilita quando TODA linha selecionada (em TODOS os grupos) já
+  // tem uma variação atribuída — evita enviar submit parcial sem perceber.
+  const allAssigned = keys.length > 0 && keys.every(key => {
+    const g = desdState.groups[key];
+    return g.rows.every(row => g.assignments[row.row_id] !== undefined);
+  });
+  btn.disabled = !allAssigned || !desdState.selectedRowIds.size || !hasName;
 }
 
 // ── Envio pra aprovação — 100% backend real (POST /desdobrador/submit) ──
+// Fix desta sessão: `ai_variant_base64` (um valor pro lote inteiro) virou
+// `ai_variants` (lista, um item por row_id) — ver AiVariantAssignment em
+// api/creative_deploy.py. Monta essa lista a partir de
+// desdState.groups[*].assignments, juntando todos os grupos.
 async function desdSubmit(){
-  const rows = DESD_QUEUE.filter(r => desdState.selectedRowIds.has(r.row_id));
-  if(!rows.length){ toast('Marque ao menos uma linha da fila pra atender', 'er'); return; }
-  // Fix desta sessão (pedido do Leonardo) — mensagem específica quando
-  // NENHUMA variação foi gerada ainda (antes caía direto no mesmo aviso
-  // de "escolha uma variação", que não deixava claro que era pra gerar
-  // primeiro — dava a entender que já existiam variações prontas pra
-  // escolher, quando na real nem foi clicado em "Gerar variações com IA").
-  if(!desdState.aiVariants.length){ toast('Você precisa gerar as peças com IA antes de enviar para aprovação', 'er'); return; }
-  if(desdState.chosenVariantIndex === null){ toast('Escolha uma variação gerada pela IA antes de enviar', 'er'); return; }
-  const chosen = desdState.aiVariants.find(v => v.index === desdState.chosenVariantIndex);
-  if(!chosen || !chosen.data_base64){ toast('Variação escolhida não está mais disponível — gere de novo', 'er'); return; }
-  // Novo nesta sessão (pedido do Leonardo) — nome do criativo agora é
-  // obrigatório e escolhido pela pessoa, não gerado sozinho.
+  const keys = Object.keys(desdState.groups);
+  if(!keys.length){ toast('Você precisa gerar as peças com IA antes de enviar para aprovação', 'er'); return; }
+
+  const aiVariants = [];
+  const rowIds = [];
+  let missing = false;
+  keys.forEach(key => {
+    const g = desdState.groups[key];
+    g.rows.forEach(row => {
+      rowIds.push(row.row_id);
+      const idx = g.assignments[row.row_id];
+      if(idx === undefined){ missing = true; return; }
+      const v = g.variants.find(x => x.index === idx);
+      if(!v || !v.data_base64){ missing = true; return; }
+      aiVariants.push({ row_id: row.row_id, data_base64: v.data_base64, content_type: v.content_type || (g.kind === 'video' ? 'video/mp4' : 'image/png') });
+    });
+  });
+  if(missing){ toast('Alguma linha ainda está sem variação atribuída — escolha uma pra cada linha antes de enviar', 'er'); return; }
+
   const creativeName = (document.getElementById('desdCreativeName').value || '').trim();
   if(!creativeName){ toast('Informe um nome pro criativo antes de enviar', 'er'); return; }
 
-  const rowIds = rows.map(r => r.row_id);
-
-  // Fix desta sessão (pedido do Leonardo) — feedback visual "Enviando..."
-  // no botão enquanto a requisição está em andamento (o /submit pode
-  // levar alguns segundos: processa a imagem, faz upload pro GCS, grava
-  // na planilha e propaga pro BigQuery).
   const btn = document.getElementById('desdSubmitBtn');
   if(btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
 
@@ -2742,30 +2865,22 @@ async function desdSubmit(){
         row_ids: rowIds,
         workspace_id: desdWorkspaceId,
         creative_name: creativeName,
-        ai_variant_base64: chosen.data_base64,
-        ai_content_type: 'image/png',
+        ai_variants: aiVariants,
         ai_cta_text: desdState.ctaText || '',
         ai_cta_color: desdState.ctaColor || '#0d0d0d',
       }),
     });
     const data = await res.json().catch(() => ({}));
     if(!res.ok) throw new Error(data.detail || 'backend recusou o submit');
-    toast('✓ ' + (data.total || rows.length) + ' peça(s) enviada(s) — na fila real de Aguardando Aprovação', 'ok');
-    // As linhas atendidas saem da fila de verdade (status virou "creative in
-    // progress" no backend) — recarrega a fila real em vez de só remover
-    // localmente, pra não ficar dessincronizado se algo tiver falhado
-    // parcialmente no backend.
+    toast('✓ ' + (data.total || rowIds.length) + ' peça(s) enviada(s) — na fila real de Aguardando Aprovação', 'ok');
     rowIds.forEach(rid => desdState.selectedRowIds.delete(rid));
-    desdState.aiVariants = [];
-    desdState.chosenVariantIndex = null;
+    desdState.groups = {};
     document.getElementById('desdCreativeName').value = '';
     await desdLoadQueue();
     desdRenderAiVariantGrid();
   }catch(e){
     toast('✕ ' + (e.message || 'Falha ao enviar pra aprovação'), 'er');
   }
-  // Restaura o texto do botão sempre (sucesso ou erro) — o estado
-  // disabled/enabled real é recalculado por desdUpdateSubmitButtonState.
   if(btn) btn.textContent = 'Enviar para Aprovação →';
   desdUpdateSubmitButtonState();
 }
