@@ -823,6 +823,17 @@
           <div id="audMetricsCaveat" style="font-family:var(--mono);font-size:9px;color:var(--warn);margin-top:4px;line-height:1.6"></div>
         </div>
 
+        <!-- Ajuste incremental — novo nesta sessão (pedido do Leonardo):
+        "adiciona interesse em perfumaria", "tira X" etc, sem precisar
+        reescrever o prompt inteiro. Manda a sugestão atual de volta pro
+        Gemini junto da instrução (POST /audiences/refine). -->
+        <div class="desd-step-lbl" style="margin:20px 0 8px">Ajustar esta sugestão</div>
+        <div style="display:flex;gap:8px">
+          <input class="fi" id="audRefineInput" placeholder="ex: adiciona interesse em perfumaria / tira luxury goods / aumenta a idade até 50" style="flex:1">
+          <button class="btn-sm" id="audRefineBtn" onclick="audApplyRefinement()" style="white-space:nowrap">↻ Aplicar ajuste</button>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:6px;line-height:1.6">// a IA aplica só o que for pedido, mantendo o resto da sugestão como está</div>
+
         <div style="display:flex;gap:8px;margin-top:18px;align-items:center">
           <button class="btn-sm" style="padding:10px 20px;font-size:10px" onclick="audApproveMock()">✓ Aprovar e criar nas plataformas (ainda mock)</button>
           <button class="btn-sm ghost" style="padding:10px 20px;font-size:10px;color:var(--danger);border-color:#fecaca" onclick="audDiscardMock()">✕ Descartar</button>
@@ -1338,6 +1349,7 @@ const USERS=[
 ];
 let audWorkspaceId = '';
 let audLastSuggestion = null;  // guarda a última sugestão gerada — útil quando a Fase 2 (criação real) for implementada, pra não precisar gerar de novo.
+let audLastPromptText = '';    // novo nesta sessão — prompt original, mandado de volta como contexto em cada ajuste (POST /audiences/refine).
 
 // Fix desta sessão (pedido do Leonardo): antes era um dropdown com
 // opções fixas fake ("Produto A Ltda"/"Produto B Ltda"). Agora carrega
@@ -1471,49 +1483,9 @@ async function audGenerateSuggestion(){
     const data = await res.json().catch(() => ({}));
     if(!res.ok) throw new Error(data.detail || 'backend recusou a geração');
 
-    audLastSuggestion = data.suggestions;
-    const s = data.suggestions || {};
-    document.getElementById('audSummaryText').textContent = s.summary || '';
+    audLastPromptText = promptText;  // guardado pra dar contexto nos ajustes (ver audApplyRefinement)
     document.getElementById('audNameInput').value = '';
-
-    const meta = s.meta || {};
-    audRenderTags('audMetaInterestsTags', meta.interests);
-    audRenderTags('audMetaBehaviorsTags', meta.behaviors);
-    document.getElementById('audMetaDemographics').innerHTML = audFormatDemographics(meta.demographics);
-    const lookalikeEl = document.getElementById('audMetaLookalikeText');
-    lookalikeEl.textContent = meta.lookalike_suggestion ? '// Lookalike sugerido: ' + meta.lookalike_suggestion : '';
-
-    const ga = s.google_ads || {};
-    audRenderTags('audGoogleKeywordsTags', ga.custom_segment_keywords);
-    audRenderTags('audGoogleUrlsTags', ga.custom_segment_urls);
-    // Fix desta sessão (pedido do Leonardo): voltou a mostrar as
-    // palavras-chave na tela (não só contagem+download) — 100+ itens
-    // cabem bem numa área com scroll (ver #audSearchKeywordsTags,
-    // max-height:180px), sem precisar de um arquivo só pra revisar.
-    // Botão de download continua disponível, como atalho extra.
-    const searchKeywords = ga.search_keywords || [];
-    document.getElementById('audSearchKeywordsCount').textContent = searchKeywords.length || '—';
-    audRenderTags('audSearchKeywordsTags', searchKeywords);
-    const dlBtn = document.getElementById('audDownloadKeywordsBtn');
-    if(dlBtn) dlBtn.disabled = !searchKeywords.length;
-
-    const tt = s.tiktok || {};
-    audRenderTags('audTiktokInterestsTags', tt.interest_categories);
-    audRenderTags('audTiktokBehaviorsTags', tt.behavior_categories);
-    document.getElementById('audTiktokDemographics').innerHTML = audFormatDemographics(tt.demographics);
-
-    // Métricas estimadas (pedido do Leonardo) — SEMPRE deixa claro que é
-    // estimativa de IA, não dado real de plataforma (ver caveat
-    // obrigatório vindo do backend). Fix desta sessão: campos renomeados
-    // pra refletir "no período da campanha" em vez de "por mês" — agora
-    // escalam pela duração real informada (audStartDate/audEndDate).
-    const em = s.estimated_metrics || {};
-    document.getElementById('audMetricUniverse').textContent = em.audience_size_estimate || '—';
-    document.getElementById('audMetricImpressions').textContent = em.estimated_impressions_for_period || '—';
-    document.getElementById('audMetricFrequency').textContent = em.estimated_frequency_for_period || '—';
-    document.getElementById('audMetricCoverage').textContent = em.estimated_coverage_pct || '—';
-    document.getElementById('audMetricsDays').textContent = em.campaign_days ? '// baseado num período de ' + em.campaign_days + ' dia(s)' : '';
-    document.getElementById('audMetricsCaveat').textContent = em.caveat ? '⚠ ' + em.caveat : '';
+    audRenderSuggestion(data.suggestions);
 
     box.style.display = 'block';
     box.scrollIntoView({behavior:'smooth', block:'nearest'});
@@ -1523,6 +1495,91 @@ async function audGenerateSuggestion(){
   }
 
   btn.disabled = false; btn.textContent = '✦ Gerar audiência com IA';
+}
+
+// Extraído nesta sessão (pedido do Leonardo, feature de ajuste
+// incremental) — antes essa renderização inteira vivia dentro de
+// audGenerateSuggestion(); agora é uma função própria pra
+// audApplyRefinement() (POST /audiences/refine) poder reaproveitar sem
+// duplicar código. NÃO mexe no campo de nome (audNameInput) — quem
+// chama decide se limpa ou não (geração nova limpa; ajuste preserva o
+// nome que a pessoa já tinha digitado).
+function audRenderSuggestion(suggestions){
+  audLastSuggestion = suggestions;
+  const s = suggestions || {};
+  document.getElementById('audSummaryText').textContent = s.summary || '';
+
+  const meta = s.meta || {};
+  audRenderTags('audMetaInterestsTags', meta.interests);
+  audRenderTags('audMetaBehaviorsTags', meta.behaviors);
+  document.getElementById('audMetaDemographics').innerHTML = audFormatDemographics(meta.demographics);
+  const lookalikeEl = document.getElementById('audMetaLookalikeText');
+  lookalikeEl.textContent = meta.lookalike_suggestion ? '// Lookalike sugerido: ' + meta.lookalike_suggestion : '';
+
+  const ga = s.google_ads || {};
+  audRenderTags('audGoogleKeywordsTags', ga.custom_segment_keywords);
+  audRenderTags('audGoogleUrlsTags', ga.custom_segment_urls);
+  const searchKeywords = ga.search_keywords || [];
+  document.getElementById('audSearchKeywordsCount').textContent = searchKeywords.length || '—';
+  audRenderTags('audSearchKeywordsTags', searchKeywords);
+  const dlBtn = document.getElementById('audDownloadKeywordsBtn');
+  if(dlBtn) dlBtn.disabled = !searchKeywords.length;
+
+  const tt = s.tiktok || {};
+  audRenderTags('audTiktokInterestsTags', tt.interest_categories);
+  audRenderTags('audTiktokBehaviorsTags', tt.behavior_categories);
+  document.getElementById('audTiktokDemographics').innerHTML = audFormatDemographics(tt.demographics);
+
+  // Métricas estimadas (pedido do Leonardo) — SEMPRE deixa claro que é
+  // estimativa de IA, não dado real de plataforma (ver caveat
+  // obrigatório vindo do backend). Campos refletem "no período da
+  // campanha" (escalam pela duração real informada em audStartDate/
+  // audEndDate) em vez de "por mês".
+  const em = s.estimated_metrics || {};
+  document.getElementById('audMetricUniverse').textContent = em.audience_size_estimate || '—';
+  document.getElementById('audMetricImpressions').textContent = em.estimated_impressions_for_period || '—';
+  document.getElementById('audMetricFrequency').textContent = em.estimated_frequency_for_period || '—';
+  document.getElementById('audMetricCoverage').textContent = em.estimated_coverage_pct || '—';
+  document.getElementById('audMetricsDays').textContent = em.campaign_days ? '// baseado num período de ' + em.campaign_days + ' dia(s)' : '';
+  document.getElementById('audMetricsCaveat').textContent = em.caveat ? '⚠ ' + em.caveat : '';
+}
+
+// Novo nesta sessão (pedido do Leonardo) — ajuste incremental: "adiciona
+// interesse em perfumaria", "tira X", etc. Manda a sugestão ATUAL de
+// volta pro backend (POST /audiences/refine) junto da instrução, em vez
+// de reformular o prompt inteiro do zero — preserva o que já estava bom.
+async function audApplyRefinement(){
+  const input = document.getElementById('audRefineInput');
+  const instruction = (input.value || '').trim();
+  if(!instruction){ toast('Descreva o ajuste desejado (ex: "adiciona perfumaria")', 'er'); return; }
+  if(!audLastSuggestion){ toast('Gere uma sugestão antes de ajustar', 'er'); return; }
+
+  const btn = document.getElementById('audRefineBtn');
+  const statusEl = document.getElementById('audGenerateStatus');
+  btn.disabled = true; btn.textContent = 'Aplicando ajuste...';
+
+  try{
+    const res = await fetch(API_BASE + '/audiences/refine', {
+      method: 'POST',
+      headers: Object.assign({'Content-Type': 'application/json'}, authHeaders()),
+      body: JSON.stringify({
+        workspace_id: audWorkspaceId,
+        current_suggestion: audLastSuggestion,
+        refinement_instruction: instruction,
+        original_prompt: audLastPromptText,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.detail || 'backend recusou o ajuste');
+
+    audRenderSuggestion(data.suggestions);
+    input.value = '';
+    toast('✓ Ajuste aplicado', 'ok');
+  }catch(e){
+    toast('✕ ' + (e.message || 'Falha ao aplicar o ajuste'), 'er');
+  }
+
+  btn.disabled = false; btn.textContent = '↻ Aplicar ajuste';
 }
 
 // Fase 2 (criar de verdade nas plataformas) ainda NÃO implementada —
