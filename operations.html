@@ -385,9 +385,9 @@
     <button class="tab-btn on" onclick="switchTab('dashboard',this)">Overview</button>
     <button class="tab-btn" onclick="switchTab('campanhas',this)">Campanhas</button>
     <button class="tab-btn" onclick="switchTab('desdobrador',this)">Desdobrador</button>
+    <button class="tab-btn" onclick="switchTab('criativos',this)">Criativos</button>
     <button class="tab-btn" onclick="switchTab('audiencias',this)">Audiências</button>
     <button class="tab-btn" onclick="switchTab('status',this)">Status</button>
-    <button class="tab-btn" onclick="switchTab('criativos',this)">Criativos</button>
     <button class="tab-btn" onclick="switchTab('bigtable',this)">Big Table</button>
   </div>
   <div class="topbar-right">
@@ -685,6 +685,24 @@
       </div>
     </div>
   </div>
+
+  <!-- ── Modal de peça ampliada (pedido do Leonardo) — clica num card de
+  variação no Desdobrador e abre isso: peça em tamanho grande, com toggle
+  Desktop/Mobile pra revisar copy/imagem com mais espaço. Independente do
+  painel lateral (#rPanel/#overlay) que já existe — modal centralizado
+  próprio, não interfere com nada existente. ── -->
+  <div id="desdModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(13,13,13,.85);z-index:9999;align-items:center;justify-content:center;padding:24px" onclick="if(event.target===this) desdCloseVariantModal()">
+    <div style="background:#fff;max-width:95vw;max-height:92vh;overflow:auto;position:relative;padding:24px;border-radius:6px">
+      <button onclick="desdCloseVariantModal()" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:28px;line-height:1;cursor:pointer;color:var(--ink-muted)">×</button>
+      <div style="display:flex;gap:8px;margin-bottom:16px;justify-content:center">
+        <button id="desdModalDeskBtn" onclick="desdSetModalDevice('desktop')" style="padding:8px 20px;border:1px solid var(--ink);background:#fff;color:var(--ink);font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">🖥 Desktop</button>
+        <button id="desdModalMobileBtn" onclick="desdSetModalDevice('mobile')" style="padding:8px 20px;border:1px solid var(--ink);background:#fff;color:var(--ink);font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">📱 Mobile</button>
+      </div>
+      <div id="desdModalMediaWrap" style="display:flex;justify-content:center"></div>
+      <div id="desdModalMeta" style="text-align:center;margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--ink-muted)"></div>
+    </div>
+  </div>
+
   <!-- ── AUDIÊNCIAS (MOCK — só visual, sem integração real ainda) ── -->
   <div class="tab-page" id="tab-audiencias">
     <div class="section-title">Audiências</div>
@@ -2777,13 +2795,22 @@ function desdRenderAiVariantGrid(){
       if(!v.data_base64){
         return `<div class="desd-preview-card" style="aspect-ratio:${isVideo?'9/16':'1/1'};display:flex;align-items:center;justify-content:center;background:var(--bg3);color:var(--danger);font-family:var(--mono);font-size:9px;padding:10px;text-align:center">${_escHtml(v.error || 'falhou')}</div>`;
       }
+      // Botão "⤢" novo nesta sessão (pedido do Leonardo) — abre a peça
+      // ampliada em modal (desdOpenVariantModal), com toggle Desktop/
+      // Mobile pra revisar copy/imagem com mais espaço. Fica como botão
+      // separado (não a peça inteira clicável) porque em vídeo o card já
+      // usa clique nativo pra play/pause do <video controls> — um botão
+      // dedicado evita esse conflito.
+      const expandBtn = `<button onclick="desdOpenVariantModal('${_escHtml(key)}', ${v.index})" title="Ver ampliado" style="position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:none;background:rgba(13,13,13,.7);color:#fff;font-size:13px;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center">⤢</button>`;
       if(isVideo){
-        return `<div class="desd-preview-card" data-key="${_escHtml(key)}" data-idx="${v.index}">
+        return `<div class="desd-preview-card" data-key="${_escHtml(key)}" data-idx="${v.index}" style="position:relative">
+          ${expandBtn}
           <video src="data:video/mp4;base64,${v.data_base64}" controls muted loop style="width:100%;aspect-ratio:9/16;background:#000"></video>
           <div class="desd-preview-lbl">Variação ${v.index + 1}${g.durationSeconds ? ' · ' + g.durationSeconds + 's' : ''}</div>
         </div>`;
       }
-      return `<div class="desd-preview-card" data-key="${_escHtml(key)}" data-idx="${v.index}">
+      return `<div class="desd-preview-card" data-key="${_escHtml(key)}" data-idx="${v.index}" style="position:relative">
+        ${expandBtn}
         <canvas id="desdAiVariant_${_escHtml(key)}_${v.index}"></canvas>
         <div class="desd-preview-lbl">Variação ${v.index + 1}</div>
       </div>`;
@@ -2842,6 +2869,77 @@ function desdAssignVariantToRow(groupKey, rowId, variantIndex){
   if(!g) return;
   g.assignments[rowId] = variantIndex;
   desdUpdateSubmitButtonState();
+}
+
+// ── Modal de peça ampliada (pedido do Leonardo) — clica no "⤢" de um
+// card de variação e abre isso: peça em tamanho grande, com toggle
+// Desktop/Mobile pra revisar copy/imagem com mais espaço. ──
+let desdModalState = { key: null, index: null, device: 'mobile' };
+
+function desdOpenVariantModal(key, index){
+  desdModalState = { key, index, device: desdModalState.device || 'mobile' };
+  desdRenderVariantModal();
+  document.getElementById('desdModalOverlay').style.display = 'flex';
+}
+
+function desdCloseVariantModal(){
+  document.getElementById('desdModalOverlay').style.display = 'none';
+  // Vídeo continua tocando em background se não pausar ao fechar.
+  const wrap = document.getElementById('desdModalMediaWrap');
+  const video = wrap && wrap.querySelector('video');
+  if(video) video.pause();
+}
+
+function desdSetModalDevice(device){
+  desdModalState.device = device;
+  desdRenderVariantModal();
+}
+
+function desdRenderVariantModal(){
+  const g = desdState.groups[desdModalState.key];
+  if(!g) return;
+  const v = g.variants.find(x => x.index === desdModalState.index);
+  if(!v || !v.data_base64) return;
+
+  const isMobile = desdModalState.device === 'mobile';
+  const deskBtn = document.getElementById('desdModalDeskBtn');
+  const mobBtn = document.getElementById('desdModalMobileBtn');
+  if(deskBtn) deskBtn.style.background = isMobile ? '#fff' : 'var(--ink)';
+  if(deskBtn) deskBtn.style.color = isMobile ? 'var(--ink)' : '#fff';
+  if(mobBtn) mobBtn.style.background = isMobile ? 'var(--ink)' : '#fff';
+  if(mobBtn) mobBtn.style.color = isMobile ? '#fff' : 'var(--ink)';
+
+  const wrap = document.getElementById('desdModalMediaWrap');
+  // Mobile: moldura estreita tipo celular (bordas grossas arredondadas),
+  // simula como a peça fica num feed de verdade. Desktop: só maior, sem
+  // moldura, largura livre — pra avaliar detalhe/legibilidade do copy.
+  const frameStyle = isMobile
+    ? 'max-width:380px;width:100%;border:10px solid #0d0d0d;border-radius:36px;box-shadow:0 12px 40px rgba(0,0,0,.35);display:block'
+    : 'max-width:900px;width:100%;border:1px solid var(--line);box-shadow:0 12px 40px rgba(0,0,0,.15);display:block';
+
+  if(g.kind === 'video'){
+    wrap.innerHTML = `<video src="data:video/mp4;base64,${v.data_base64}" controls autoplay loop muted style="${frameStyle};aspect-ratio:9/16"></video>`;
+  } else {
+    wrap.innerHTML = `<canvas id="desdModalCanvas" style="${frameStyle}"></canvas>`;
+    const canvas = document.getElementById('desdModalCanvas');
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      // Mesmo overlay de preview de CTA usado nos cards pequenos — o CTA
+      // real só é desenhado de verdade no /submit (ver desdSubmit).
+      desdDrawCtaBarOnCanvas(ctx, img.width, img.height, desdState.ctaText, desdState.ctaColor);
+    };
+    img.src = 'data:image/png;base64,' + v.data_base64;
+  }
+
+  const metaEl = document.getElementById('desdModalMeta');
+  if(metaEl){
+    const durationPart = (g.kind === 'video' && g.durationSeconds) ? ` · ${g.durationSeconds}s` : '';
+    metaEl.textContent = `${g.rows[0].campaign_name} · Variação ${desdModalState.index + 1}${durationPart} · ${g.rows.length} linha(s) neste grupo`;
+  }
 }
 
 function desdUpdateSubmitButtonState(){
