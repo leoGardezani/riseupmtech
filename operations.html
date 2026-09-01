@@ -2230,6 +2230,39 @@ function btDownload(type){
 function refreshAll(){toast('Filtros aplicados','ok');}
 // ── CHARTS ──
 let chartsInited = new Set(['dashboard']);
+// ── Preparação pro GA4 (pedido do Leonardo — GA4 em si entra numa sessão
+// futura, isso aqui só deixa o gancho pronto). Problema real que isso
+// resolve: o operations.html é um SPA — trocar de aba não recarrega a
+// página, então sem isso o GA4 veria SEMPRE 1 pageview só (a inicial),
+// não importa quantas abas a pessoa visite. `trackVirtualPageview()`
+// simula uma "página" por aba: atualiza o título, muda a URL (só o hash
+// — #desdobrador, #campanhas etc. — NUNCA o path de verdade, porque o
+// GitHub Pages não tem fallback de rota SPA; um F5 numa URL tipo
+// /operations/desdobrador daria 404 no servidor, enquanto hash nunca
+// gera request nenhum, é 100% seguro pra F5), e dispara o evento
+// page_view do GA4 SE o gtag.js já estiver instalado (guard —
+// `typeof gtag === 'function'` — não quebra nada hoje, antes do
+// Measurement ID entrar; começa a funcionar sozinho assim que o snippet
+// gtag.js for adicionado, sem precisar tocar aqui de novo).
+const TAB_LABELS = {
+  dashboard: 'Overview', campanhas: 'Campanhas', desdobrador: 'Desdobrador',
+  audiencias: 'Audiências', status: 'Status', criativos: 'Criativos', bigtable: 'Big Table',
+};
+function trackVirtualPageview(id){
+  const label = TAB_LABELS[id] || id;
+  const title = 'Rise Up MTech — ' + label;
+  const path = location.pathname + '#' + id;
+  document.title = title;
+  // replaceState (não pushState) — não polui o histórico de back/forward
+  // do navegador a cada clique de aba; mesma UX de hoje (troca de aba não
+  // empilha no botão "voltar"). Se quiser back/forward entre abas no
+  // futuro, troca pra pushState aqui.
+  try{ history.replaceState({tab: id}, title, path); }catch(e){}
+  if(typeof gtag === 'function'){
+    gtag('event', 'page_view', { page_title: title, page_path: path, page_location: location.href });
+  }
+}
+
 function switchTab(id, el){
   document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
@@ -2239,6 +2272,7 @@ function switchTab(id, el){
   // deve voltar sempre pro Overview, deve manter o usuário onde estava.
   // Restaurado no window.addEventListener('load') abaixo.
   try{ localStorage.setItem('riseup_active_tab', id); }catch(e){}
+  trackVirtualPageview(id);
   if(id === 'campanhas') campLoadWorkspaces();
   if(id === 'desdobrador') desdLoadWorkspaces();
   if(id === 'criativos'){ pendLoadWorkspaces(); upfLoadWorkspaces(); }
@@ -2915,10 +2949,31 @@ window.addEventListener('load',()=>{
   // F5 não deve voltar sempre pro Overview, deve manter onde estava (ver
   // switchTab(), que salva a cada troca). Sem isso, o padrão do HTML
   // ("Overview" já vem com .active/.on marcados) sempre vencia.
+  //
+  // Novo nesta sessão (pedido do Leonardo, item #2 do deep-link pro GA4):
+  // o hash da URL (#desdobrador, #campanhas etc. — ver trackVirtualPageview)
+  // agora tem PRIORIDADE sobre o localStorage. Isso faz um link direto tipo
+  // operations.html#desdobrador abrir de propósito naquela aba (útil pra
+  // compartilhar link, favoritar uma aba específica, ou o próprio GA4
+  // registrar de onde a visita veio) — sem hash na URL, cai no
+  // comportamento de sempre (localStorage). Hash inválido (não bate com
+  // nenhum id de aba conhecido) é ignorado silenciosamente, cai pro
+  // fallback também.
   try{
+    const hashTab = (location.hash || '').replace('#', '');
     const savedTab = localStorage.getItem('riseup_active_tab');
-    if(savedTab && savedTab !== 'dashboard') switchTabById(savedTab);
+    const targetTab = (hashTab && TAB_LABELS[hashTab]) ? hashTab : savedTab;
+    if(targetTab && targetTab !== 'dashboard') switchTabById(targetTab);
   }catch(e){}
+});
+
+// Novo nesta sessão — deep-link também funciona com a página já aberta
+// (ex: alguém cola/edita a URL com #outraaba na barra de endereço sem
+// dar F5, ou algum link interno futuro aponta pra cá com hash). Sem
+// isso, só funcionaria no load inicial.
+window.addEventListener('hashchange', () => {
+  const hashTab = (location.hash || '').replace('#', '');
+  if(hashTab && TAB_LABELS[hashTab]) switchTabById(hashTab);
 });
 
 function desdSetupDropzone(){
