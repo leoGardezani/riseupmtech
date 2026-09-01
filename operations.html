@@ -780,34 +780,48 @@
             <div class="repo-tags" id="audTiktokBehaviorsTags" style="margin-bottom:12px"></div>
             <div id="audTiktokDemographics" style="font-size:11px;color:var(--ink-mid);line-height:2"></div>
           </div>
-          <div style="background:var(--bg);padding:16px 18px;display:flex;flex-direction:column">
-            <div class="desd-format-group-lbl" style="margin-top:0">Search — Palavras-chave</div>
-            <div id="audSearchKeywordsCount" style="font-family:var(--fh);font-weight:700;font-size:26px;margin:8px 0 2px">—</div>
-            <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:14px">palavras-chave geradas (mín. 100)</div>
-            <button class="btn-sm ghost" id="audDownloadKeywordsBtn" style="align-self:flex-start" onclick="audDownloadKeywords()" disabled>↓ Baixar .txt</button>
-          </div>
         </div>
 
-        <div class="pacing-grid" style="margin:20px 0 4px;grid-template-columns:repeat(4,1fr)">
-          <div class="pacing-card" style="padding:14px 16px">
-            <div class="kpi-lbl">Universo estimado</div>
-            <div class="kpi-val" style="font-size:18px" id="audMetricUniverse">—</div>
+        <!-- Search fica FORA do grid de 3 colunas, largura total — 100+
+        palavras-chave precisam de mais espaço horizontal do que um card
+        estreito comporta (pedido do Leonardo: trazer de volta pra tela
+        em vez de só contagem+download). Área com scroll pra não esticar
+        a página inteira quando a lista é grande. ── -->
+        <div style="background:var(--bg);border:1px solid var(--border);padding:16px 18px;margin-bottom:16px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px">
+            <div class="desd-format-group-lbl" style="margin:0">Search — Palavras-chave (<span id="audSearchKeywordsCount">—</span>)</div>
+            <button class="btn-sm ghost" id="audDownloadKeywordsBtn" onclick="audDownloadKeywords()" disabled>↓ Baixar .txt</button>
           </div>
-          <div class="pacing-card" style="padding:14px 16px">
-            <div class="kpi-lbl">Impressões no período (est.)</div>
-            <div class="kpi-val" style="font-size:18px" id="audMetricImpressions">—</div>
-          </div>
-          <div class="pacing-card" style="padding:14px 16px">
-            <div class="kpi-lbl">Frequência ao fim do período (est.)</div>
-            <div class="kpi-val" style="font-size:18px" id="audMetricFrequency">—</div>
-          </div>
-          <div class="pacing-card" style="padding:14px 16px">
-            <div class="kpi-lbl">Cobertura ao fim do período (est.)</div>
-            <div class="kpi-val" style="font-size:18px" id="audMetricCoverage">—</div>
-          </div>
+          <div class="repo-tags" id="audSearchKeywordsTags" style="max-height:180px;overflow-y:auto;padding-right:4px"></div>
         </div>
-        <div id="audMetricsDays" style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:-8px;margin-bottom:4px"></div>
-        <div id="audMetricsCaveat" style="font-family:var(--mono);font-size:9px;color:var(--warn);margin-top:-4px;line-height:1.6"></div>
+
+        <!-- Estimativa geral — pedido do Leonardo: precisa ficar claro
+        visualmente que isso é um TOTAL somando as 3 plataformas + Search,
+        não mais um card de plataforma individual (por isso o fundo/borda
+        diferentes dos cards acima e um título próprio). ── -->
+        <div class="desd-step-lbl" style="margin:20px 0 8px">Estimativa Geral — soma das 3 plataformas + Search</div>
+        <div style="background:var(--bg2);border:1px solid var(--border);padding:16px 18px">
+          <div class="pacing-grid" style="grid-template-columns:repeat(4,1fr);background:var(--bg2)">
+            <div class="pacing-card" style="padding:14px 16px;background:var(--bg)">
+              <div class="kpi-lbl">Universo estimado</div>
+              <div class="kpi-val" style="font-size:18px" id="audMetricUniverse">—</div>
+            </div>
+            <div class="pacing-card" style="padding:14px 16px;background:var(--bg)">
+              <div class="kpi-lbl">Impressões no período (est.)</div>
+              <div class="kpi-val" style="font-size:18px" id="audMetricImpressions">—</div>
+            </div>
+            <div class="pacing-card" style="padding:14px 16px;background:var(--bg)">
+              <div class="kpi-lbl">Frequência ao fim do período (est.)</div>
+              <div class="kpi-val" style="font-size:18px" id="audMetricFrequency">—</div>
+            </div>
+            <div class="pacing-card" style="padding:14px 16px;background:var(--bg)">
+              <div class="kpi-lbl">Cobertura ao fim do período (est.)</div>
+              <div class="kpi-val" style="font-size:18px" id="audMetricCoverage">—</div>
+            </div>
+          </div>
+          <div id="audMetricsDays" style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:10px"></div>
+          <div id="audMetricsCaveat" style="font-family:var(--mono);font-size:9px;color:var(--warn);margin-top:4px;line-height:1.6"></div>
+        </div>
 
         <div style="display:flex;gap:8px;margin-top:18px;align-items:center">
           <button class="btn-sm" style="padding:10px 20px;font-size:10px" onclick="audApproveMock()">✓ Aprovar e criar nas plataformas (ainda mock)</button>
@@ -1472,12 +1486,14 @@ async function audGenerateSuggestion(){
     const ga = s.google_ads || {};
     audRenderTags('audGoogleKeywordsTags', ga.custom_segment_keywords);
     audRenderTags('audGoogleUrlsTags', ga.custom_segment_urls);
-    // Fix desta sessão (pedido do Leonardo): antes renderizava as
-    // palavras-chave como tags soltas — ilegível com 100+ itens. Agora só
-    // mostra a contagem e libera o botão de baixar .txt (ver
-    // audDownloadKeywords) — a lista completa vai pro arquivo, não pra tela.
+    // Fix desta sessão (pedido do Leonardo): voltou a mostrar as
+    // palavras-chave na tela (não só contagem+download) — 100+ itens
+    // cabem bem numa área com scroll (ver #audSearchKeywordsTags,
+    // max-height:180px), sem precisar de um arquivo só pra revisar.
+    // Botão de download continua disponível, como atalho extra.
     const searchKeywords = ga.search_keywords || [];
     document.getElementById('audSearchKeywordsCount').textContent = searchKeywords.length || '—';
+    audRenderTags('audSearchKeywordsTags', searchKeywords);
     const dlBtn = document.getElementById('audDownloadKeywordsBtn');
     if(dlBtn) dlBtn.disabled = !searchKeywords.length;
 
