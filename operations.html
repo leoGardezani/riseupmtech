@@ -3581,10 +3581,35 @@ async function connLoadTiktokIdentities(workspaceId, advertiserId){
       return;
     }
     const selectedVal = data.selected;
-    el.innerHTML = '<select class="fs_" id="acctSel-acctMount-tiktok-identity_id" style="font-size:10px;padding:6px 22px 6px 8px" '
+    const selectedIdentity = identities.find(i => i.id === selectedVal);
+    // Aviso visível quando a identidade JÁ selecionada é uma
+    // CUSTOMIZED_USER — não basta desabilitar a opção pra frente, se o
+    // workspace já está com uma configurada, a pessoa precisa ver que
+    // está quebrada e trocar (foi exatamente o caso que gerou esse fix:
+    // workspace configurado antes do TikTok descontinuar Custom Identity).
+    const deprecatedWarning = (selectedIdentity && selectedIdentity.identity_type === 'CUSTOMIZED_USER')
+      ? '<div style="font-family:var(--mono);font-size:9px;color:var(--danger);margin-bottom:4px">⚠ identidade atual é Custom Identity — o TikTok não aceita mais isso pra publicar anúncio. Escolha outra abaixo.</div>'
+      : '';
+    el.innerHTML = deprecatedWarning
+      + '<select class="fs_" id="acctSel-acctMount-tiktok-identity_id" style="font-size:10px;padding:6px 22px 6px 8px" '
       + 'onchange="connSaveTiktokIdentity(\'' + workspaceId + '\',this)">'
       + '<option value="">Selecione…</option>'
-      + identities.map(i => '<option value="' + i.id + '" data-identity-type="' + _escHtml(i.identity_type) + '" data-identity-bc-id="' + _escHtml(i.identity_authorized_bc_id || '') + '"' + (i.id === selectedVal ? ' selected' : '') + '>' + _escHtml(i.name || i.id) + '</option>').join('')
+      // Fix desta sessão (pedido do Leonardo): identidades CUSTOMIZED_USER
+      // aparecem desabilitadas no dropdown, com nota explicando o motivo —
+      // o TikTok confirmou ao vivo que Custom Identity não é mais aceito
+      // pra publicar anúncio nenhum (erro real da API: "Custom identities
+      // are no longer supported"), então deixar essa opção selecionável
+      // sem aviso só engana quem for escolher (ia falhar sempre, sem
+      // pista do motivo). Não removida da lista de propósito — se o
+      // TikTok um dia reverter essa política, só tirar o disabled aqui.
+      + identities.map(i => {
+          const isDeprecated = i.identity_type === 'CUSTOMIZED_USER';
+          const label = isDeprecated ? _escHtml(i.name || i.id) + ' (Custom Identity — não suportado mais pelo TikTok)' : _escHtml(i.name || i.id);
+          return '<option value="' + i.id + '" data-identity-type="' + _escHtml(i.identity_type) + '" data-identity-bc-id="' + _escHtml(i.identity_authorized_bc_id || '') + '"'
+            + (i.id === selectedVal ? ' selected' : '')
+            + (isDeprecated ? ' disabled' : '')
+            + '>' + label + '</option>';
+        }).join('')
       + '</select>';
   }catch(e){
     el.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">falha ao carregar identidades</span>';
