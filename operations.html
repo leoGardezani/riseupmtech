@@ -724,6 +724,16 @@
           <label class="fl">Descrição da audiência (prompt livre)</label>
           <textarea class="fi" id="audPromptText" rows="3" style="resize:vertical" placeholder="ex: mulheres 25-40 anos, interessadas em skincare natural, alta renda, moram em capitais"></textarea>
         </div>
+        <!-- Novo nesta sessão (pedido do Leonardo) — data de início/fim da
+        campanha, usadas pra escalar as métricas estimadas
+        (impressões/frequência/cobertura) pela duração real, em vez de um
+        número solto sem período. Opcionais — sem elas, a IA assume 30
+        dias (mesma janela de referência que Meta/TikTok usam de verdade). -->
+        <div style="display:flex;gap:12px;max-width:360px;margin-bottom:14px">
+          <div class="fg" style="flex:1;margin-bottom:0"><label class="fl">Início da campanha</label><input class="fi" type="date" id="audStartDate"></div>
+          <div class="fg" style="flex:1;margin-bottom:0"><label class="fl">Fim da campanha</label><input class="fi" type="date" id="audEndDate"></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin:-8px 0 14px;line-height:1.6">// opcional — sem preencher, a estimativa assume 30 dias (janela de referência nativa do Meta/TikTok)</div>
         <button class="btn-full" id="audGenerateBtn" onclick="audGenerateSuggestion()" style="max-width:280px">✦ Gerar audiência com IA</button>
         <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px;line-height:1.6">// a IA sugere sinais/interesses por plataforma + keywords de Search — nada é criado ainda nesse passo, só a sugestão</div>
         <div id="audGenerateStatus" style="margin-top:10px"></div>
@@ -745,41 +755,64 @@
 
         <div id="audSummaryText" style="font-size:12px;color:var(--ink-mid);margin-bottom:16px;line-height:1.6"></div>
 
-        <div class="desd-format-group-lbl" style="margin-top:0">Google Ads — Custom Segment (sinais)</div>
-        <div class="repo-tags" id="audGoogleKeywordsTags" style="margin-bottom:6px"></div>
-        <div class="repo-tags" id="audGoogleUrlsTags" style="margin-bottom:16px"></div>
-
-        <div class="desd-format-group-lbl">Meta Ads — Interesses/Comportamentos (Detailed Targeting)</div>
-        <div class="repo-tags" id="audMetaInterestsTags" style="margin-bottom:6px"></div>
-        <div class="repo-tags" id="audMetaBehaviorsTags" style="margin-bottom:6px"></div>
-        <div id="audMetaLookalikeText" style="font-family:var(--mono);font-size:10px;color:var(--ink-mid);margin-bottom:16px"></div>
-
-        <div class="desd-format-group-lbl">TikTok Ads — Interesses/Comportamentos</div>
-        <div class="repo-tags" id="audTiktokInterestsTags" style="margin-bottom:6px"></div>
-        <div class="repo-tags" id="audTiktokBehaviorsTags" style="margin-bottom:16px"></div>
-
-        <div class="desd-format-group-lbl">Search — Palavras-chave sugeridas</div>
-        <div class="repo-tags" id="audSearchKeywordsTags" style="margin-bottom:16px"></div>
-
-        <div class="pacing-grid" style="margin:20px 0 4px">
-          <div class="pacing-card" style="padding:14px 16px">
-            <div class="kpi-lbl">Universo estimado</div>
-            <div class="kpi-val" style="font-size:20px">—</div>
+        <!-- Um quadro por plataforma (pedido do Leonardo — lista corrida
+        estava ruim de ler). Cada card é auto-contido: só o que é sinal
+        de audiência de verdade (interesse/comportamento/demografia) —
+        NUNCA config de dispositivo/placement, ver regra no backend
+        (services/audience_ai_engine.py). ── -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--border);margin-bottom:16px">
+          <div style="background:var(--bg);padding:16px 18px">
+            <div class="desd-format-group-lbl" style="margin-top:0">Google Ads — Custom Segment</div>
+            <div class="repo-tags" id="audGoogleKeywordsTags" style="margin-bottom:10px"></div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:4px">URLs de referência</div>
+            <div class="repo-tags" id="audGoogleUrlsTags"></div>
           </div>
-          <div class="pacing-card" style="padding:14px 16px">
-            <div class="kpi-lbl">Plataformas</div>
-            <div class="kpi-val" style="font-size:20px">3 + Search</div>
+          <div style="background:var(--bg);padding:16px 18px">
+            <div class="desd-format-group-lbl" style="margin-top:0">Meta Ads — Detailed Targeting</div>
+            <div class="repo-tags" id="audMetaInterestsTags" style="margin-bottom:8px"></div>
+            <div class="repo-tags" id="audMetaBehaviorsTags" style="margin-bottom:12px"></div>
+            <div id="audMetaDemographics" style="font-size:11px;color:var(--ink-mid);line-height:2;margin-bottom:8px"></div>
+            <div id="audMetaLookalikeText" style="font-family:var(--mono);font-size:9px;color:var(--ink-mid);line-height:1.6"></div>
           </div>
-          <div class="pacing-card" style="padding:14px 16px">
-            <div class="kpi-lbl">Status</div>
-            <div style="margin-top:4px"><span class="badge b-y">Aguardando aprovação</span></div>
+          <div style="background:var(--bg);padding:16px 18px">
+            <div class="desd-format-group-lbl" style="margin-top:0">TikTok Ads</div>
+            <div class="repo-tags" id="audTiktokInterestsTags" style="margin-bottom:8px"></div>
+            <div class="repo-tags" id="audTiktokBehaviorsTags" style="margin-bottom:12px"></div>
+            <div id="audTiktokDemographics" style="font-size:11px;color:var(--ink-mid);line-height:2"></div>
+          </div>
+          <div style="background:var(--bg);padding:16px 18px;display:flex;flex-direction:column">
+            <div class="desd-format-group-lbl" style="margin-top:0">Search — Palavras-chave</div>
+            <div id="audSearchKeywordsCount" style="font-family:var(--fh);font-weight:700;font-size:26px;margin:8px 0 2px">—</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:14px">palavras-chave geradas (mín. 100)</div>
+            <button class="btn-sm ghost" id="audDownloadKeywordsBtn" style="align-self:flex-start" onclick="audDownloadKeywords()" disabled>↓ Baixar .txt</button>
           </div>
         </div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:-8px">// universo estimado ainda não é calculado de verdade (depende da Fase 2, integração real com cada plataforma)</div>
 
-        <div style="display:flex;gap:8px;margin-top:18px">
+        <div class="pacing-grid" style="margin:20px 0 4px;grid-template-columns:repeat(4,1fr)">
+          <div class="pacing-card" style="padding:14px 16px">
+            <div class="kpi-lbl">Universo estimado</div>
+            <div class="kpi-val" style="font-size:18px" id="audMetricUniverse">—</div>
+          </div>
+          <div class="pacing-card" style="padding:14px 16px">
+            <div class="kpi-lbl">Impressões no período (est.)</div>
+            <div class="kpi-val" style="font-size:18px" id="audMetricImpressions">—</div>
+          </div>
+          <div class="pacing-card" style="padding:14px 16px">
+            <div class="kpi-lbl">Frequência ao fim do período (est.)</div>
+            <div class="kpi-val" style="font-size:18px" id="audMetricFrequency">—</div>
+          </div>
+          <div class="pacing-card" style="padding:14px 16px">
+            <div class="kpi-lbl">Cobertura ao fim do período (est.)</div>
+            <div class="kpi-val" style="font-size:18px" id="audMetricCoverage">—</div>
+          </div>
+        </div>
+        <div id="audMetricsDays" style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:-8px;margin-bottom:4px"></div>
+        <div id="audMetricsCaveat" style="font-family:var(--mono);font-size:9px;color:var(--warn);margin-top:-4px;line-height:1.6"></div>
+
+        <div style="display:flex;gap:8px;margin-top:18px;align-items:center">
           <button class="btn-sm" style="padding:10px 20px;font-size:10px" onclick="audApproveMock()">✓ Aprovar e criar nas plataformas (ainda mock)</button>
           <button class="btn-sm ghost" style="padding:10px 20px;font-size:10px;color:var(--danger);border-color:#fecaca" onclick="audDiscardMock()">✕ Descartar</button>
+          <span class="badge b-y" style="margin-left:auto">Aguardando aprovação</span>
         </div>
       </div>
     </div>
@@ -1335,6 +1368,42 @@ function audRenderTags(containerId, items){
   }).join('');
 }
 
+// Formata o bloco de demografia (idade/gênero/localização) — usado pros
+// cards de Meta e TikTok. Novo nesta sessão (pedido do Leonardo): esse
+// dado já vinha do backend mas nunca era mostrado na tela.
+function audFormatDemographics(dem){
+  if(!dem) return '';
+  const genderLabel = { all: 'Todos', male: 'Homens', female: 'Mulheres' };
+  const rows = [];
+  if(dem.age_min != null || dem.age_max != null){
+    rows.push('<div><strong>Idade:</strong> ' + (dem.age_min ?? '?') + ' – ' + (dem.age_max ?? '?') + ' anos</div>');
+  }
+  if(dem.genders && dem.genders.length){
+    rows.push('<div><strong>Gênero:</strong> ' + dem.genders.map(g => genderLabel[g] || g).join(', ') + '</div>');
+  }
+  if(dem.locations && dem.locations.length){
+    rows.push('<div><strong>Local:</strong> ' + dem.locations.map(l => _escHtml(l)).join(', ') + '</div>');
+  }
+  return rows.join('');
+}
+
+// Baixa as palavras-chave de Search como .txt — pedido do Leonardo: com
+// 100+ itens, mostrar como tags na tela ficava ilegível; um arquivo
+// pra colar direto no Google Ads Keyword Planner/Custom Segment é bem
+// mais útil que uma parede de tags.
+function audDownloadKeywords(){
+  const keywords = (audLastSuggestion && audLastSuggestion.google_ads && audLastSuggestion.google_ads.search_keywords) || [];
+  if(!keywords.length){ toast('Nenhuma palavra-chave gerada ainda', 'er'); return; }
+  const name = (document.getElementById('audNameInput').value || 'audiencia').trim() || 'audiencia';
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'audiencia';
+  const blob = new Blob([keywords.join('\n')], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'keywords_' + slug + '.txt';
+  a.click();
+  toast('✓ ' + keywords.length + ' palavra(s)-chave baixada(s)', 'ok');
+}
+
 // ── AUDIÊNCIAS — Fase 1 (sugestão via IA) real: chama POST
 // /audiences/suggest de verdade. Fase 2 (criar de fato nas plataformas)
 // segue mock — ver audApproveMock() abaixo, ainda simulado com
@@ -1372,12 +1441,18 @@ async function audGenerateSuggestion(){
   btn.disabled = true; btn.textContent = 'Gerando (pode levar alguns segundos)...';
   box.style.display = 'none';
   if(statusEl) statusEl.innerHTML = '';
+  // Reseta o estado do botão de download — evita baixar keywords de uma
+  // geração anterior enquanto a nova ainda está carregando.
+  const dlBtnReset = document.getElementById('audDownloadKeywordsBtn');
+  if(dlBtnReset) dlBtnReset.disabled = true;
 
   try{
+    const startDate = document.getElementById('audStartDate').value || null;
+    const endDate = document.getElementById('audEndDate').value || null;
     const res = await fetch(API_BASE + '/audiences/suggest', {
       method: 'POST',
       headers: Object.assign({'Content-Type': 'application/json'}, authHeaders()),
-      body: JSON.stringify({ workspace_id: audWorkspaceId, prompt: promptText }),
+      body: JSON.stringify({ workspace_id: audWorkspaceId, prompt: promptText, start_date: startDate, end_date: endDate }),
     });
     const data = await res.json().catch(() => ({}));
     if(!res.ok) throw new Error(data.detail || 'backend recusou a geração');
@@ -1390,17 +1465,39 @@ async function audGenerateSuggestion(){
     const meta = s.meta || {};
     audRenderTags('audMetaInterestsTags', meta.interests);
     audRenderTags('audMetaBehaviorsTags', meta.behaviors);
+    document.getElementById('audMetaDemographics').innerHTML = audFormatDemographics(meta.demographics);
     const lookalikeEl = document.getElementById('audMetaLookalikeText');
     lookalikeEl.textContent = meta.lookalike_suggestion ? '// Lookalike sugerido: ' + meta.lookalike_suggestion : '';
 
     const ga = s.google_ads || {};
     audRenderTags('audGoogleKeywordsTags', ga.custom_segment_keywords);
     audRenderTags('audGoogleUrlsTags', ga.custom_segment_urls);
-    audRenderTags('audSearchKeywordsTags', ga.search_keywords);
+    // Fix desta sessão (pedido do Leonardo): antes renderizava as
+    // palavras-chave como tags soltas — ilegível com 100+ itens. Agora só
+    // mostra a contagem e libera o botão de baixar .txt (ver
+    // audDownloadKeywords) — a lista completa vai pro arquivo, não pra tela.
+    const searchKeywords = ga.search_keywords || [];
+    document.getElementById('audSearchKeywordsCount').textContent = searchKeywords.length || '—';
+    const dlBtn = document.getElementById('audDownloadKeywordsBtn');
+    if(dlBtn) dlBtn.disabled = !searchKeywords.length;
 
     const tt = s.tiktok || {};
     audRenderTags('audTiktokInterestsTags', tt.interest_categories);
     audRenderTags('audTiktokBehaviorsTags', tt.behavior_categories);
+    document.getElementById('audTiktokDemographics').innerHTML = audFormatDemographics(tt.demographics);
+
+    // Métricas estimadas (pedido do Leonardo) — SEMPRE deixa claro que é
+    // estimativa de IA, não dado real de plataforma (ver caveat
+    // obrigatório vindo do backend). Fix desta sessão: campos renomeados
+    // pra refletir "no período da campanha" em vez de "por mês" — agora
+    // escalam pela duração real informada (audStartDate/audEndDate).
+    const em = s.estimated_metrics || {};
+    document.getElementById('audMetricUniverse').textContent = em.audience_size_estimate || '—';
+    document.getElementById('audMetricImpressions').textContent = em.estimated_impressions_for_period || '—';
+    document.getElementById('audMetricFrequency').textContent = em.estimated_frequency_for_period || '—';
+    document.getElementById('audMetricCoverage').textContent = em.estimated_coverage_pct || '—';
+    document.getElementById('audMetricsDays').textContent = em.campaign_days ? '// baseado num período de ' + em.campaign_days + ' dia(s)' : '';
+    document.getElementById('audMetricsCaveat').textContent = em.caveat ? '⚠ ' + em.caveat : '';
 
     box.style.display = 'block';
     box.scrollIntoView({behavior:'smooth', block:'nearest'});
