@@ -892,7 +892,7 @@
         <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// só desta sessão (recarregar a página perde a lista) — presets persistidos ainda não implementados</span>
       </div>
       <table><thead><tr>
-        <th>Audiência</th><th>Workspace</th><th>Criado por</th><th>Plataformas</th><th>Implementado em</th><th>Status</th><th>Criada</th><th></th>
+        <th>Audiência</th><th>Plataforma</th><th>Descrição</th><th>Workspace</th><th>Criado por</th><th>Implementado em</th><th>Status</th><th>Criada</th><th></th>
       </tr></thead>
       <tbody id="audCreatedTable"></tbody></table>
     </div>
@@ -1566,7 +1566,7 @@ async function audOpenImplementModal(idx){
 
   document.getElementById('audImplementModalTitle').textContent = 'Implementar "' + entry.name + '" em outras campanhas';
   document.getElementById('audImplementStatus').innerHTML = '';
-  document.getElementById('audImplementPlatforms').innerHTML = (entry.platsOk || []).map(p => `
+  document.getElementById('audImplementPlatforms').innerHTML = [entry.platform].map(p => `
     <div style="margin-bottom:14px">
       <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px">${_audPlatformLabel(p)}</div>
       <button class="fi" style="text-align:left;cursor:pointer" onclick="audToggleImplementDropdown('${p}')" id="audImplDropdownBtn_${p}">Selecionar campanhas…</button>
@@ -1585,7 +1585,7 @@ async function audOpenImplementModal(idx){
     audImplementTargetsData = res.ok ? await res.json() : audImplementTargetsData;
   }catch(e){ /* segue com listas vazias, os selects mostram "nenhuma campanha encontrada" */ }
 
-  (entry.platsOk || []).forEach(p => { audRenderImplCampaignCheckboxes(p); audRenderImplAdGroupCheckboxes(p); });
+  [entry.platform].forEach(p => { audRenderImplCampaignCheckboxes(p); audRenderImplAdGroupCheckboxes(p); });
 }
 
 function audCloseImplementModal(){
@@ -1645,7 +1645,7 @@ function audUpdateImplDropdownLabel(platform){
 }
 
 function audToggleImplementDropdown(platform){
-  (audImplementContext.platsOk || []).forEach(p => {
+  [audImplementContext.platform].forEach(p => {
     const panel = document.getElementById('audImplDropdown_' + p);
     if(!panel) return;
     panel.style.display = (p === platform && panel.style.display === 'none') ? 'block' : 'none';
@@ -1767,19 +1767,20 @@ function renderAudCreatedTable(){
   const tbody = document.getElementById('audCreatedTable');
   if(!tbody) return;
   if(!AUD_CREATED_SESSION.length){
-    tbody.innerHTML = '<tr><td colspan="8" style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);text-align:center;padding:16px">nenhuma audiência criada nesta sessão ainda</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);text-align:center;padding:16px">nenhuma audiência criada nesta sessão ainda</td></tr>';
     return;
   }
   tbody.innerHTML = AUD_CREATED_SESSION.map((a, idx) => `
     <tr>
       <td class="td-bold">${_escHtml(a.name)}</td>
+      <td class="td-mono">${_escHtml(a.platformLabel || '')}</td>
+      <td style="font-size:11px;color:var(--ink-mid);max-width:220px" title="${_escHtml(a.description || '')}">${_escHtml((a.description || '').length > 60 ? a.description.slice(0,60) + '…' : (a.description || '—'))}</td>
       <td class="td-mono">${_escHtml(a.workspaceName || '')}</td>
       <td class="td-mono">${_escHtml(a.createdBy || '—')}</td>
-      <td class="td-mono">${_escHtml(a.plats)}</td>
       <td class="td-mono" style="font-size:10px">${a.implementedIn && a.implementedIn.length ? _escHtml(a.implementedIn.join(', ')) : '<span style="color:var(--ink-muted)">nenhuma ainda</span>'}</td>
       <td class="td-mono">${a.statusBadge}</td>
       <td class="td-mono" style="color:var(--ink-muted)">${_escHtml(a.criada)}</td>
-      <td>${a.platsOk && a.platsOk.length ? '<button class="btn-sm ghost" style="padding:5px 10px;font-size:9px;white-space:nowrap" onclick="audOpenImplementModal(' + idx + ')">+ Implementar</button>' : ''}</td>
+      <td>${a.creationOk ? '<button class="btn-sm ghost" style="padding:5px 10px;font-size:9px;white-space:nowrap" onclick="audOpenImplementModal(' + idx + ')">+ Implementar</button>' : ''}</td>
     </tr>`).join('');
 }
 
@@ -1974,39 +1975,50 @@ async function audApprove(){
 
     if(statusEl) statusEl.innerHTML = lines.join('');
 
-    // Novo nesta sessão (pedido do Leonardo) — guarda o suficiente pra
-    // linha da tabela mostrar workspace/quem criou/onde foi implementado,
-    // e pro botão "Implementar" poder atribuir esta MESMA audiência em
-    // outras campanhas depois (sem precisar gerar sugestão de novo — usa
-    // a suggestion original e, no caso do Google, o resource_name já
-    // criado em vez de recriar o Custom Audience à toa).
+    // Fix desta sessão (pedido do Leonardo): antes uma linha só juntava
+    // as 3 plataformas — agora cada plataforma vira sua PRÓPRIA linha na
+    // tabela de Audiências Criadas, com a descrição (prompt original)
+    // salva junto, pra identificar mais fácil o que tem dentro de cada
+    // uma sem precisar reabrir a sugestão.
     const wsSel = document.getElementById('audWorkspaceSelect');
     const wsName = wsSel && wsSel.selectedOptions[0] ? wsSel.selectedOptions[0].textContent : audWorkspaceId;
     let createdBy = '';
     try{ createdBy = (JSON.parse(localStorage.getItem('riseup_user') || 'null') || {}).name || ''; }catch(e){}
 
-    const implementedIn = [];
-    ['meta', 'google_ads', 'tiktok'].forEach(p => {
-      Array.from(audSelectedTargets[p].ad_groups).forEach(id => {
-        const found = ((audTargetsData[p] || {}).ad_groups || []).find(a => a.id === id);
-        implementedIn.push((found ? found.name : id) + ' (' + (p === 'meta' ? 'Meta' : p === 'google_ads' ? 'Google Ads' : 'TikTok') + ')');
+    ['meta', 'google_ads', 'tiktok'].forEach(key => {
+      const info = r[key];
+      if(!info) return;
+      const label = key === 'meta' ? 'Meta' : key === 'google_ads' ? 'Google Ads' : 'TikTok';
+      const implementedIn = Array.from(audSelectedTargets[key].ad_groups).map(id => {
+        const found = ((audTargetsData[key] || {}).ad_groups || []).find(a => a.id === id);
+        return found ? found.name : id;
+      });
+      const nAttach = (info.attachments || []).length;
+      const nOk = (info.attachments || []).filter(a => a.ok).length;
+      let statusBadge;
+      if(!info.ok) statusBadge = '<span class="badge b-r">falhou</span>';
+      else if(nAttach && nOk === 0) statusBadge = '<span class="badge b-y">criada, atribuição falhou</span>';
+      else if(nAttach && nOk < nAttach) statusBadge = '<span class="badge b-y">parcial</span>';
+      else statusBadge = '<span class="badge b-g">OK</span>';
+
+      AUD_CREATED_SESSION.unshift({
+        name,
+        platform: key,
+        platformLabel: label,
+        description: audLastPromptText,
+        workspaceId: audWorkspaceId,
+        workspaceName: wsName,
+        createdBy,
+        implementedIn,
+        statusBadge,
+        creationOk: info.ok,
+        criada: 'agora',
+        suggestion: audLastSuggestion,
+        googleCustomAudienceResourceName: key === 'google_ads' ? (info.custom_audience_resource_name || null) : null,
       });
     });
-
-    AUD_CREATED_SESSION.unshift({
-      name,
-      workspaceId: audWorkspaceId,
-      workspaceName: wsName,
-      createdBy,
-      plats: platformLabels.join(' · ') || 'nenhuma (todas falharam)',
-      platsOk: platformLabels.map(l => l === 'Meta' ? 'meta' : l === 'Google Ads' ? 'google_ads' : 'tiktok'),
-      implementedIn,
-      statusBadge: platformLabels.length === 3 ? '<span class="badge b-g">OK</span>' : platformLabels.length > 0 ? '<span class="badge b-y">parcial</span>' : '<span class="badge b-r">falhou</span>',
-      criada: 'agora',
-      suggestion: audLastSuggestion,
-      googleCustomAudienceResourceName: (r.google_ads || {}).custom_audience_resource_name || null,
-    });
     renderAudCreatedTable();
+
     if(platformLabels.length){
       toast('✓ Audiência "' + name + '" criada em: ' + platformLabels.join(', '), 'ok');
       document.getElementById('audResultBox').style.display = 'none';
