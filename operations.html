@@ -1951,7 +1951,24 @@ async function audApprove(){
       const label = key === 'meta' ? 'Meta' : key === 'google_ads' ? 'Google Ads' : 'TikTok';
       const info = r[key];
       if(!info) return;
-      if(info.ok){ platformLabels.push(label); lines.push(`<div style="color:var(--success)">✓ ${label}: criado com sucesso${(info.attachments||[]).length ? ' · ' + info.attachments.filter(a=>a.ok).length + '/' + info.attachments.length + ' atribuição(ões) OK' : ''}</div>`); }
+      if(info.ok){
+        platformLabels.push(label);
+        // Fix desta sessão: TikTok não cria um objeto de audiência
+        // separado (diferente de Meta/Google) — "ok" ali só significa
+        // "disponível", não "criado". Mensagem ajustada pra não afirmar
+        // "criado com sucesso" quando não teve atribuição nenhuma ainda,
+        // e pra deixar vermelho se TODAS as atribuições tentadas
+        // falharam (mesmo a plataforma continuando "disponível" pra
+        // tentar de novo depois, por isso platformLabels ainda inclui).
+        const nAttach = (info.attachments || []).length;
+        const nOk = (info.attachments || []).filter(a => a.ok).length;
+        let msg, color;
+        if(key === 'tiktok' && nAttach === 0){ msg = 'pronto (nenhum ad group selecionado ainda pra atribuir)'; color = 'var(--success)'; }
+        else if(nAttach && nOk === 0){ msg = `criado, mas 0/${nAttach} atribuição(ões) funcionou (ver detalhe no ad group)`; color = 'var(--danger)'; }
+        else if(nAttach){ msg = `criado com sucesso · ${nOk}/${nAttach} atribuição(ões) OK`; color = 'var(--success)'; }
+        else { msg = 'criado com sucesso'; color = 'var(--success)'; }
+        lines.push(`<div style="color:${color}">${color === 'var(--success)' ? '✓' : '⚠'} ${label}: ${msg}</div>`);
+      }
       else{ lines.push(`<div style="color:var(--danger)">✕ ${label}: ${_escHtml(info.error || 'falhou')}</div>`); }
     });
 
