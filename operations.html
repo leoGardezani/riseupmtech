@@ -834,11 +834,27 @@
         </div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:6px;line-height:1.6">// a IA aplica só o que for pedido, mantendo o resto da sugestão como está</div>
 
+        <!-- Atribuição a campanhas/ad groups existentes — novo nesta
+        sessão (pedido do Leonardo). Ainda não existe uma tela de
+        "escolher campanha da lista" (precisaria de um endpoint de
+        listagem que ainda não tenho/não existe) — por enquanto, cola o
+        ID de destino direto (visível no Ads Manager de cada
+        plataforma). Deixar em branco = só cria a audiência, sem
+        atribuir a nada ainda (dá pra atribuir depois manualmente). -->
+        <div class="desd-step-lbl" style="margin:20px 0 8px">Atribuir a campanhas/ad groups existentes <span style="font-weight:400;color:var(--ink-muted);font-size:11px">(opcional)</span></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+          <div class="fg" style="margin-bottom:0"><label class="fl">Meta — Ad Set ID(s)</label><input class="fi" id="audMetaTargets" placeholder="separado por vírgula"></div>
+          <div class="fg" style="margin-bottom:0"><label class="fl">Google Ads — Ad Group (resource name)</label><input class="fi" id="audGoogleTargets" placeholder="customers/.../adGroups/..."></div>
+          <div class="fg" style="margin-bottom:0"><label class="fl">TikTok — AdGroup ID(s)</label><input class="fi" id="audTiktokTargets" placeholder="separado por vírgula"></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin:6px 0 0;line-height:1.6">// pega os IDs direto no Ads Manager de cada plataforma — uma tela de seleção fica pra depois</div>
+
         <div style="display:flex;gap:8px;margin-top:18px;align-items:center">
-          <button class="btn-sm" style="padding:10px 20px;font-size:10px" onclick="audApproveMock()">✓ Aprovar e criar nas plataformas (ainda mock)</button>
-          <button class="btn-sm ghost" style="padding:10px 20px;font-size:10px;color:var(--danger);border-color:#fecaca" onclick="audDiscardMock()">✕ Descartar</button>
+          <button class="btn-sm" id="audApproveBtn" style="padding:10px 20px;font-size:10px" onclick="audApprove()">✓ Aprovar e criar nas plataformas</button>
+          <button class="btn-sm ghost" style="padding:10px 20px;font-size:10px;color:var(--danger);border-color:#fecaca" onclick="audDiscard()">✕ Descartar</button>
           <span class="badge b-y" style="margin-left:auto">Aguardando aprovação</span>
         </div>
+        <div id="audApproveStatus" style="margin-top:10px"></div>
       </div>
     </div>
 
@@ -846,10 +862,10 @@
     <div class="tbox">
       <div class="tbox-head">
         <div class="tbox-title">Audiências Criadas</div>
-        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// espelha a aba "audiences" da planilha — alcance/freq./impressões/cobertura vêm por fórmula, não da IA</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// só desta sessão (recarregar a página perde a lista) — presets persistidos ainda não implementados</span>
       </div>
       <table><thead><tr>
-        <th>Audiência</th><th>Plataformas</th><th>Universo</th><th>Alcance</th><th>Freq.</th><th>Impressões</th><th>Cobertura</th><th>Criada</th>
+        <th>Audiência</th><th>Plataformas</th><th>Status</th><th>Criada</th>
       </tr></thead>
       <tbody id="audCreatedTable"></tbody></table>
     </div>
@@ -1430,29 +1446,25 @@ function audDownloadKeywords(){
   toast('✓ ' + keywords.length + ' palavra(s)-chave baixada(s)', 'ok');
 }
 
-// ── AUDIÊNCIAS — Fase 1 (sugestão via IA) real: chama POST
-// /audiences/suggest de verdade. Fase 2 (criar de fato nas plataformas)
-// segue mock — ver audApproveMock() abaixo, ainda simulado com
-// setTimeout até os engines (Meta/Google Ads/TikTok) ganharem os
-// métodos de criação de audiência de verdade. ──
-const AUD_CREATED_MOCK = [
-  {name:'remarketing_carrinho_abandonado', plats:'Google Ads · Meta · TikTok', universo:'180k', alcance:'142k', freq:'2,3', imp:'890k', cobertura:'79%', criada:'20 Ago'},
-  {name:'interesse_tecnologia_b2b', plats:'Google Ads · Meta', universo:'2,4M', alcance:'1,1M', freq:'1,8', imp:'2,0M', cobertura:'46%', criada:'18 Ago'},
-  {name:'lookalike_clientes_gold', plats:'Meta · TikTok', universo:'480k', alcance:'310k', freq:'2,1', imp:'650k', cobertura:'65%', criada:'12 Ago'},
-];
+// ── AUDIÊNCIAS — Fase 1 (sugestão via IA) e Fase 2 (criação real nas
+// plataformas, POST /audiences/create) já são reais. Fase 3 (presets
+// persistidos no Firestore, com histórico entre sessões) ainda não
+// existe — a lista abaixo é só estado local desta sessão (some se
+// recarregar a página). ──
+let AUD_CREATED_SESSION = [];
 function renderAudCreatedTable(){
   const tbody = document.getElementById('audCreatedTable');
   if(!tbody) return;
-  tbody.innerHTML = AUD_CREATED_MOCK.map(a => `
+  if(!AUD_CREATED_SESSION.length){
+    tbody.innerHTML = '<tr><td colspan="4" style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);text-align:center;padding:16px">nenhuma audiência criada nesta sessão ainda</td></tr>';
+    return;
+  }
+  tbody.innerHTML = AUD_CREATED_SESSION.map(a => `
     <tr>
-      <td class="td-bold">${a.name}</td>
-      <td class="td-mono">${a.plats}</td>
-      <td class="td-mono">${a.universo}</td>
-      <td class="td-mono">${a.alcance}</td>
-      <td class="td-mono">${a.freq}</td>
-      <td class="td-mono">${a.imp}</td>
-      <td class="td-mono">${a.cobertura}</td>
-      <td class="td-mono" style="color:var(--ink-muted)">${a.criada}</td>
+      <td class="td-bold">${_escHtml(a.name)}</td>
+      <td class="td-mono">${_escHtml(a.plats)}</td>
+      <td class="td-mono">${a.statusBadge}</td>
+      <td class="td-mono" style="color:var(--ink-muted)">${_escHtml(a.criada)}</td>
     </tr>`).join('');
 }
 
@@ -1582,32 +1594,82 @@ async function audApplyRefinement(){
   btn.disabled = false; btn.textContent = '↻ Aplicar ajuste';
 }
 
-// Fase 2 (criar de verdade nas plataformas) ainda NÃO implementada —
-// continua simulado com setTimeout até os engines ganharem os métodos
-// de criação de audiência (Custom Audience/Lookalike no Meta, Custom
-// Segment no Google Ads, Custom Audience no TikTok) + atribuição a
-// campanhas/ad groups selecionados, combinado com o Leonardo pra uma
-// sessão futura.
-function audApproveMock(){
+// Fase 2 real — chama POST /audiences/create de verdade (Custom
+// Audience/Saved Audience no Meta, Custom Audience no Google Ads,
+// interest/action categories no TikTok) + atribuição aos IDs de destino
+// preenchidos (opcional — ver #audMetaTargets/#audGoogleTargets/
+// #audTiktokTargets acima). NÃO TESTADO AO VIVO ainda (ver docstring de
+// create_audience em api/audiences.py) — erros de uma plataforma não
+// travam as outras, a resposta sempre reporta cada uma separadamente.
+function _parseCommaList(elId){
+  const raw = (document.getElementById(elId).value || '').trim();
+  if(!raw) return [];
+  return raw.split(',').map(s => s.trim()).filter(Boolean);
+}
+
+async function audApprove(){
   const name = (document.getElementById('audNameInput').value || '').trim();
   if(!name){ toast('Dê um nome pra audiência antes de aprovar', 'er'); return; }
+  if(!audLastSuggestion){ toast('Nenhuma sugestão carregada', 'er'); return; }
+
+  const statusEl = document.getElementById('audApproveStatus');
   const btns = document.querySelectorAll('#audResultBox .btn-sm');
   btns.forEach(b => b.disabled = true);
-  if(btns[0]) btns[0].textContent = 'Criando nas plataformas...';
-  setTimeout(() => {
-    AUD_CREATED_MOCK.unshift({
-      name, plats:'Google Ads · Meta · TikTok · Search',
-      universo:'2,8M', alcance:'—', freq:'—', imp:'—', cobertura:'—', criada:'agora',
+  const approveBtn = document.getElementById('audApproveBtn');
+  if(approveBtn) approveBtn.textContent = 'Criando nas plataformas...';
+  if(statusEl) statusEl.innerHTML = '';
+
+  try{
+    const res = await fetch(API_BASE + '/audiences/create', {
+      method: 'POST',
+      headers: Object.assign({'Content-Type': 'application/json'}, authHeaders()),
+      body: JSON.stringify({
+        workspace_id: audWorkspaceId,
+        name: name,
+        suggestion: audLastSuggestion,
+        meta_ad_set_ids: _parseCommaList('audMetaTargets'),
+        google_ad_group_resource_names: _parseCommaList('audGoogleTargets'),
+        tiktok_adgroup_ids: _parseCommaList('audTiktokTargets'),
+      }),
     });
-    document.getElementById('audResultBox').style.display = 'none';
-    document.getElementById('audPromptText').value = '';
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.detail || 'backend recusou a criação');
+
+    const r = data.results || {};
+    const platformLabels = [];
+    const lines = [];
+    ['meta', 'google_ads', 'tiktok'].forEach(key => {
+      const label = key === 'meta' ? 'Meta' : key === 'google_ads' ? 'Google Ads' : 'TikTok';
+      const info = r[key];
+      if(!info) return;
+      if(info.ok){ platformLabels.push(label); lines.push(`<div style="color:var(--success)">✓ ${label}: criado com sucesso${(info.attachments||[]).length ? ' · ' + info.attachments.filter(a=>a.ok).length + '/' + info.attachments.length + ' atribuição(ões) OK' : ''}</div>`); }
+      else{ lines.push(`<div style="color:var(--danger)">✕ ${label}: ${_escHtml(info.error || 'falhou')}</div>`); }
+    });
+
+    if(statusEl) statusEl.innerHTML = lines.join('');
+    AUD_CREATED_SESSION.unshift({
+      name,
+      plats: platformLabels.join(' · ') || 'nenhuma (todas falharam)',
+      statusBadge: platformLabels.length === 3 ? '<span class="badge b-g">OK</span>' : platformLabels.length > 0 ? '<span class="badge b-y">parcial</span>' : '<span class="badge b-r">falhou</span>',
+      criada: 'agora',
+    });
     renderAudCreatedTable();
-    toast('✓ Audiência "' + name + '" criada nas plataformas (mock) — alcance/freq./cobertura ainda vêm zerados até a fórmula calcular', 'ok');
-    btns.forEach(b => b.disabled = false);
-    if(btns[0]) btns[0].textContent = '✓ Aprovar e criar nas plataformas (ainda mock)';
-  }, 1100);
+    if(platformLabels.length){
+      toast('✓ Audiência "' + name + '" criada em: ' + platformLabels.join(', '), 'ok');
+      document.getElementById('audResultBox').style.display = 'none';
+      document.getElementById('audPromptText').value = '';
+    } else {
+      toast('✕ Falha nas 3 plataformas — ver detalhes acima', 'er');
+    }
+  }catch(e){
+    if(statusEl) statusEl.innerHTML = '<div style="color:var(--danger)">✕ ' + _escHtml(e.message || 'Falha ao criar a audiência') + '</div>';
+    toast('✕ ' + (e.message || 'Falha ao criar a audiência'), 'er');
+  }
+
+  btns.forEach(b => b.disabled = false);
+  if(approveBtn) approveBtn.textContent = '✓ Aprovar e criar nas plataformas';
 }
-function audDiscardMock(){
+function audDiscard(){
   document.getElementById('audResultBox').style.display = 'none';
   toast('Sugestão descartada', '');
 }
