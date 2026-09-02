@@ -1731,6 +1731,7 @@ async function audSubmitImplement(){
         google_ad_group_resource_names: googleIds,
         google_custom_audience_resource_name: entry.googleCustomAudienceResourceName || null,
         tiktok_adgroup_ids: tiktokIds,
+        target_names: _audBuildTargetNamesMap(audImplementTargetsData),
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -1758,6 +1759,20 @@ async function audSubmitImplement(){
 // todas as seções da sugestão (interesses, behaviors, keywords, urls).
 // `items` pode ser lista de strings OU lista de {name, reasoning} — nesse
 // segundo caso o reasoning vira o `title` (tooltip) da tag.
+// Novo nesta sessão (pedido do Leonardo: "Implementado em" deve mostrar
+// o NOME da campanha/ad group, não o ID) — monta um mapa id→nome a
+// partir de um objeto de targets (audTargetsData ou
+// audImplementTargetsData, mesmo formato dos dois: {platform:
+// {ad_groups: [{id,name,...}]}}), pra mandar junto na criação — o
+// backend não tem como saber o nome sozinho sem isso.
+function _audBuildTargetNamesMap(targetsData){
+  const map = {};
+  ['meta', 'google_ads', 'tiktok'].forEach(p => {
+    ((targetsData[p] || {}).ad_groups || []).forEach(a => { map[a.id] = a.name; });
+  });
+  return map;
+}
+
 function audRenderTags(containerId, items){
   const el = document.getElementById(containerId);
   if(!el) return;
@@ -1990,6 +2005,7 @@ async function audApprove(){
         meta_ad_set_ids: Array.from(audSelectedTargets.meta.ad_groups),
         google_ad_group_resource_names: Array.from(audSelectedTargets.google_ads.ad_groups),
         tiktok_adgroup_ids: Array.from(audSelectedTargets.tiktok.ad_groups),
+        target_names: _audBuildTargetNamesMap(audTargetsData),
       }),
     });
     const data = await res.json().catch(() => ({}));
