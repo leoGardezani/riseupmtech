@@ -835,19 +835,46 @@
         <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:6px;line-height:1.6">// a IA aplica só o que for pedido, mantendo o resto da sugestão como está</div>
 
         <!-- Atribuição a campanhas/ad groups existentes — novo nesta
-        sessão (pedido do Leonardo). Ainda não existe uma tela de
-        "escolher campanha da lista" (precisaria de um endpoint de
-        listagem que ainda não tenho/não existe) — por enquanto, cola o
-        ID de destino direto (visível no Ads Manager de cada
-        plataforma). Deixar em branco = só cria a audiência, sem
-        atribuir a nada ainda (dá pra atribuir depois manualmente). -->
+        sessão (pedido do Leonardo): os IDs vêm do BigQuery
+        (set-implementation, não da planilha — sobrevive se a planilha
+        for excluída), com nome real da plataforma. Seleção em cascata:
+        marca campanha(s) primeiro, só então os ad groups/ad sets
+        daquelas campanhas ficam disponíveis pra marcar. Deixar tudo
+        desmarcado = só cria a audiência, sem atribuir a nada ainda. -->
         <div class="desd-step-lbl" style="margin:20px 0 8px">Atribuir a campanhas/ad groups existentes <span style="font-weight:400;color:var(--ink-muted);font-size:11px">(opcional)</span></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
-          <div class="fg" style="margin-bottom:0"><label class="fl">Meta — Ad Set ID(s)</label><input class="fi" id="audMetaTargets" placeholder="separado por vírgula"></div>
-          <div class="fg" style="margin-bottom:0"><label class="fl">Google Ads — Ad Group (resource name)</label><input class="fi" id="audGoogleTargets" placeholder="customers/.../adGroups/..."></div>
-          <div class="fg" style="margin-bottom:0"><label class="fl">TikTok — AdGroup ID(s)</label><input class="fi" id="audTiktokTargets" placeholder="separado por vírgula"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px">Meta — Ad Sets</div>
+            <button class="fi" style="text-align:left;cursor:pointer" onclick="audToggleDropdown('meta')" id="audDropdownBtn_meta">Selecionar campanhas…</button>
+            <div id="audDropdown_meta" class="aud-dropdown-panel" style="display:none;border:1px solid var(--border);margin-top:4px;max-height:260px;overflow-y:auto;background:var(--bg);padding:8px">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);text-transform:uppercase;margin-bottom:4px">Campanhas</div>
+              <div id="audCampaignList_meta"></div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);text-transform:uppercase;margin:10px 0 4px;border-top:1px solid var(--border);padding-top:8px">Ad Sets (das campanhas marcadas acima)</div>
+              <div id="audAdGroupList_meta"></div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px">Google Ads — Ad Groups</div>
+            <button class="fi" style="text-align:left;cursor:pointer" onclick="audToggleDropdown('google_ads')" id="audDropdownBtn_google_ads">Selecionar campanhas…</button>
+            <div id="audDropdown_google_ads" class="aud-dropdown-panel" style="display:none;border:1px solid var(--border);margin-top:4px;max-height:260px;overflow-y:auto;background:var(--bg);padding:8px">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);text-transform:uppercase;margin-bottom:4px">Campanhas</div>
+              <div id="audCampaignList_google_ads"></div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);text-transform:uppercase;margin:10px 0 4px;border-top:1px solid var(--border);padding-top:8px">Ad Groups (das campanhas marcadas acima)</div>
+              <div id="audAdGroupList_google_ads"></div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px">TikTok — Ad Groups</div>
+            <button class="fi" style="text-align:left;cursor:pointer" onclick="audToggleDropdown('tiktok')" id="audDropdownBtn_tiktok">Selecionar campanhas…</button>
+            <div id="audDropdown_tiktok" class="aud-dropdown-panel" style="display:none;border:1px solid var(--border);margin-top:4px;max-height:260px;overflow-y:auto;background:var(--bg);padding:8px">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);text-transform:uppercase;margin-bottom:4px">Campanhas</div>
+              <div id="audCampaignList_tiktok"></div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);text-transform:uppercase;margin:10px 0 4px;border-top:1px solid var(--border);padding-top:8px">Ad Groups (das campanhas marcadas acima)</div>
+              <div id="audAdGroupList_tiktok"></div>
+            </div>
+          </div>
         </div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin:6px 0 0;line-height:1.6">// pega os IDs direto no Ads Manager de cada plataforma — uma tela de seleção fica pra depois</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin:6px 0 0;line-height:1.6">// lista vem do BigQuery (set-implementation) — só aparecem campanhas/ad groups que já existem de verdade na plataforma</div>
 
         <div style="display:flex;gap:8px;margin-top:18px;align-items:center">
           <button class="btn-sm" id="audApproveBtn" style="padding:10px 20px;font-size:10px" onclick="audApprove()">✓ Aprovar e criar nas plataformas</button>
@@ -1388,13 +1415,117 @@ async function audLoadWorkspaces(){
   }catch(e){
     sel.innerHTML = '<option value="">Falha ao carregar workspaces</option>';
   }
+  audLoadTargets();  // novo — carrega campanhas/ad groups reais (BQ) desse workspace
 }
 
 function audOnWorkspaceChange(){
   const sel = document.getElementById('audWorkspaceSelect');
   audWorkspaceId = sel ? sel.value : '';
+  audLoadTargets();
 }
 
+// ── Seletor em cascata de campanhas/ad groups existentes (pedido do
+// Leonardo) — GET /audiences/targets lê do BigQuery (set-implementation),
+// não da planilha (sobrevive se a planilha for excluída). Marca
+// campanha(s) primeiro; só os ad groups/ad sets DAQUELAS campanhas ficam
+// disponíveis pra marcar (cascata de verdade, não é só um filtro visual).
+let audTargetsData = { meta: {campaigns:[], ad_groups:[]}, google_ads: {campaigns:[], ad_groups:[]}, tiktok: {campaigns:[], ad_groups:[]} };
+let audSelectedTargets = {
+  meta: { campaigns: new Set(), ad_groups: new Set() },
+  google_ads: { campaigns: new Set(), ad_groups: new Set() },
+  tiktok: { campaigns: new Set(), ad_groups: new Set() },
+};
+
+async function audLoadTargets(){
+  audSelectedTargets = {
+    meta: { campaigns: new Set(), ad_groups: new Set() },
+    google_ads: { campaigns: new Set(), ad_groups: new Set() },
+    tiktok: { campaigns: new Set(), ad_groups: new Set() },
+  };
+  if(!audWorkspaceId){
+    audTargetsData = { meta: {campaigns:[], ad_groups:[]}, google_ads: {campaigns:[], ad_groups:[]}, tiktok: {campaigns:[], ad_groups:[]} };
+    ['meta','google_ads','tiktok'].forEach(p => { audRenderCampaignCheckboxes(p); audRenderAdGroupCheckboxes(p); audUpdateDropdownLabel(p); });
+    return;
+  }
+  try{
+    const res = await fetch(API_BASE + '/audiences/targets?workspace_id=' + encodeURIComponent(audWorkspaceId), { headers: authHeaders() });
+    if(!res.ok) throw new Error('falha ao carregar campanhas/ad groups');
+    audTargetsData = await res.json();
+  }catch(e){
+    audTargetsData = { meta: {campaigns:[], ad_groups:[]}, google_ads: {campaigns:[], ad_groups:[]}, tiktok: {campaigns:[], ad_groups:[]} };
+  }
+  ['meta','google_ads','tiktok'].forEach(p => { audRenderCampaignCheckboxes(p); audRenderAdGroupCheckboxes(p); audUpdateDropdownLabel(p); });
+}
+
+function audRenderCampaignCheckboxes(platform){
+  const el = document.getElementById('audCampaignList_' + platform);
+  if(!el) return;
+  const campaigns = (audTargetsData[platform] || {}).campaigns || [];
+  if(!campaigns.length){ el.innerHTML = '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">nenhuma campanha encontrada</div>'; return; }
+  el.innerHTML = campaigns.map(c => `
+    <label style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;cursor:pointer">
+      <input type="checkbox" onchange="audToggleCampaignSelection('${platform}','${_escHtml(c.id)}',this.checked)">
+      ${_escHtml(c.name)}
+    </label>`).join('');
+}
+
+function audRenderAdGroupCheckboxes(platform){
+  const el = document.getElementById('audAdGroupList_' + platform);
+  if(!el) return;
+  const selectedCampaigns = audSelectedTargets[platform].campaigns;
+  const adGroups = ((audTargetsData[platform] || {}).ad_groups || []).filter(a => selectedCampaigns.has(a.campaign_id));
+  if(!selectedCampaigns.size){ el.innerHTML = '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">marque uma campanha acima primeiro</div>'; return; }
+  if(!adGroups.length){ el.innerHTML = '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">nenhum ad group encontrado pras campanhas marcadas</div>'; return; }
+  el.innerHTML = adGroups.map(a => `
+    <label style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;cursor:pointer">
+      <input type="checkbox" ${audSelectedTargets[platform].ad_groups.has(a.id) ? 'checked' : ''} onchange="audToggleAdGroupSelection('${platform}','${_escHtml(a.id)}',this.checked)">
+      ${_escHtml(a.name)}
+    </label>`).join('');
+}
+
+function audToggleCampaignSelection(platform, campaignId, checked){
+  const set = audSelectedTargets[platform].campaigns;
+  if(checked) set.add(campaignId); else set.delete(campaignId);
+  // Desmarcar uma campanha também derruba os ad groups dela já
+  // marcados — evita mandar um ad_group_id cuja campanha-pai não está
+  // mais selecionada (a cascata precisa valer nos dois sentidos).
+  if(!checked){
+    const stillValid = new Set(((audTargetsData[platform] || {}).ad_groups || []).filter(a => set.has(a.campaign_id)).map(a => a.id));
+    audSelectedTargets[platform].ad_groups.forEach(id => { if(!stillValid.has(id)) audSelectedTargets[platform].ad_groups.delete(id); });
+  }
+  audRenderAdGroupCheckboxes(platform);
+  audUpdateDropdownLabel(platform);
+}
+
+function audToggleAdGroupSelection(platform, adGroupId, checked){
+  if(checked) audSelectedTargets[platform].ad_groups.add(adGroupId);
+  else audSelectedTargets[platform].ad_groups.delete(adGroupId);
+  audUpdateDropdownLabel(platform);
+}
+
+function audUpdateDropdownLabel(platform){
+  const btn = document.getElementById('audDropdownBtn_' + platform);
+  if(!btn) return;
+  const nCamp = audSelectedTargets[platform].campaigns.size;
+  const nAg = audSelectedTargets[platform].ad_groups.size;
+  btn.textContent = nCamp ? `${nCamp} campanha(s), ${nAg} ad group(s) selecionado(s)` : 'Selecionar campanhas…';
+}
+
+function audToggleDropdown(platform){
+  ['meta','google_ads','tiktok'].forEach(p => {
+    const panel = document.getElementById('audDropdown_' + p);
+    if(!panel) return;
+    panel.style.display = (p === platform && panel.style.display === 'none') ? 'block' : 'none';
+  });
+}
+document.addEventListener('click', (e) => {
+  ['meta','google_ads','tiktok'].forEach(p => {
+    const panel = document.getElementById('audDropdown_' + p);
+    const btn = document.getElementById('audDropdownBtn_' + p);
+    if(!panel || panel.style.display === 'none') return;
+    if(!panel.contains(e.target) && e.target !== btn) panel.style.display = 'none';
+  });
+});
 // Renderiza uma lista de tags (span.repo-tag) num container — usado pra
 // todas as seções da sugestão (interesses, behaviors, keywords, urls).
 // `items` pode ser lista de strings OU lista de {name, reasoning} — nesse
@@ -1596,17 +1727,11 @@ async function audApplyRefinement(){
 
 // Fase 2 real — chama POST /audiences/create de verdade (Custom
 // Audience/Saved Audience no Meta, Custom Audience no Google Ads,
-// interest/action categories no TikTok) + atribuição aos IDs de destino
-// preenchidos (opcional — ver #audMetaTargets/#audGoogleTargets/
-// #audTiktokTargets acima). NÃO TESTADO AO VIVO ainda (ver docstring de
-// create_audience em api/audiences.py) — erros de uma plataforma não
-// travam as outras, a resposta sempre reporta cada uma separadamente.
-function _parseCommaList(elId){
-  const raw = (document.getElementById(elId).value || '').trim();
-  if(!raw) return [];
-  return raw.split(',').map(s => s.trim()).filter(Boolean);
-}
-
+// interest/action categories no TikTok) + atribuição aos ad groups/ad
+// sets marcados no seletor em cascata (ver audSelectedTargets acima).
+// NÃO TESTADO AO VIVO ainda (ver docstring de create_audience em
+// api/audiences.py) — erros de uma plataforma não travam as outras, a
+// resposta sempre reporta cada uma separadamente.
 async function audApprove(){
   const name = (document.getElementById('audNameInput').value || '').trim();
   if(!name){ toast('Dê um nome pra audiência antes de aprovar', 'er'); return; }
@@ -1627,9 +1752,9 @@ async function audApprove(){
         workspace_id: audWorkspaceId,
         name: name,
         suggestion: audLastSuggestion,
-        meta_ad_set_ids: _parseCommaList('audMetaTargets'),
-        google_ad_group_resource_names: _parseCommaList('audGoogleTargets'),
-        tiktok_adgroup_ids: _parseCommaList('audTiktokTargets'),
+        meta_ad_set_ids: Array.from(audSelectedTargets.meta.ad_groups),
+        google_ad_group_resource_names: Array.from(audSelectedTargets.google_ads.ad_groups),
+        tiktok_adgroup_ids: Array.from(audSelectedTargets.tiktok.ad_groups),
       }),
     });
     const data = await res.json().catch(() => ({}));
