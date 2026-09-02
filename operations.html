@@ -703,11 +703,11 @@
     </div>
   </div>
 
-  <!-- ── AUDIÊNCIAS (MOCK — só visual, sem integração real ainda) ── -->
+  <!-- ── AUDIÊNCIAS ── -->
   <div class="tab-page" id="tab-audiencias">
     <div class="section-title">Audiências</div>
     <div class="section-sub">A IA traduz uma descrição livre em audiência implementável — Google Ads, Meta Ads, TikTok Ads e Search, de uma vez só</div>
-    <div style="background:#fef9c3;border:1px solid #fde68a;padding:10px 14px;margin-bottom:20px;font-family:var(--mono);font-size:10px;color:#854d0e;letter-spacing:.04em">// FASE 1 (sugestão via IA) já é real — chama o Gemini de verdade. FASE 2 (criar de fato nas plataformas) ainda é mock — falta implementar a criação em cada engine (Meta/Google Ads/TikTok).</div>
+    <div style="background:#fef9c3;border:1px solid #fde68a;padding:10px 14px;margin-bottom:20px;font-family:var(--mono);font-size:10px;color:#854d0e;letter-spacing:.04em">// FASE 1 (sugestão via IA) e FASE 2 (criação real nas plataformas + persistência) já são reais — ⚠️ ainda não testadas de ponta a ponta ao vivo com todos os fixes recentes.</div>
 
     <!-- Gerar nova audiência -->
     <div class="tbox" style="margin-bottom:24px">
@@ -889,7 +889,7 @@
     <div class="tbox">
       <div class="tbox-head">
         <div class="tbox-title">Audiências Criadas</div>
-        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// só desta sessão (recarregar a página perde a lista) — presets persistidos ainda não implementados</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// persiste entre sessões (Firestore) — sobrevive a F5</span>
       </div>
       <table><thead><tr>
         <th>Audiência</th><th>Plataforma</th><th>Descrição</th><th>Workspace</th><th>Criado por</th><th>Implementado em</th><th>Status</th><th>Criada</th><th></th>
@@ -1474,6 +1474,14 @@ async function audLoadPresets(){
     }));
   }catch(e){
     AUD_CREATED_SESSION = [];
+    // Fix desta sessão, achado ao vivo (Leonardo reportou: audiências
+    // criadas não aparecem depois de F5) — antes essa falha era 100%
+    // silenciosa (só limpava a lista, sem pista nenhuma do motivo). Agora
+    // mostra o erro real — se for 404, o mais provável é o backend
+    // (api/audiences.py com o endpoint /list novo) ainda não ter sido
+    // deployado junto com este HTML.
+    console.error('[audLoadPresets] falha ao carregar audiências salvas:', e);
+    toast('✕ Falha ao carregar audiências salvas — ' + (e.message || 'ver Console (F12) para detalhes'), 'er');
   }
   renderAudCreatedTable();
 }
