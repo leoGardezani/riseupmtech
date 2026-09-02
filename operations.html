@@ -1434,12 +1434,48 @@ async function audLoadWorkspaces(){
     sel.innerHTML = '<option value="">Falha ao carregar workspaces</option>';
   }
   audLoadTargets();  // novo — carrega campanhas/ad groups reais (BQ) desse workspace
+  audLoadPresets();  // novo — carrega audiências já criadas/persistidas (Firestore) desse workspace
 }
 
 function audOnWorkspaceChange(){
   const sel = document.getElementById('audWorkspaceSelect');
   audWorkspaceId = sel ? sel.value : '';
   audLoadTargets();
+  audLoadPresets();
+}
+
+// Novo nesta sessão (pedido do Leonardo: "guardar essas configs pra caso
+// o usuário queira aplicá-las de novo") — substitui o estado
+// local-de-sessão que a tabela de "Audiências Criadas" usava antes
+// (sumia com F5). Lê do Firestore via GET /audiences/list.
+async function audLoadPresets(){
+  if(!audWorkspaceId){ AUD_CREATED_SESSION = []; renderAudCreatedTable(); return; }
+  try{
+    const res = await fetch(API_BASE + '/audiences/list?workspace_id=' + encodeURIComponent(audWorkspaceId), { headers: authHeaders() });
+    if(!res.ok) throw new Error('falha ao carregar audiências salvas');
+    const data = await res.json();
+    const sel = document.getElementById('audWorkspaceSelect');
+    const wsName = sel && sel.selectedOptions[0] ? sel.selectedOptions[0].textContent : audWorkspaceId;
+    AUD_CREATED_SESSION = (data.presets || []).map(p => ({
+      name: p.name,
+      platform: p.platform,
+      platformLabel: p.platform === 'meta' ? 'Meta' : p.platform === 'google_ads' ? 'Google Ads' : 'TikTok',
+      description: p.description,
+      workspaceId: p.workspace_id,
+      workspaceName: wsName,
+      createdBy: p.created_by,
+      implementedIn: p.implemented_in || [],
+      statusBadge: p.status_ok ? '<span class="badge b-g">OK</span>' : '<span class="badge b-r">falhou</span>',
+      creationOk: p.status_ok,
+      criada: p.created_at_iso ? new Date(p.created_at_iso).toLocaleString('pt-BR') : '—',
+      suggestion: p.suggestion,
+      googleCustomAudienceResourceName: p.google_custom_audience_resource_name || null,
+      presetId: p.id,
+    }));
+  }catch(e){
+    AUD_CREATED_SESSION = [];
+  }
+  renderAudCreatedTable();
 }
 
 // ── Seletor em cascata de campanhas/ad groups existentes (pedido do
@@ -1680,6 +1716,9 @@ async function audSubmitImplement(){
         workspace_id: entry.workspaceId,
         name: entry.name,
         suggestion: entry.suggestion,
+        platforms: [entry.platform],
+        is_new_preset: false,
+        preset_ids: entry.presetId ? { [entry.platform]: entry.presetId } : {},
         meta_ad_set_ids: metaIds,
         google_ad_group_resource_names: googleIds,
         google_custom_audience_resource_name: entry.googleCustomAudienceResourceName || null,
@@ -1700,6 +1739,7 @@ async function audSubmitImplement(){
     });
     entry.implementedIn = (entry.implementedIn || []).concat(newImplemented);
     renderAudCreatedTable();
+    audLoadPresets();  // recarrega do Firestore — reflete o implemented_in persistido de verdade
     toast('✓ Audiência implementada em ' + newImplemented.length + ' campanha(s)/ad group(s)', 'ok');
     audCloseImplementModal();
   }catch(e){
@@ -1937,6 +1977,8 @@ async function audApprove(){
         workspace_id: audWorkspaceId,
         name: name,
         suggestion: audLastSuggestion,
+        description: audLastPromptText,
+        is_new_preset: true,
         meta_ad_set_ids: Array.from(audSelectedTargets.meta.ad_groups),
         google_ad_group_resource_names: Array.from(audSelectedTargets.google_ads.ad_groups),
         tiktok_adgroup_ids: Array.from(audSelectedTargets.tiktok.ad_groups),
@@ -2015,9 +2057,14 @@ async function audApprove(){
         criada: 'agora',
         suggestion: audLastSuggestion,
         googleCustomAudienceResourceName: key === 'google_ads' ? (info.custom_audience_resource_name || null) : null,
+        // Novo — id do documento salvo no Firestore (ver
+        // /audiences/list) — precisa disso pro "Implementar" saber qual
+        // preset atualizar em vez de duplicar.
+        presetId: (data.preset_ids || {})[key] || null,
       });
     });
     renderAudCreatedTable();
+    audLoadPresets();  // recarrega do Firestore — garante que a linha reflita o que foi persistido de verdade, não só o estado otimista local
 
     if(platformLabels.length){
       toast('✓ Audiência "' + name + '" criada em: ' + platformLabels.join(', '), 'ok');
@@ -2977,7 +3024,7 @@ function switchTab(id, el){
   if(id === 'campanhas') campLoadWorkspaces();
   if(id === 'desdobrador') desdLoadWorkspaces();
   if(id === 'criativos'){ pendLoadWorkspaces(); upfLoadWorkspaces(); }
-  if(id === 'audiencias'){ audLoadWorkspaces(); renderAudCreatedTable(); }
+  if(id === 'audiencias'){ audLoadWorkspaces(); }
   if(!chartsInited.has(id)){
     chartsInited.add(id);
     setTimeout(() => initChartsForTab(id), 60);
