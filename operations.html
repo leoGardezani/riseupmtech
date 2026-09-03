@@ -232,6 +232,16 @@
   .btn-sm:hover{background:#333;}
   .btn-sm.ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--border);}
   .btn-sm.ghost:hover{border-color:var(--ink);color:var(--ink);}
+  /* Botão-com-progresso — pedido do Leonardo: em vez de só trocar o
+  texto do botão pra "Criando...", o próprio botão vira uma barra de
+  progresso enquanto espera a resposta do backend. Como /audiences/create
+  é UMA chamada só (não dá progresso incremental real por plataforma do
+  servidor), a barra é indeterminada (listras animadas correndo) — não
+  finge saber uma porcentagem que não temos de verdade. */
+  .btn-progress{position:relative;overflow:hidden;cursor:wait;pointer-events:none;}
+  .btn-progress::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.18) 0 10px,transparent 10px 20px);background-size:200% 100%;animation:btnProgressStripe .9s linear infinite;}
+  .btn-progress span{position:relative;z-index:1;}
+  @keyframes btnProgressStripe{from{background-position:0 0;}to{background-position:-40px 0;}}
   /* overlay & toast */
   .overlay{position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:299;opacity:0;pointer-events:none;transition:opacity .3s;}
   .overlay.on{opacity:1;pointer-events:all;}
@@ -910,7 +920,7 @@
       <div id="audImplementPlatforms"></div>
       <div id="audImplementStatus" style="margin-top:10px"></div>
       <div style="display:flex;gap:8px;margin-top:16px">
-        <button class="btn-sm" onclick="audSubmitImplement()">✓ Implementar nas campanhas marcadas</button>
+        <button class="btn-sm" id="audSubmitImplementBtn" onclick="audSubmitImplement()">✓ Implementar nas campanhas marcadas</button>
         <button class="btn-sm ghost" onclick="audCloseImplementModal()">Cancelar</button>
       </div>
     </div>
@@ -1705,16 +1715,18 @@ async function audSubmitImplement(){
   const entry = audImplementContext;
   if(!entry) return;
   const statusEl = document.getElementById('audImplementStatus');
-  statusEl.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Implementando...</div>';
+  const implBtn = document.getElementById('audSubmitImplementBtn');
+  statusEl.innerHTML = '';
 
   const metaIds = Array.from(audImplementSelected.meta.ad_groups);
   const googleIds = Array.from(audImplementSelected.google_ads.ad_groups);
   const tiktokIds = Array.from(audImplementSelected.tiktok.ad_groups);
   if(!metaIds.length && !googleIds.length && !tiktokIds.length){
     toast('Marque ao menos um ad group/ad set antes de implementar', 'er');
-    statusEl.innerHTML = '';
     return;
   }
+
+  _setBtnProgress(implBtn, true, 'Implementando...');
 
   try{
     const res = await fetch(API_BASE + '/audiences/create', {
@@ -1754,6 +1766,7 @@ async function audSubmitImplement(){
   }catch(e){
     statusEl.innerHTML = '<div style="color:var(--danger)">✕ ' + _escHtml(e.message || 'Falha ao implementar') + '</div>';
   }
+  _setBtnProgress(implBtn, false, '✓ Implementar nas campanhas marcadas');
 }
 // Renderiza uma lista de tags (span.repo-tag) num container — usado pra
 // todas as seções da sugestão (interesses, behaviors, keywords, urls).
@@ -1771,6 +1784,26 @@ function _audBuildTargetNamesMap(targetsData){
     ((targetsData[p] || {}).ad_groups || []).forEach(a => { map[a.id] = a.name; });
   });
   return map;
+}
+
+// Botão-com-progresso (pedido do Leonardo) — em vez de só trocar o texto
+// pra "Criando...", o botão vira visualmente uma barra de progresso
+// (listras animadas, indeterminada — /audiences/create é uma chamada só,
+// sem progresso incremental real por plataforma vindo do servidor, não
+// finge saber uma % que não temos). `active=true` entra no modo
+// progresso com o `label` dado; `active=false` sai do modo e volta pro
+// `label` (ou pro texto original salvo, se nenhum for passado).
+function _setBtnProgress(btn, active, label){
+  if(!btn) return;
+  if(active){
+    if(btn.dataset.origHtml === undefined) btn.dataset.origHtml = btn.innerHTML;
+    btn.classList.add('btn-progress');
+    btn.innerHTML = '<span>' + _escHtml(label || 'Processando...') + '</span>';
+  } else {
+    btn.classList.remove('btn-progress');
+    btn.innerHTML = label != null ? label : (btn.dataset.origHtml || btn.innerHTML);
+    delete btn.dataset.origHtml;
+  }
 }
 
 function audRenderTags(containerId, items){
@@ -1989,7 +2022,7 @@ async function audApprove(){
   const btns = document.querySelectorAll('#audResultBox .btn-sm');
   btns.forEach(b => b.disabled = true);
   const approveBtn = document.getElementById('audApproveBtn');
-  if(approveBtn) approveBtn.textContent = 'Criando nas plataformas...';
+  _setBtnProgress(approveBtn, true, 'Criando nas plataformas...');
   if(statusEl) statusEl.innerHTML = '';
 
   try{
@@ -2103,6 +2136,7 @@ async function audApprove(){
   }
 
   btns.forEach(b => b.disabled = false);
+  _setBtnProgress(approveBtn, false, '✓ Aprovar e criar nas plataformas');
   if(approveBtn) approveBtn.textContent = '✓ Aprovar e criar nas plataformas';
 }
 function audDiscard(){
