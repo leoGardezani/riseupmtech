@@ -734,6 +734,14 @@
           <label class="fl">Descrição da audiência (prompt livre)</label>
           <textarea class="fi" id="audPromptText" rows="3" style="resize:vertical" placeholder="ex: mulheres 25-40 anos, interessadas em skincare natural, alta renda, moram em capitais"></textarea>
         </div>
+        <!-- Novo nesta sessão (pedido do Leonardo) — URL real do
+        produto/site do cliente. Dá contexto de marca/produto pra IA e
+        vira automaticamente a primeira entrada de URLs sugeridas pro
+        Google Ads (mais confiável que um domínio inventado). Opcional. -->
+        <div class="fg" style="max-width:420px">
+          <label class="fl">URL do produto/site <span style="font-weight:400;color:var(--ink-muted);font-size:11px">(opcional)</span></label>
+          <input class="fi" type="url" id="audProductUrl" placeholder="https://seusite.com.br/produto">
+        </div>
         <!-- Novo nesta sessão (pedido do Leonardo) — data de início/fim da
         campanha, usadas pra escalar as métricas estimadas
         (impressões/frequência/cobertura) pela duração real, em vez de um
@@ -1899,10 +1907,11 @@ async function audGenerateSuggestion(){
   try{
     const startDate = document.getElementById('audStartDate').value || null;
     const endDate = document.getElementById('audEndDate').value || null;
+    const productUrl = (document.getElementById('audProductUrl').value || '').trim() || null;
     const res = await fetch(API_BASE + '/audiences/suggest', {
       method: 'POST',
       headers: Object.assign({'Content-Type': 'application/json'}, authHeaders()),
-      body: JSON.stringify({ workspace_id: audWorkspaceId, prompt: promptText, start_date: startDate, end_date: endDate }),
+      body: JSON.stringify({ workspace_id: audWorkspaceId, prompt: promptText, start_date: startDate, end_date: endDate, product_url: productUrl }),
     });
     const data = await res.json().catch(() => ({}));
     if(!res.ok) throw new Error(data.detail || 'backend recusou a geração');
