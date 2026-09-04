@@ -872,13 +872,34 @@
             </div>
           </div>
           <div>
-            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px">Google Ads — Ad Groups</div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px">Google Ads (Display/Demand Gen) — Ad Groups</div>
             <button class="fi" style="text-align:left;cursor:pointer" onclick="audToggleDropdown('google_ads')" id="audDropdownBtn_google_ads">Selecionar campanhas…</button>
             <div id="audDropdown_google_ads" class="aud-dropdown-panel" style="display:none;border:1px solid var(--border);margin-top:4px;max-height:260px;overflow-y:auto;background:var(--bg);padding:8px">
               <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);text-transform:uppercase;margin-bottom:4px">Campanhas</div>
               <div id="audCampaignList_google_ads"></div>
               <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);text-transform:uppercase;margin:10px 0 4px;border-top:1px solid var(--border);padding-top:8px">Ad Groups (das campanhas marcadas acima)</div>
               <div id="audAdGroupList_google_ads"></div>
+            </div>
+          </div>
+          <!-- Novo nesta sessão (pedido do Leonardo, achado ao vivo) —
+          Search precisa ser um seletor SEPARADO de Display: são
+          mecanismos de audiência incompatíveis na API do Google Ads
+          (Custom Audience só funciona em Display/Demand Gen; Search usa
+          keyword — a própria API rejeita Custom Audience num ad group
+          de Search: "The operation is not allowed for the given
+          context"). O backend já sabe diferenciar sozinho por ad group
+          (get_channel_type_for_ad_group), então os dois seletores
+          combinam na mesma lista final na hora de enviar — aqui é só
+          pra deixar visualmente claro pra pessoa qual é qual antes de
+          marcar. -->
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px">Google Ads (Search) — Ad Groups <span style="text-transform:none;color:var(--ink-muted)">— usa keyword, não audiência</span></div>
+            <button class="fi" style="text-align:left;cursor:pointer" onclick="audToggleDropdown('google_ads_search')" id="audDropdownBtn_google_ads_search">Selecionar campanhas…</button>
+            <div id="audDropdown_google_ads_search" class="aud-dropdown-panel" style="display:none;border:1px solid var(--border);margin-top:4px;max-height:260px;overflow-y:auto;background:var(--bg);padding:8px">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);text-transform:uppercase;margin-bottom:4px">Campanhas</div>
+              <div id="audCampaignList_google_ads_search"></div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);text-transform:uppercase;margin:10px 0 4px;border-top:1px solid var(--border);padding-top:8px">Ad Groups (das campanhas marcadas acima)</div>
+              <div id="audAdGroupList_google_ads_search"></div>
             </div>
           </div>
           <div>
@@ -1509,10 +1530,11 @@ async function audLoadPresets(){
 // não da planilha (sobrevive se a planilha for excluída). Marca
 // campanha(s) primeiro; só os ad groups/ad sets DAQUELAS campanhas ficam
 // disponíveis pra marcar (cascata de verdade, não é só um filtro visual).
-let audTargetsData = { meta: {campaigns:[], ad_groups:[]}, google_ads: {campaigns:[], ad_groups:[]}, tiktok: {campaigns:[], ad_groups:[]} };
+let audTargetsData = { meta: {campaigns:[], ad_groups:[]}, google_ads: {campaigns:[], ad_groups:[]}, google_ads_search: {campaigns:[], ad_groups:[]}, tiktok: {campaigns:[], ad_groups:[]} };
 let audSelectedTargets = {
   meta: { campaigns: new Set(), ad_groups: new Set() },
   google_ads: { campaigns: new Set(), ad_groups: new Set() },
+  google_ads_search: { campaigns: new Set(), ad_groups: new Set() },
   tiktok: { campaigns: new Set(), ad_groups: new Set() },
 };
 
@@ -1520,11 +1542,12 @@ async function audLoadTargets(){
   audSelectedTargets = {
     meta: { campaigns: new Set(), ad_groups: new Set() },
     google_ads: { campaigns: new Set(), ad_groups: new Set() },
+    google_ads_search: { campaigns: new Set(), ad_groups: new Set() },
     tiktok: { campaigns: new Set(), ad_groups: new Set() },
   };
   if(!audWorkspaceId){
-    audTargetsData = { meta: {campaigns:[], ad_groups:[]}, google_ads: {campaigns:[], ad_groups:[]}, tiktok: {campaigns:[], ad_groups:[]} };
-    ['meta','google_ads','tiktok'].forEach(p => { audRenderCampaignCheckboxes(p); audRenderAdGroupCheckboxes(p); audUpdateDropdownLabel(p); });
+    audTargetsData = { meta: {campaigns:[], ad_groups:[]}, google_ads: {campaigns:[], ad_groups:[]}, google_ads_search: {campaigns:[], ad_groups:[]}, tiktok: {campaigns:[], ad_groups:[]} };
+    ['meta','google_ads','google_ads_search','tiktok'].forEach(p => { audRenderCampaignCheckboxes(p); audRenderAdGroupCheckboxes(p); audUpdateDropdownLabel(p); });
     return;
   }
   try{
@@ -1532,9 +1555,9 @@ async function audLoadTargets(){
     if(!res.ok) throw new Error('falha ao carregar campanhas/ad groups');
     audTargetsData = await res.json();
   }catch(e){
-    audTargetsData = { meta: {campaigns:[], ad_groups:[]}, google_ads: {campaigns:[], ad_groups:[]}, tiktok: {campaigns:[], ad_groups:[]} };
+    audTargetsData = { meta: {campaigns:[], ad_groups:[]}, google_ads: {campaigns:[], ad_groups:[]}, google_ads_search: {campaigns:[], ad_groups:[]}, tiktok: {campaigns:[], ad_groups:[]} };
   }
-  ['meta','google_ads','tiktok'].forEach(p => { audRenderCampaignCheckboxes(p); audRenderAdGroupCheckboxes(p); audUpdateDropdownLabel(p); });
+  ['meta','google_ads','google_ads_search','tiktok'].forEach(p => { audRenderCampaignCheckboxes(p); audRenderAdGroupCheckboxes(p); audUpdateDropdownLabel(p); });
 }
 
 function audRenderCampaignCheckboxes(platform){
@@ -1592,14 +1615,14 @@ function audUpdateDropdownLabel(platform){
 }
 
 function audToggleDropdown(platform){
-  ['meta','google_ads','tiktok'].forEach(p => {
+  ['meta','google_ads','google_ads_search','tiktok'].forEach(p => {
     const panel = document.getElementById('audDropdown_' + p);
     if(!panel) return;
     panel.style.display = (p === platform && panel.style.display === 'none') ? 'block' : 'none';
   });
 }
 document.addEventListener('click', (e) => {
-  ['meta','google_ads','tiktok'].forEach(p => {
+  ['meta','google_ads','google_ads_search','tiktok'].forEach(p => {
     const panel = document.getElementById('audDropdown_' + p);
     const btn = document.getElementById('audDropdownBtn_' + p);
     if(!panel || panel.style.display === 'none') return;
@@ -1624,11 +1647,17 @@ async function audOpenImplementModal(idx){
   const entry = AUD_CREATED_SESSION[idx];
   if(!entry) return;
   audImplementContext = entry;
-  audImplementSelected = { meta:{campaigns:new Set(),ad_groups:new Set()}, google_ads:{campaigns:new Set(),ad_groups:new Set()}, tiktok:{campaigns:new Set(),ad_groups:new Set()} };
+  audImplementSelected = { meta:{campaigns:new Set(),ad_groups:new Set()}, google_ads:{campaigns:new Set(),ad_groups:new Set()}, google_ads_search:{campaigns:new Set(),ad_groups:new Set()}, tiktok:{campaigns:new Set(),ad_groups:new Set()} };
+
+  // Fix desta sessão (pedido do Leonardo, achado ao vivo) — pra uma
+  // audiência de Google Ads, o modal precisa mostrar os DOIS seletores
+  // (Display E Search), já que uma audiência pode ser implementada em
+  // ad groups de qualquer um dos dois — não são a mesma coisa na API.
+  const implPlatforms = entry.platform === 'google_ads' ? ['google_ads', 'google_ads_search'] : [entry.platform];
 
   document.getElementById('audImplementModalTitle').textContent = 'Implementar "' + entry.name + '" em outras campanhas';
   document.getElementById('audImplementStatus').innerHTML = '';
-  document.getElementById('audImplementPlatforms').innerHTML = [entry.platform].map(p => `
+  document.getElementById('audImplementPlatforms').innerHTML = implPlatforms.map(p => `
     <div style="margin-bottom:14px">
       <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px">${_audPlatformLabel(p)}</div>
       <button class="fi" style="text-align:left;cursor:pointer" onclick="audToggleImplementDropdown('${p}')" id="audImplDropdownBtn_${p}">Selecionar campanhas…</button>
@@ -1647,7 +1676,7 @@ async function audOpenImplementModal(idx){
     audImplementTargetsData = res.ok ? await res.json() : audImplementTargetsData;
   }catch(e){ /* segue com listas vazias, os selects mostram "nenhuma campanha encontrada" */ }
 
-  [entry.platform].forEach(p => { audRenderImplCampaignCheckboxes(p); audRenderImplAdGroupCheckboxes(p); });
+  implPlatforms.forEach(p => { audRenderImplCampaignCheckboxes(p); audRenderImplAdGroupCheckboxes(p); });
 }
 
 function audCloseImplementModal(){
@@ -1707,7 +1736,8 @@ function audUpdateImplDropdownLabel(platform){
 }
 
 function audToggleImplementDropdown(platform){
-  [audImplementContext.platform].forEach(p => {
+  const implPlatforms = audImplementContext.platform === 'google_ads' ? ['google_ads', 'google_ads_search'] : [audImplementContext.platform];
+  implPlatforms.forEach(p => {
     const panel = document.getElementById('audImplDropdown_' + p);
     if(!panel) return;
     panel.style.display = (p === platform && panel.style.display === 'none') ? 'block' : 'none';
@@ -1727,7 +1757,12 @@ async function audSubmitImplement(){
   statusEl.innerHTML = '';
 
   const metaIds = Array.from(audImplementSelected.meta.ad_groups);
-  const googleIds = Array.from(audImplementSelected.google_ads.ad_groups);
+  // Fix desta sessão — Display e Search são seletores separados na tela,
+  // mas o backend espera uma lista SÓ (google_ad_group_resource_names) e
+  // decide sozinho, por ad group, qual mecanismo usar (keyword vs Custom
+  // Audience) — ver get_channel_type_for_ad_group em
+  // services/google_ads_engine.py.
+  const googleIds = Array.from(audImplementSelected.google_ads.ad_groups).concat(Array.from(audImplementSelected.google_ads_search.ad_groups));
   const tiktokIds = Array.from(audImplementSelected.tiktok.ad_groups);
   if(!metaIds.length && !googleIds.length && !tiktokIds.length){
     toast('Marque ao menos um ad group/ad set antes de implementar', 'er');
@@ -1762,7 +1797,11 @@ async function audSubmitImplement(){
     ['meta','google_ads','tiktok'].forEach(p => {
       const selectedIds = p === 'meta' ? metaIds : p === 'google_ads' ? googleIds : tiktokIds;
       selectedIds.forEach(id => {
-        const found = ((audImplementTargetsData[p] || {}).ad_groups || []).find(a => a.id === id);
+        // Fix desta sessão — googleIds agora mistura Display+Search, o
+        // nome pode estar em qualquer um dos dois buckets de targets.
+        const found = p === 'google_ads'
+          ? ((audImplementTargetsData.google_ads || {}).ad_groups || []).concat((audImplementTargetsData.google_ads_search || {}).ad_groups || []).find(a => a.id === id)
+          : ((audImplementTargetsData[p] || {}).ad_groups || []).find(a => a.id === id);
         newImplemented.push((found ? found.name : id) + ' (' + (p === 'meta' ? 'Meta' : p === 'google_ads' ? 'Google Ads' : 'TikTok') + ')');
       });
     });
@@ -1788,7 +1827,7 @@ async function audSubmitImplement(){
 // backend não tem como saber o nome sozinho sem isso.
 function _audBuildTargetNamesMap(targetsData){
   const map = {};
-  ['meta', 'google_ads', 'tiktok'].forEach(p => {
+  ['meta', 'google_ads', 'google_ads_search', 'tiktok'].forEach(p => {
     ((targetsData[p] || {}).ad_groups || []).forEach(a => { map[a.id] = a.name; });
   });
   return map;
@@ -2045,7 +2084,10 @@ async function audApprove(){
         description: audLastPromptText,
         is_new_preset: true,
         meta_ad_set_ids: Array.from(audSelectedTargets.meta.ad_groups),
-        google_ad_group_resource_names: Array.from(audSelectedTargets.google_ads.ad_groups),
+        // Fix desta sessão — Display e Search são seletores separados na
+        // tela, mas o backend espera uma lista só e decide sozinho, por
+        // ad group, qual mecanismo usar (keyword vs Custom Audience).
+        google_ad_group_resource_names: Array.from(audSelectedTargets.google_ads.ad_groups).concat(Array.from(audSelectedTargets.google_ads_search.ad_groups)),
         tiktok_adgroup_ids: Array.from(audSelectedTargets.tiktok.ad_groups),
         target_names: _audBuildTargetNamesMap(audTargetsData),
       }),
@@ -2097,8 +2139,16 @@ async function audApprove(){
       const info = r[key];
       if(!info) return;
       const label = key === 'meta' ? 'Meta' : key === 'google_ads' ? 'Google Ads' : 'TikTok';
-      const implementedIn = Array.from(audSelectedTargets[key].ad_groups).map(id => {
-        const found = ((audTargetsData[key] || {}).ad_groups || []).find(a => a.id === id);
+      // Fix desta sessão — pra Google Ads, os ad groups selecionados
+      // podem estar espalhados entre os buckets "google_ads" (Display) e
+      // "google_ads_search" — junta os dois pra montar o "implementado em".
+      const selectedIdsForKey = key === 'google_ads'
+        ? Array.from(audSelectedTargets.google_ads.ad_groups).concat(Array.from(audSelectedTargets.google_ads_search.ad_groups))
+        : Array.from(audSelectedTargets[key].ad_groups);
+      const implementedIn = selectedIdsForKey.map(id => {
+        const found = key === 'google_ads'
+          ? ((audTargetsData.google_ads || {}).ad_groups || []).concat((audTargetsData.google_ads_search || {}).ad_groups || []).find(a => a.id === id)
+          : ((audTargetsData[key] || {}).ad_groups || []).find(a => a.id === id);
         return found ? found.name : id;
       });
       const nAttach = (info.attachments || []).length;
