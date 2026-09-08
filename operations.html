@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rise Up MTech — Operações</title>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NG9TFZ74');</script>
+<!-- End Google Tag Manager -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -383,6 +390,10 @@
 </style>
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 <div class="tc" id="tc"></div>
 <div class="overlay" id="overlay" onclick="closePanel()"></div>
 <!-- TOPBAR -->
@@ -3159,8 +3170,7 @@ function btDownload(type){
 function refreshAll(){toast('Filtros aplicados','ok');}
 // ── CHARTS ──
 let chartsInited = new Set(['dashboard']);
-// ── Preparação pro GA4 (pedido do Leonardo — GA4 em si entra numa sessão
-// futura, isso aqui só deixa o gancho pronto). Problema real que isso
+// ── Preparação pro GA4 (pedido do Leonardo). Problema real que isso
 // resolve: o operations.html é um SPA — trocar de aba não recarrega a
 // página, então sem isso o GA4 veria SEMPRE 1 pageview só (a inicial),
 // não importa quantas abas a pessoa visite. `trackVirtualPageview()`
@@ -3168,11 +3178,19 @@ let chartsInited = new Set(['dashboard']);
 // — #desdobrador, #campanhas etc. — NUNCA o path de verdade, porque o
 // GitHub Pages não tem fallback de rota SPA; um F5 numa URL tipo
 // /operations/desdobrador daria 404 no servidor, enquanto hash nunca
-// gera request nenhum, é 100% seguro pra F5), e dispara o evento
-// page_view do GA4 SE o gtag.js já estiver instalado (guard —
-// `typeof gtag === 'function'` — não quebra nada hoje, antes do
-// Measurement ID entrar; começa a funcionar sozinho assim que o snippet
-// gtag.js for adicionado, sem precisar tocar aqui de novo).
+// gera request nenhum, é 100% seguro pra F5).
+// Decisão 08/set: GA4 entra via GOOGLE TAG MANAGER (GTM-XXXXXXX), não
+// gtag.js direto — por isso empurra pro window.dataLayer em vez de
+// chamar gtag() direto (GTM não expõe gtag() global sozinho, trabalha
+// via dataLayer.push). No GTM, configurar um Trigger de "Evento
+// personalizado" chamado "virtual_page_view" disparando uma tag de
+// evento do GA4 (ou a própria tag de configuração do GA4 com
+// page_path/page_title vindos das variáveis de camada de dados
+// {{DLV - page_path}}/{{DLV - page_title}}). window.dataLayer é
+// inicializado aqui como guarda — o snippet do GTM (a entrar no <head>
+// quando o container GTM-XXXXXXX for criado) também inicializa, mas não
+// custa garantir mesmo antes do snippet entrar.
+window.dataLayer = window.dataLayer || [];
 const TAB_LABELS = {
   dashboard: 'Overview', campanhas: 'Campanhas', desdobrador: 'Desdobrador',
   audiencias: 'Audiências', status: 'Status', criativos: 'Criativos', bigtable: 'Big Table',
@@ -3187,9 +3205,12 @@ function trackVirtualPageview(id){
   // empilha no botão "voltar"). Se quiser back/forward entre abas no
   // futuro, troca pra pushState aqui.
   try{ history.replaceState({tab: id}, title, path); }catch(e){}
-  if(typeof gtag === 'function'){
-    gtag('event', 'page_view', { page_title: title, page_path: path, page_location: location.href });
-  }
+  window.dataLayer.push({
+    event: 'virtual_page_view',
+    page_title: title,
+    page_path: path,
+    page_location: location.href,
+  });
 }
 
 function switchTab(id, el){
