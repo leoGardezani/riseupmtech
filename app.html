@@ -695,7 +695,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       <div class="l-tag">// Media Automation Platform</div>
     </div>
-    <!-- Login via Google OAuth (único fluxo que o backend suporta hoje: GET /auth/login) -->
+    <!-- Login via Google OAuth (GET /auth/login) OU magic link (POST
+    /auth/magic-link/request — novo nesta sessão, pedido do Leonardo:
+    login sem senha mantendo o social login como opção, não substituindo) -->
     <div id="fL">
       <div class="l-title">Bem-vindo</div>
       <div class="l-sub">Acesse sua conta para continuar.</div>
@@ -704,6 +706,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <svg width="16" height="16" viewBox="0 0 48 48" style="flex-shrink:0"><path fill="#050508" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.3 0 6.3 1.2 8.6 3.2l6.4-6.4C35.6 4.5 30.1 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></svg>
         Entrar com Google
       </button>
+      <div style="display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text-dimmer);font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase">
+        <div style="flex:1;height:1px;background:var(--border-dim)"></div>ou<div style="flex:1;height:1px;background:var(--border-dim)"></div>
+      </div>
+      <div id="mlForm">
+        <input type="email" id="mlEmail" placeholder="seu@email.com" class="inp" style="width:100%;margin-bottom:10px" onkeydown="if(event.key==='Enter')doM()">
+        <button class="fsub" id="mlBtn" onclick="doM()" style="background:transparent;color:var(--text);border:1px solid var(--border-dim)">Enviar link de acesso</button>
+      </div>
+      <div id="mlSent" style="display:none;text-align:center;padding:14px 0;color:var(--text-dim);font-size:13px;line-height:1.6">
+        ✓ Se esse e-mail estiver correto, enviamos um link de acesso.<br>Confira sua caixa de entrada (e o spam).
+      </div>
     </div>
     <div class="l-footer">
       <a href="https://riseupmtech.com/terms-of-service.html" target="_blank">Termos de Uso</a>
@@ -881,6 +893,15 @@ window.addEventListener('load',()=>{
     location.href='operations.html';
     return;
   }
+  // Novo nesta sessão — /auth/magic-link/verify redireciona pra cá com
+  // ?magic_error=1 quando o token do link é inválido, expirado ou já foi
+  // usado (ver api/auth.py). Mostra a mensagem de erro no mesmo lugar que
+  // já existia pro erro de Google OAuth (#lErr), sem criar UI nova.
+  if(p.get('magic_error')){
+    document.getElementById('lErr').textContent='Link inválido, expirado ou já usado. Peça um novo link abaixo.';
+    document.getElementById('lErr').style.display='block';
+    history.replaceState({},'',location.pathname);
+  }
   if(S.token){location.href='operations.html';return;}
   sv('vl');
 });
@@ -895,6 +916,27 @@ function sv(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove
 function sp(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('p-'+id).classList.add('active');document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));if(el)el.classList.add('on');document.getElementById('pT').textContent={workspace:'Workspace',campaigns:'Campanhas',status:'Status',dashboard:'Dashboard',report:'Reports',platforms:'Plataformas',users:'Usuários',settings:'Configurações'}[id]||id;if(id==='status')ldS();if(id==='campaigns')ldC();}
 
 function doL(){location.href=API+'/auth/login';}
+
+// Novo nesta sessão — pedido do Leonardo: login sem senha (magic link),
+// mantendo o Google OAuth acima como opção. Sempre mostra a mesma
+// mensagem de sucesso genérica (o backend também nunca revela se o
+// e-mail existe ou não — ver api/auth.py), então não precisa tratar
+// "erro" de e-mail não encontrado aqui, só erro de rede/backend fora do
+// ar mesmo.
+async function doM(){
+  const email=(document.getElementById('mlEmail').value||'').trim();
+  if(!email||!email.includes('@')){toast('Digite um e-mail válido','er');return;}
+  const btn=document.getElementById('mlBtn');
+  btn.disabled=true;btn.textContent='Enviando...';
+  try{
+    await fetch(API+'/auth/magic-link/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+    document.getElementById('mlForm').style.display='none';
+    document.getElementById('mlSent').style.display='block';
+  }catch{
+    toast('Erro de conexão — tente de novo','er');
+  }
+  btn.disabled=false;btn.textContent='Enviar link de acesso';
+}
 
 function lo(){['riseup_token','riseup_role','riseup_ws'].forEach(k=>localStorage.removeItem(k));S={...S,token:null,user:null,ws:null};sv('vl');}
 
