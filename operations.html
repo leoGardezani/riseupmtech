@@ -2508,8 +2508,8 @@ const REPO_ASSETS = [
 ];
 let PENDING_ASSETS = [];
 let repoTypeFilter = '';
-function typeIcon(t){return {image:'🖼',video:'▶',html5:'⟨/⟩',audio:'♪'}[t]||'📄';}
-function typeLabel(t){return {image:'Imagem',video:'Vídeo',html5:'HTML5',audio:'Áudio'}[t]||t;}
+function typeIcon(t){return {image:'🖼',video:'▶',html5:'⟨/⟩',audio:'♪',text:'📝'}[t]||'📄';}
+function typeLabel(t){return {image:'Imagem',video:'Vídeo',html5:'HTML5',audio:'Áudio',text:'Texto'}[t]||t;}
 function setType(type,el){
   repoTypeFilter=type;
   document.querySelectorAll('.repo-type-pill').forEach(p=>p.classList.remove('on'));
@@ -2614,21 +2614,34 @@ async function loadPendingFromBackend(){
     // creative_type, creative_name, preview_url) pra forma que
     // renderPending()/approveAsset()/rejectAsset() já esperavam — id vira
     // o row_id (string, não numérico como no mock antigo).
-    PENDING_ASSETS = (data.pending || []).map(p => ({
-      id: p.row_id,
-      name: p.creative_name || p.row_id,
-      camp: p.campaign_name || '—',
-      plat: p.source || '—',
-      type: 'image',
-      date: '',
-      img: p.preview_url || '',
-      dims: '—',
-      size: '—',
-      fmt: '—',
-      tags: [p.source, p.creative_type].filter(Boolean),
-      submittedBy: 'Desdobrador',
-      submittedAt: '',
-    }));
+    // Corrigido — antes forçava type:'image' pra TODO item, mesmo texto
+    // (RSA, asset é .json) e vídeo (TikTok, asset é .mp4) — resultava em
+    // <img src="...json"> ou <img src="...mp4"> sempre quebrada. Deriva
+    // o tipo real: creative_type="text" → texto; source=tiktok (só cria
+    // vídeo, ver arquitetura) ou creative_type mencionando "video" →
+    // vídeo; resto → imagem.
+    PENDING_ASSETS = (data.pending || []).map(p => {
+      const ct = (p.creative_type || '').toLowerCase();
+      const src = (p.source || '').toLowerCase();
+      let type = 'image';
+      if(ct === 'text') type = 'text';
+      else if(src === 'tiktok' || ct.includes('video')) type = 'video';
+      return {
+        id: p.row_id,
+        name: p.creative_name || p.row_id,
+        camp: p.campaign_name || '—',
+        plat: p.source || '—',
+        type,
+        date: '',
+        img: p.preview_url || '',
+        dims: '—',
+        size: '—',
+        fmt: '—',
+        tags: [p.source, p.creative_type].filter(Boolean),
+        submittedBy: 'Desdobrador',
+        submittedAt: '',
+      };
+    });
   }catch(e){
     PENDING_ASSETS = [];
     if(grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--danger)">Não foi possível carregar a fila de aprovação — verifique login/conexão.</div>';
@@ -2656,12 +2669,27 @@ function renderPending(){
     div.style.outline = '2px solid #f59e0b';
     div.style.outlineOffset = '-2px';
     const imgStyle = a.type === 'audio' ? 'filter:grayscale(1);opacity:.5;' : '';
+    // Corrigido — antes sempre montava <img src="a.img">, mesmo pra
+    // vídeo (.mp4, não renderiza como imagem) e texto/RSA (.json, não é
+    // nem imagem nem vídeo) — ficava sempre quebrado. Agora ramifica por
+    // tipo real (ver loadPendingFromBackend): vídeo usa <video>, texto
+    // usa um placeholder que busca e mostra o headline/description de
+    // verdade (pendingLoadTextPreview, chamado depois do grid montado).
+    let thumbHtml;
+    if(a.type === 'video'){
+      thumbHtml = '<video class="repo-thumb" src="' + a.img + '" muted loop controls style="object-fit:cover" onerror="this.parentElement.style.background=\'var(--bg3)\'"></video>';
+    } else if(a.type === 'text'){
+      thumbHtml = '<div class="repo-thumb" id="pendingTextPreview_' + _escHtml(a.id) + '" style="display:flex;align-items:center;justify-content:center;padding:14px;text-align:left">'
+        + '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">Carregando prévia do RSA...</span></div>';
+    } else {
+      thumbHtml = '<img class="repo-thumb" src="' + a.img + '" alt="' + _escHtml(a.name) + '" loading="lazy" style="' + imgStyle + '" onerror="this.style.background=\'var(--bg3)\';this.src=\'\'">';
+    }
     div.innerHTML =
       '<div class="repo-thumb-wrap">'
       + '<label style="position:absolute;top:8px;left:8px;z-index:2;background:rgba(13,13,13,.6);padding:4px;display:flex;cursor:pointer">'
       + '<input type="checkbox" ' + (pendingSelectedIds.has(a.id) ? 'checked' : '') + ' onclick="event.stopPropagation();pendingToggleCardSelect(\'' + _escJsAttr(a.id) + '\',this.checked)">'
       + '</label>'
-      + '<img class="repo-thumb" src="' + a.img + '" alt="' + _escHtml(a.name) + '" loading="lazy" style="' + imgStyle + '" onerror="this.style.background=\'var(--bg3)\';this.src=\'\'">'
+      + thumbHtml
       + '<div class="type-tag">' + typeIcon(a.type) + ' ' + typeLabel(a.type) + '</div>'
       + '<div style="position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;padding:3px 8px;background:#f59e0b;color:#fff">⏳ Pendente</div>'
       + '</div>'
@@ -2674,9 +2702,37 @@ function renderPending(){
       + '<button onclick="rejectAsset(\'' + _escJsAttr(a.id) + '\', this)" style="flex:1;padding:8px;background:transparent;color:var(--danger);border:1px solid #fecaca;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">✕ Reprovar</button>'
       + '</div></div>';
     grid.appendChild(div);
+    if(a.type === 'text' && a.img) pendingLoadTextPreview(a.id, a.img);
   });
   pendingUpdateBulkButtons();
 }
+
+// Busca o JSON de verdade (headlines/descriptions) do asset de um RSA
+// pendente — preview_url é uma signed URL do GCS, funciona com fetch()
+// normal (sem authHeaders(), é assinada pelo backend pra acesso direto).
+// Mostra as 3 primeiras headlines + 2 primeiras descriptions como prévia
+// real do anúncio, em vez de tentar (e falhar) carregar isso como imagem.
+async function pendingLoadTextPreview(rowId, url){
+  const el = document.getElementById('pendingTextPreview_' + rowId);
+  if(!el) return;
+  try{
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const headlines = (data.headlines || []).slice(0, 3);
+    const descriptions = (data.descriptions || []).slice(0, 2);
+    if(!headlines.length && !descriptions.length) throw new Error('sem conteúdo');
+    el.style.display = 'block';
+    el.style.padding = '12px';
+    el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;line-height:1.5">'
+      + headlines.map(h => '<div style="font-weight:700;color:var(--ink)">' + _escHtml(h) + '</div>').join('')
+      + descriptions.map(d => '<div style="color:var(--ink-muted);margin-top:3px">' + _escHtml(d) + '</div>').join('')
+      + '</div>';
+  }catch(e){
+    el.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">RSA — prévia indisponível</span>';
+  }
+}
+
 // ── Seleção + ações em massa (novo nesta sessão, pedido do Leonardo) ──
 let pendingSelectedIds = new Set();
 
@@ -3872,25 +3928,32 @@ function desdRenderTextGroupHtml(key, g){
   const hOk = g.selectedHeadlines.length >= 3;
   const dOk = g.selectedDescriptions.length >= 2;
 
-  // Card clicável — igual ao padrão dos cards de imagem/vídeo (clique
-  // seleciona/deseleciona, borda + fundo destacam o estado). O clique no
-  // <input> não propaga pro card (senão editar o texto também
-  // selecionaria/deselecionaria sem querer).
+  // Card clicável — igual ao padrão dos cards de imagem/vídeo (clique em
+  // QUALQUER parte, inclusive o texto, seleciona/deseleciona; borda +
+  // fundo destacam o estado). O <input> fica readonly + pointer-events:
+  // none por padrão (clique nele "atravessa" pro card por trás, em vez
+  // de focar o campo) — pra editar o texto, clica no ✎, que destrava só
+  // aquele campo (desdEnableHeadlineEdit/desdEnableDescriptionEdit) e
+  // trava de novo ao sair do campo (onblur).
   const headlinesHtml = g.headlines.map(h => {
     const selected = g.selectedHeadlines.includes(h.index);
+    const id = `desdHL_${_escHtml(key)}_${h.index}`;
     return `<div onclick="desdToggleHeadline('${_escHtml(key)}', ${h.index})" style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:6px;border:1px solid ${selected ? 'var(--ink)' : 'var(--line)'};background:${selected ? 'var(--bg3)' : 'transparent'};cursor:pointer;border-radius:2px">
       <span style="font-size:14px;line-height:1">${selected ? '✓' : '○'}</span>
-      <input class="fi" style="font-size:11px;flex:1;border:none;background:transparent;padding:2px 0" value="${_escHtml(h.text)}" onclick="event.stopPropagation()" oninput="desdEditHeadlineText('${_escHtml(key)}', ${h.index}, this.value)">
+      <input class="fi" id="${id}" readonly style="font-size:11px;flex:1;border:none;background:transparent;padding:2px 0;pointer-events:none;cursor:pointer" value="${_escHtml(h.text)}" oninput="desdEditHeadlineText('${_escHtml(key)}', ${h.index}, this.value)" onblur="desdLockTextField('${id}')">
       <span id="desdHLCount_${_escHtml(key)}_${h.index}" style="font-family:var(--mono);font-size:9px;color:${h.text.length > g.headlineMaxChars ? 'var(--danger)' : 'var(--ink-muted)'};min-width:40px;text-align:right">${h.text.length}/${g.headlineMaxChars}</span>
+      <button onclick="event.stopPropagation();desdUnlockTextField('${id}')" title="Editar texto" style="border:none;background:none;cursor:pointer;color:var(--ink-muted);font-size:12px;padding:2px 4px;flex-shrink:0">✎</button>
     </div>`;
   }).join('');
 
   const descriptionsHtml = g.descriptions.map(d => {
     const selected = g.selectedDescriptions.includes(d.index);
+    const id = `desdDESC_${_escHtml(key)}_${d.index}`;
     return `<div onclick="desdToggleDescription('${_escHtml(key)}', ${d.index})" style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:6px;border:1px solid ${selected ? 'var(--ink)' : 'var(--line)'};background:${selected ? 'var(--bg3)' : 'transparent'};cursor:pointer;border-radius:2px">
       <span style="font-size:14px;line-height:1">${selected ? '✓' : '○'}</span>
-      <input class="fi" style="font-size:11px;flex:1;border:none;background:transparent;padding:2px 0" value="${_escHtml(d.text)}" onclick="event.stopPropagation()" oninput="desdEditDescriptionText('${_escHtml(key)}', ${d.index}, this.value)">
+      <input class="fi" id="${id}" readonly style="font-size:11px;flex:1;border:none;background:transparent;padding:2px 0;pointer-events:none;cursor:pointer" value="${_escHtml(d.text)}" oninput="desdEditDescriptionText('${_escHtml(key)}', ${d.index}, this.value)" onblur="desdLockTextField('${id}')">
       <span id="desdDESCCount_${_escHtml(key)}_${d.index}" style="font-family:var(--mono);font-size:9px;color:${d.text.length > g.descriptionMaxChars ? 'var(--danger)' : 'var(--ink-muted)'};min-width:40px;text-align:right">${d.text.length}/${g.descriptionMaxChars}</span>
+      <button onclick="event.stopPropagation();desdUnlockTextField('${id}')" title="Editar texto" style="border:none;background:none;cursor:pointer;color:var(--ink-muted);font-size:12px;padding:2px 4px;flex-shrink:0">✎</button>
     </div>`;
   }).join('');
 
@@ -3905,7 +3968,7 @@ function desdRenderTextGroupHtml(key, g){
     </div>
     <div style="padding:12px 20px 0">
       <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:10px;line-height:1.6">// mesma seleção vale pros ${g.rows.length} anúncio(s) deste grupo: ${rowNames}</div>
-      <div class="desd-step-lbl" style="margin-top:0;font-size:11px;color:${hOk ? 'var(--success)' : 'var(--danger)'}">Headlines — ${g.selectedHeadlines.length} selecionada(s) (mín. 3) <span style="font-weight:400;color:var(--ink-muted)">— clique pra marcar/desmarcar, edite o texto direto no campo</span></div>
+      <div class="desd-step-lbl" style="margin-top:0;font-size:11px;color:${hOk ? 'var(--success)' : 'var(--danger)'}">Headlines — ${g.selectedHeadlines.length} selecionada(s) (mín. 3) <span style="font-weight:400;color:var(--ink-muted)">— clique em qualquer parte do card pra marcar/desmarcar; clique no ✎ pra editar o texto</span></div>
       ${headlinesHtml}
       <div class="desd-step-lbl" style="font-size:11px;margin-top:14px;color:${dOk ? 'var(--success)' : 'var(--danger)'}">Descriptions — ${g.selectedDescriptions.length} selecionada(s) (mín. 2)</div>
       ${descriptionsHtml}
@@ -3916,6 +3979,28 @@ function desdRenderTextGroupHtml(key, g){
 // Edita o texto de um candidato (headline/description) — atualiza o
 // estado e o contador de caractere direto (sem re-render completo, pra
 // não perder o foco do campo enquanto digita).
+// Destrava/trava um campo de texto de candidato pra edição — por padrão
+// o input é readonly + pointer-events:none (clique "atravessa" pro card
+// por trás e conta como seleção); clicar no ✎ chama isso pra poder
+// digitar, e sair do campo (blur) trava de novo.
+function desdUnlockTextField(inputId){
+  const el = document.getElementById(inputId);
+  if(!el) return;
+  el.readOnly = false;
+  el.style.pointerEvents = 'auto';
+  el.style.cursor = 'text';
+  el.focus();
+  el.select();
+}
+
+function desdLockTextField(inputId){
+  const el = document.getElementById(inputId);
+  if(!el) return;
+  el.readOnly = true;
+  el.style.pointerEvents = 'none';
+  el.style.cursor = 'pointer';
+}
+
 function desdEditHeadlineText(groupKey, index, value){
   const g = desdState.groups[groupKey];
   if(!g) return;
