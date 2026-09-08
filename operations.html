@@ -640,6 +640,7 @@
     <div class="desd-layout">
       <!-- COLUNA ESQUERDA: KV + geração via IA -->
       <div class="desd-col">
+        <div id="desdKvStepWrap">
         <div class="desd-step-lbl">1. KV de origem</div>
         <div class="uz" id="desdDropzone" style="margin-bottom:16px" onclick="document.getElementById('desdFileInput').click()">
           <div class="uz-icon">🖼️</div>
@@ -650,16 +651,20 @@
         <div class="desd-canvas-wrap" id="desdKvPreviewWrap" style="display:none">
           <img id="desdKvPreviewImg" style="max-width:100%;max-height:220px;display:block;margin:0 auto">
         </div>
+        </div>
+        <div id="desdTextModeNote" style="display:none;padding:10px 12px;background:var(--bg3);border:1px solid var(--line);font-family:var(--mono);font-size:10px;color:var(--ink-muted);margin-bottom:16px;line-height:1.6">// linha(s) selecionada(s) são de Search (RSA) — anúncio de texto, sem peça visual. KV não é necessário, pulado.</div>
 
         <div class="desd-step-lbl">2. Peças a gerar</div>
         <div style="font-size:12px;color:var(--ink-mid);margin-bottom:10px;line-height:1.6">O formato de cada peça vem da própria linha de material-request — marque acima quais linhas da fila este KV vai atender. Linhas idênticas (mesma campanha+plataforma+meio+tipo, repetidas pela coluna <code>volume</code> do media-plan) formam um grupo e recebem uma variação DIFERENTE cada uma automaticamente.</div>
         <div id="desdSelectedRowsSummary" style="margin-bottom:8px"></div>
         <div id="desdGroupsSummary" style="margin-bottom:8px"></div>
 
+        <div id="desdDurationWrap">
         <div class="desd-step-lbl">Duração do vídeo <span style="font-weight:400;color:var(--ink-muted);font-size:11px">(só linhas TikTok — TikTok não aceita mais imagem estática)</span></div>
         <div style="display:flex;gap:16px;margin-bottom:10px;font-size:12px">
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="desdDuration" value="6" checked onchange="desdState.durationSeconds=6"> 6s</label>
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="desdDuration" value="15" onchange="desdState.durationSeconds=15"> 15s <span style="color:var(--ink-muted);font-size:10px">(não testado ainda contra a API real)</span></label>
+        </div>
         </div>
 
         <div class="desd-step-lbl">3. Gerar variações com IA</div>
@@ -3314,7 +3319,20 @@ function desdComputeGroups(){
     key,
     rows: byKey[key],
     isTikTok: (byKey[key][0].source || '').trim().toLowerCase() === 'tiktok',
+    // Novo (Search/RSA): creative_type="text" vem do material-request
+    // (medium="search") — mesmo campo que já compõe a chave de
+    // agrupamento (desdGroupKey), então linhas de texto já formam grupo
+    // próprio, nunca misturado com imagem/vídeo.
+    isText: (byKey[key][0].creative_type || '').trim().toLowerCase() === 'text',
   }));
+}
+
+// Novo (Search/RSA) — true quando TODOS os grupos da seleção atual são de
+// texto. Usado pra pular a exigência de KV (imagem) inteiramente: RSA não
+// tem peça visual nenhuma, só headline/description.
+function desdIsAllTextSelected(){
+  const groups = desdComputeGroups();
+  return groups.length > 0 && groups.every(g => g.isText);
 }
 
 function desdParseSize(sizeStr){
@@ -3417,6 +3435,7 @@ function desdToggleSelectAll(checked){
   desdRenderCtaCharHint();
   desdRenderAiVariantGrid();
   desdUpdateSubmitButtonState();
+  desdUpdateKvStepVisibility();
 }
 
 function desdToggleQueueRow(rowId){
@@ -3438,6 +3457,7 @@ function desdToggleQueueRow(rowId){
   desdRenderCtaCharHint();
   desdRenderAiVariantGrid();
   desdUpdateSubmitButtonState();
+  desdUpdateKvStepVisibility();
 }
 
 // Novo nesta sessão (pedido do Leonardo) — mostra o limite de caracteres
@@ -3458,6 +3478,18 @@ function desdRenderCtaCharHint(){
   const cur = (document.getElementById('desdCtaText').value || '').length;
   el.textContent = `${cur} / ${maxChar} caracteres (limite da linha "${first.campaign_name}")`;
   el.style.color = cur > maxChar ? 'var(--danger)' : 'var(--ink-muted)';
+}
+
+// Novo (Search/RSA) — esconde o passo de KV + seletor de duração de vídeo
+// quando a seleção atual é só de linhas de texto (RSA não tem peça visual).
+function desdUpdateKvStepVisibility(){
+  const allText = desdIsAllTextSelected();
+  const kvWrap = document.getElementById('desdKvStepWrap');
+  const note = document.getElementById('desdTextModeNote');
+  const durWrap = document.getElementById('desdDurationWrap');
+  if(kvWrap) kvWrap.style.display = allText ? 'none' : '';
+  if(note) note.style.display = allText ? '' : 'none';
+  if(durWrap) durWrap.style.display = allText ? 'none' : '';
 }
 
 function desdRenderSelectedSummary(){
@@ -3555,9 +3587,12 @@ function desdDrawCtaBarOnCanvas(ctx, w, h, text, color){
 async function desdGenerateAiVariants(){
   const statusEl = document.getElementById('desdAiStatus');
   const btn = document.getElementById('desdGenerateBtn');
-  if(!desdState.blobPath){ toast('Envie um KV antes de gerar variações', 'er'); return; }
   const groups = desdComputeGroups();
   if(!groups.length){ toast('Marque ao menos uma linha da fila (define o(s) formato(s) da pré-visualização)', 'er'); return; }
+  // KV só é exigido se pelo menos um grupo selecionado NÃO for de texto —
+  // RSA (Search) não tem peça visual nenhuma, só headline/description.
+  const needsKv = groups.some(g => !g.isText);
+  if(needsKv && !desdState.blobPath){ toast('Envie um KV antes de gerar variações', 'er'); return; }
 
   const promptText = document.getElementById('desdPromptText').value || '';
   if(btn){ btn.disabled = true; btn.textContent = 'Gerando (pode levar 1-2 min por grupo)...'; }
@@ -3569,14 +3604,17 @@ async function desdGenerateAiVariants(){
   let failMsgs = [];
 
   for(const group of groups){
-    if(statusEl) statusEl.innerHTML = `<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Grupo "${_escHtml(group.rows[0].campaign_name)}" (${group.rows.length} linha(s)${group.isTikTok ? ', vídeo TikTok' : ''}) — chamando a IA...</div>`;
+    if(statusEl) statusEl.innerHTML = `<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Grupo "${_escHtml(group.rows[0].campaign_name)}" (${group.rows.length} linha(s)${group.isTikTok ? ', vídeo TikTok' : ''}${group.isText ? ', texto/RSA' : ''}) — chamando a IA...</div>`;
     try{
       const body = {
-        blob_path: desdState.blobPath,
         row_ids: group.rows.map(r => r.row_id),
         workspace_id: desdWorkspaceId,
         brand_instructions: promptText,
       };
+      // blob_path só faz sentido pra grupo com peça visual — grupo de
+      // texto não manda esse campo (backend não precisa dele pra gerar
+      // headline/description).
+      if(!group.isText) body.blob_path = desdState.blobPath;
       if(group.isTikTok) body.duration_seconds = desdState.durationSeconds || 6;
 
       const res = await fetch(API_BASE + '/desdobrador/ai-preview', {
@@ -3586,6 +3624,48 @@ async function desdGenerateAiVariants(){
       });
       const data = await res.json().catch(() => ({}));
       if(!res.ok) throw new Error(data.detail || 'backend recusou a geração');
+
+      if(group.isText || data.kind === 'text'){
+        // ── Fluxo RSA/texto — NÃO TESTADO ainda contra a API real nesta
+        // sessão: assume que /ai-preview devolve {kind:"text",
+        // headlines:[...], descriptions:[...], headline_max_chars,
+        // description_max_chars} — cada item de headlines/descriptions
+        // pode vir como string solta OU {text:"..."}, tratado defensivo
+        // abaixo. Se o formato real vier diferente, ajustar aqui depois
+        // do primeiro teste ao vivo.
+        const toText = x => (typeof x === 'string' ? x : (x && x.text) || '');
+        const headlines = (data.headlines || []).map((h, i) => ({ index: i, text: toText(h) }));
+        const descriptions = (data.descriptions || []).map((d, i) => ({ index: i, text: toText(d) }));
+        const headlineMaxChars = data.headline_max_chars || 30;
+        const descriptionMaxChars = data.description_max_chars || 90;
+
+        // Auto-seleção inicial: primeiras 3 headlines / 2 descriptions
+        // (mínimo exigido pelo RSA) pra cada linha (=cada anúncio RSA
+        // distinto do grupo) — usuário ajusta manualmente depois.
+        const assignments = {};
+        group.rows.forEach(row => {
+          assignments[row.row_id] = {
+            headlines: headlines.slice(0, Math.min(3, headlines.length)).map(h => h.index),
+            descriptions: descriptions.slice(0, Math.min(2, descriptions.length)).map(d => d.index),
+          };
+        });
+
+        desdState.groups[group.key] = {
+          rows: group.rows,
+          isTikTok: false,
+          isText: true,
+          kind: 'text',
+          headlines,
+          descriptions,
+          headlineMaxChars,
+          descriptionMaxChars,
+          assignments,
+        };
+        if(headlines.length >= 3 && descriptions.length >= 2) okGroups++;
+        else failMsgs.push(`"${group.rows[0].campaign_name}": a IA gerou candidatos insuficientes (mínimo 3 headlines / 2 descriptions)`);
+        desdRenderAiVariantGrid();
+        continue;
+      }
 
       const variants = data.variants || [];
       // Auto-atribuição sequencial: variação i vai pra linha i do grupo,
@@ -3610,7 +3690,9 @@ async function desdGenerateAiVariants(){
       else failMsgs.push(`"${group.rows[0].campaign_name}": nenhuma variação gerou com sucesso`);
     }catch(e){
       failMsgs.push(`"${group.rows[0].campaign_name}": ${e.message || 'falha ao gerar'}`);
-      desdState.groups[group.key] = { rows: group.rows, isTikTok: group.isTikTok, kind: group.isTikTok ? 'video' : 'image', variants: [], assignments: {} };
+      desdState.groups[group.key] = group.isText
+        ? { rows: group.rows, isTikTok: false, isText: true, kind: 'text', headlines: [], descriptions: [], headlineMaxChars: 30, descriptionMaxChars: 90, assignments: {} }
+        : { rows: group.rows, isTikTok: group.isTikTok, kind: group.isTikTok ? 'video' : 'image', variants: [], assignments: {} };
     }
     desdRenderAiVariantGrid();
   }
@@ -3637,6 +3719,7 @@ function desdRenderAiVariantGrid(){
 
   container.innerHTML = keys.map(key => {
     const g = desdState.groups[key];
+    if(g.kind === 'text') return desdRenderTextGroupHtml(key, g);
     const isVideo = g.kind === 'video';
     const cardsHtml = g.variants.map(v => {
       if(!v.data_base64){
@@ -3687,10 +3770,11 @@ function desdRenderAiVariantGrid(){
 
   // Desenha as variações de IMAGEM nos canvas (com overlay de CTA só pra
   // preview local — o CTA real é desenhado no backend, no /submit). Vídeo
-  // já tocou direto via <video src="data:...">, não precisa de canvas.
+  // já tocou direto via <video src="data:...">, e texto/RSA não tem
+  // canvas nenhum — nenhum dos dois precisa desse loop.
   keys.forEach(key => {
     const g = desdState.groups[key];
-    if(g.kind === 'video') return;
+    if(g.kind === 'video' || g.kind === 'text') return;
     g.variants.forEach(v => {
       if(!v.data_base64) return;
       const canvas = document.getElementById(`desdAiVariant_${key}_${v.index}`);
@@ -3706,6 +3790,126 @@ function desdRenderAiVariantGrid(){
       img.src = 'data:image/png;base64,' + v.data_base64;
     });
   });
+}
+
+// ── Grupo de texto (Search/RSA) — NÃO TESTADO ainda contra a API real
+// nesta sessão. Renderiza: (1) os candidatos de headline/description
+// gerados pela IA, editáveis com contador de caractere; (2) por linha
+// (=cada anúncio RSA distinto do grupo), checkboxes pra escolher quais
+// desses candidatos entram naquele anúncio específico (mínimo 3
+// headlines / 2 descriptions, regra real do RSA). ──
+function desdRenderTextGroupHtml(key, g){
+  const headlinesHtml = g.headlines.map(h => `
+    <div style="display:flex;align-items:center;gap:8px;padding:4px 0">
+      <input class="fi" style="font-size:11px;flex:1" value="${_escHtml(h.text)}" oninput="desdEditHeadlineText('${_escHtml(key)}', ${h.index}, this.value)">
+      <span id="desdHLCount_${_escHtml(key)}_${h.index}" style="font-family:var(--mono);font-size:9px;color:${h.text.length > g.headlineMaxChars ? 'var(--danger)' : 'var(--ink-muted)'};min-width:48px;text-align:right">${h.text.length}/${g.headlineMaxChars}</span>
+    </div>`).join('');
+
+  const descriptionsHtml = g.descriptions.map(d => `
+    <div style="display:flex;align-items:center;gap:8px;padding:4px 0">
+      <input class="fi" style="font-size:11px;flex:1" value="${_escHtml(d.text)}" oninput="desdEditDescriptionText('${_escHtml(key)}', ${d.index}, this.value)">
+      <span id="desdDESCCount_${_escHtml(key)}_${d.index}" style="font-family:var(--mono);font-size:9px;color:${d.text.length > g.descriptionMaxChars ? 'var(--danger)' : 'var(--ink-muted)'};min-width:48px;text-align:right">${d.text.length}/${g.descriptionMaxChars}</span>
+    </div>`).join('');
+
+  const rowsHtml = g.rows.map(row => {
+    const assign = g.assignments[row.row_id] || { headlines: [], descriptions: [] };
+    const hCount = assign.headlines.length;
+    const dCount = assign.descriptions.length;
+    const hOk = hCount >= 3, dOk = dCount >= 2;
+    const hChecks = g.headlines.map(h => `
+      <label style="display:flex;align-items:center;gap:6px;font-size:10px;padding:2px 0;cursor:pointer">
+        <input type="checkbox" ${assign.headlines.includes(h.index) ? 'checked' : ''} onchange="desdToggleHeadlineForRow('${_escHtml(key)}','${row.row_id}',${h.index},this.checked)">
+        <span style="font-family:var(--mono)">${_escHtml(h.text) || '(vazio)'}</span>
+      </label>`).join('');
+    const dChecks = g.descriptions.map(d => `
+      <label style="display:flex;align-items:center;gap:6px;font-size:10px;padding:2px 0;cursor:pointer">
+        <input type="checkbox" ${assign.descriptions.includes(d.index) ? 'checked' : ''} onchange="desdToggleDescriptionForRow('${_escHtml(key)}','${row.row_id}',${d.index},this.checked)">
+        <span style="font-family:var(--mono)">${_escHtml(d.text) || '(vazio)'}</span>
+      </label>`).join('');
+
+    return `<div style="padding:10px 0;border-top:1px solid var(--line)">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mid);margin-bottom:6px">${_escHtml(row.campaign_name)} — anúncio RSA</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div style="font-size:9px;font-family:var(--mono);color:${hOk ? 'var(--success)' : 'var(--danger)'};margin-bottom:4px">Headlines: ${hCount} selecionada(s) (mín. 3)</div>
+          ${hChecks}
+        </div>
+        <div>
+          <div style="font-size:9px;font-family:var(--mono);color:${dOk ? 'var(--success)' : 'var(--danger)'};margin-bottom:4px">Descriptions: ${dCount} selecionada(s) (mín. 2)</div>
+          ${dChecks}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="tbox" style="margin-bottom:16px">
+    <div class="tbox-head">
+      <div class="tbox-title">${_escHtml(g.rows[0].campaign_name)} · ${_escHtml(g.rows[0].source)} · texto/RSA · ${g.rows.length} anúncio(s)</div>
+    </div>
+    <div style="padding:12px 20px 0">
+      <div class="desd-step-lbl" style="margin-top:0;font-size:11px">Candidatos de headline <span style="font-weight:400;color:var(--ink-muted)">(edite o texto se quiser antes de escolher abaixo)</span></div>
+      ${headlinesHtml}
+      <div class="desd-step-lbl" style="font-size:11px;margin-top:14px">Candidatos de description</div>
+      ${descriptionsHtml}
+    </div>
+    <div style="padding:4px 20px 14px">${rowsHtml}</div>
+  </div>`;
+}
+
+// Edita o texto de um candidato (headline/description) — atualiza o
+// estado e o contador de caractere direto (sem re-render completo, pra
+// não perder o foco do campo enquanto digita).
+function desdEditHeadlineText(groupKey, index, value){
+  const g = desdState.groups[groupKey];
+  if(!g) return;
+  const h = g.headlines.find(x => x.index === index);
+  if(!h) return;
+  h.text = value;
+  const countEl = document.getElementById(`desdHLCount_${groupKey}_${index}`);
+  if(countEl){
+    countEl.textContent = `${value.length}/${g.headlineMaxChars}`;
+    countEl.style.color = value.length > g.headlineMaxChars ? 'var(--danger)' : 'var(--ink-muted)';
+  }
+}
+
+function desdEditDescriptionText(groupKey, index, value){
+  const g = desdState.groups[groupKey];
+  if(!g) return;
+  const d = g.descriptions.find(x => x.index === index);
+  if(!d) return;
+  d.text = value;
+  const countEl = document.getElementById(`desdDESCCount_${groupKey}_${index}`);
+  if(countEl){
+    countEl.textContent = `${value.length}/${g.descriptionMaxChars}`;
+    countEl.style.color = value.length > g.descriptionMaxChars ? 'var(--danger)' : 'var(--ink-muted)';
+  }
+}
+
+// Marca/desmarca um candidato de headline/description pra uma linha
+// (=anúncio RSA) específica dentro do grupo. Re-renderiza tudo (troca de
+// checkbox não perde foco de digitação, diferente do input de texto).
+function desdToggleHeadlineForRow(groupKey, rowId, index, checked){
+  const g = desdState.groups[groupKey];
+  if(!g) return;
+  if(!g.assignments[rowId]) g.assignments[rowId] = { headlines: [], descriptions: [] };
+  const arr = g.assignments[rowId].headlines;
+  const pos = arr.indexOf(index);
+  if(checked && pos === -1) arr.push(index);
+  if(!checked && pos !== -1) arr.splice(pos, 1);
+  desdRenderAiVariantGrid();
+  desdUpdateSubmitButtonState();
+}
+
+function desdToggleDescriptionForRow(groupKey, rowId, index, checked){
+  const g = desdState.groups[groupKey];
+  if(!g) return;
+  if(!g.assignments[rowId]) g.assignments[rowId] = { headlines: [], descriptions: [] };
+  const arr = g.assignments[rowId].descriptions;
+  const pos = arr.indexOf(index);
+  if(checked && pos === -1) arr.push(index);
+  if(!checked && pos !== -1) arr.splice(pos, 1);
+  desdRenderAiVariantGrid();
+  desdUpdateSubmitButtonState();
 }
 
 // Troca manualmente qual variação está atribuída a uma linha específica
@@ -3796,9 +4000,17 @@ function desdUpdateSubmitButtonState(){
   const hasName = nameEl && nameEl.value.trim().length > 0;
   const keys = Object.keys(desdState.groups);
   // Só habilita quando TODA linha selecionada (em TODOS os grupos) já
-  // tem uma variação atribuída — evita enviar submit parcial sem perceber.
+  // tem uma variação atribuída (imagem/vídeo) ou já bate o mínimo de
+  // seleção do RSA — 3 headlines/2 descriptions (texto) — evita enviar
+  // submit parcial sem perceber.
   const allAssigned = keys.length > 0 && keys.every(key => {
     const g = desdState.groups[key];
+    if(g.kind === 'text'){
+      return g.rows.every(row => {
+        const a = g.assignments[row.row_id];
+        return a && a.headlines.length >= 3 && a.descriptions.length >= 2;
+      });
+    }
     return g.rows.every(row => g.assignments[row.row_id] !== undefined);
   });
   btn.disabled = !allAssigned || !desdState.selectedRowIds.size || !hasName;
@@ -3814,12 +4026,28 @@ async function desdSubmit(){
   if(!keys.length){ toast('Você precisa gerar as peças com IA antes de enviar para aprovação', 'er'); return; }
 
   const aiVariants = [];
+  // NÃO TESTADO ainda contra a API real nesta sessão — nome de campo
+  // (text_ad_variants) e formato ({row_id, headlines, descriptions}) são
+  // a melhor aposta combinada com o Leonardo, baseada no plano dos dois
+  // endpoints (/ai-preview e /submit) que ele descreveu; ajustar aqui se
+  // o backend esperar outra coisa no primeiro teste ao vivo.
+  const textAdVariants = [];
   const rowIds = [];
   let missing = false;
   keys.forEach(key => {
     const g = desdState.groups[key];
     g.rows.forEach(row => {
       rowIds.push(row.row_id);
+      if(g.kind === 'text'){
+        const a = g.assignments[row.row_id];
+        if(!a || a.headlines.length < 3 || a.descriptions.length < 2){ missing = true; return; }
+        textAdVariants.push({
+          row_id: row.row_id,
+          headlines: a.headlines.map(i => (g.headlines.find(h => h.index === i) || {}).text || ''),
+          descriptions: a.descriptions.map(i => (g.descriptions.find(d => d.index === i) || {}).text || ''),
+        });
+        return;
+      }
       const idx = g.assignments[row.row_id];
       if(idx === undefined){ missing = true; return; }
       const v = g.variants.find(x => x.index === idx);
@@ -3827,7 +4055,7 @@ async function desdSubmit(){
       aiVariants.push({ row_id: row.row_id, data_base64: v.data_base64, content_type: v.content_type || (g.kind === 'video' ? 'video/mp4' : 'image/png') });
     });
   });
-  if(missing){ toast('Alguma linha ainda está sem variação atribuída — escolha uma pra cada linha antes de enviar', 'er'); return; }
+  if(missing){ toast('Alguma linha ainda está sem variação/seleção completa — confira cada linha antes de enviar', 'er'); return; }
 
   const creativeName = (document.getElementById('desdCreativeName').value || '').trim();
   if(!creativeName){ toast('Informe um nome pro criativo antes de enviar', 'er'); return; }
@@ -3840,11 +4068,16 @@ async function desdSubmit(){
       method: 'POST',
       headers: Object.assign({'Content-Type': 'application/json'}, authHeaders()),
       body: JSON.stringify({
+        // blob_path fica null quando o envio é só de anúncios de texto
+        // (RSA nunca teve KV) — backend deve tratar null como "sem peça
+        // visual neste submit", só o array de ai_variants já deixa isso
+        // implícito por linha também.
         blob_path: desdState.blobPath,
         row_ids: rowIds,
         workspace_id: desdWorkspaceId,
         creative_name: creativeName,
         ai_variants: aiVariants,
+        text_ad_variants: textAdVariants,
         ai_cta_text: desdState.ctaText || '',
         ai_cta_color: desdState.ctaColor || '#0d0d0d',
       }),
@@ -3857,6 +4090,7 @@ async function desdSubmit(){
     document.getElementById('desdCreativeName').value = '';
     await desdLoadQueue();
     desdRenderAiVariantGrid();
+    desdUpdateKvStepVisibility();
   }catch(e){
     toast('✕ ' + (e.message || 'Falha ao enviar pra aprovação'), 'er');
   }
@@ -3879,6 +4113,7 @@ window.addEventListener('load',()=>{
   renderAudCards();
   desdRenderSelectedSummary();
   desdUpdateSubmitButtonState();
+  desdUpdateKvStepVisibility();
   desdSetupDropzone();
   upfSetupDropzone();
   // small timeout ensures DOM is painted before Chart.js measures canvas
