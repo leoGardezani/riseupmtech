@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NG9TFZ74');</script>
+<!-- End Google Tag Manager -->
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Política de Privacidade — Rise Up MTech</title>
@@ -46,6 +54,11 @@
 </style>
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
 
 <nav>
   <div class="nav-inner">
@@ -57,69 +70,94 @@
 <div class="wrap">
   <div class="page-tag">// プライバシーポリシー</div>
   <h1>Política de Privacidade</h1>
-  <div class="updated">Última atualização: 31 de março de 2026</div>
+  <div class="updated">Última atualização: 08 de setembro de 2026</div>
 
-  <p>A Rise Up MTech ("nós", "nosso" ou "empresa") está comprometida com a proteção da sua privacidade. Esta Política de Privacidade descreve como coletamos, usamos e protegemos suas informações ao usar nossos produtos e serviços, incluindo o <strong>Rise Up MTech ETL</strong> (Google Workspace Add-on) e o site <strong>riseupmtech.com</strong>.</p>
+  <p>A Rise Up MTech ("nós", "nosso" ou "empresa") está comprometida com a proteção da sua privacidade. Esta Política de Privacidade descreve como coletamos, usamos e protegemos suas informações ao usar nossos produtos e serviços, incluindo o <strong>Rise Up MTech ETL</strong> (Google Workspace Add-on), a <strong>Plataforma Rise Up MTech</strong> (aplicação web de automação de campanhas publicitárias, acessada por login) e o site <strong>riseupmtech.com</strong>.</p>
 
   <div class="highlight">
-    Esta política se aplica especificamente ao uso do add-on <strong>Rise Up MTech ETL</strong>, que integra dados de plataformas de mídia ao Google Sheets mediante autorização explícita do usuário.
+    Esta política cobre dois produtos distintos, com tratamentos de dados diferentes: (1) o add-on <strong>Rise Up MTech ETL</strong>, que integra dados de plataformas de mídia ao Google Sheets mediante autorização explícita do usuário; e (2) a <strong>Plataforma Rise Up MTech</strong>, aplicação web onde agências criam e gerenciam campanhas publicitárias com o apoio de inteligência artificial. Onde o tratamento difere entre os dois, isso é indicado explicitamente abaixo.
   </div>
 
   <h2>1. Informações que coletamos</h2>
-  <p>Ao usar o Rise Up MTech ETL, podemos coletar as seguintes informações:</p>
+  <p><strong>No Rise Up MTech ETL (add-on):</strong></p>
   <ul>
     <li><strong>Endereço de e-mail</strong> — para identificação do usuário e gerenciamento de licenças</li>
     <li><strong>Tokens de acesso às plataformas de mídia</strong> — armazenados localmente no Google Apps Script Properties Service (criptografado pelo Google), nunca transmitidos a servidores da Rise Up MTech sem necessidade</li>
     <li><strong>Dados de uso</strong> — número de extrações realizadas, plataformas utilizadas e período consultado, usados exclusivamente para gerenciamento de licenças e melhoria do produto</li>
     <li><strong>Dados de mídia extraídos</strong> — métricas das suas campanhas publicitárias. Esses dados são escritos diretamente na sua planilha Google Sheets e <strong>não são armazenados em servidores da Rise Up MTech</strong></li>
   </ul>
+  <p><strong>Na Plataforma Rise Up MTech (aplicação web):</strong></p>
+  <ul>
+    <li><strong>Dados de conta e autenticação</strong> — nome, e-mail e foto de perfil obtidos via login social (Google OAuth)</li>
+    <li><strong>Dados de workspace e campanha</strong> — nomes de campanha, público-alvo, orçamento, segmentações geográficas e demográficas, palavras-chave, e demais parâmetros que você insere pra criar e gerenciar campanhas publicitárias</li>
+    <li><strong>Criativos publicitários</strong> — imagens, vídeos e textos que você envia (KVs de origem) ou que são gerados com apoio de inteligência artificial a partir do que você envia (ver seção 2 sobre uso de IA)</li>
+    <li><strong>Tokens de acesso a plataformas de anúncio</strong> — Google Ads, Meta Ads e TikTok Ads, obtidos via OAuth ou fornecidos por você, usados pelo backend pra criar e gerenciar campanhas em seu nome</li>
+    <li><strong>Métricas de uso do produto</strong> — páginas/abas acessadas dentro da plataforma, coletadas de forma agregada via Google Analytics (GA4) — ver seção 8</li>
+  </ul>
 
-  <h2>2. Como usamos suas informações</h2>
+  <h2>2. Uso de Inteligência Artificial</h2>
+  <p>A Plataforma Rise Up MTech usa a API Gemini (Google) para gerar sugestões de conteúdo publicitário a partir dos dados que você fornece:</p>
+  <ul>
+    <li><strong>Geração de criativos</strong> — a partir de uma imagem de referência (KV) e instruções de texto que você fornece, a IA gera variações de imagem/vídeo em diferentes formatos, e headlines/descriptions para anúncios de texto (Google Ads Search)</li>
+    <li><strong>Sugestão de públicos-alvo</strong> — a IA sugere segmentações de público (interesses, palavras-chave, dados demográficos) com base no briefing da campanha</li>
+  </ul>
+  <p>O conteúdo enviado a essas gerações (imagens de referência, instruções, briefing de campanha) é processado pela API Gemini do Google exclusivamente para gerar a resposta solicitada. Todo conteúdo gerado por IA é <strong>uma sugestão</strong> — passa por uma etapa de revisão e aprovação humana antes de ser publicado em qualquer plataforma de anúncio (Google Ads, Meta Ads, TikTok Ads).</p>
+
+  <h2>3. Como usamos suas informações</h2>
   <p>Usamos suas informações exclusivamente para:</p>
   <ul>
     <li>Autenticar sua identidade e verificar sua licença ativa</li>
-    <li>Executar as extrações de dados das plataformas autorizadas por você</li>
-    <li>Escrever os dados extraídos na sua planilha Google Sheets</li>
+    <li>Executar as extrações de dados das plataformas autorizadas por você (add-on) e a criação/gestão de campanhas em seu nome (Plataforma)</li>
+    <li>Escrever os dados extraídos na sua planilha Google Sheets (add-on)</li>
+    <li>Gerar sugestões de criativos e públicos-alvo via IA, mediante sua solicitação (Plataforma)</li>
     <li>Enviar comunicações relacionadas ao serviço (renovação de licença, atualizações)</li>
+    <li>Entender como a Plataforma é usada, de forma agregada, pra melhorar o produto (GA4 — ver seção 9)</li>
     <li>Melhorar a qualidade e confiabilidade do produto</li>
   </ul>
   <p><strong>Não vendemos, alugamos ou compartilhamos suas informações pessoais com terceiros para fins de marketing.</strong></p>
 
-  <h2>3. Acesso a dados de terceiros</h2>
-  <p>O Rise Up MTech ETL solicita acesso às APIs das seguintes plataformas mediante autorização explícita do usuário:</p>
+  <h2>4. Acesso a dados de terceiros</h2>
+  <p>Solicitamos acesso às APIs das seguintes plataformas mediante autorização explícita do usuário:</p>
   <ul>
     <li>Google Ads (<code>https://www.googleapis.com/auth/adwords</code>)</li>
     <li>YouTube Analytics (<code>https://www.googleapis.com/auth/youtube.readonly</code>)</li>
     <li>Google Analytics / GA4 (<code>https://www.googleapis.com/auth/analytics.readonly</code>)</li>
-    <li>Google Sheets (<code>https://www.googleapis.com/auth/spreadsheets</code>)</li>
-    <li>Meta Ads API — mediante token fornecido pelo usuário</li>
+    <li>Google Sheets e Google Drive (<code>https://www.googleapis.com/auth/spreadsheets</code>, <code>drive.readonly</code>, <code>drive.file</code>)</li>
+    <li>Meta Ads API — mediante token fornecido pelo usuário ou OAuth</li>
     <li>TikTok Ads API — mediante token fornecido pelo usuário</li>
     <li>LinkedIn Ads API — mediante token fornecido pelo usuário</li>
     <li>Pinterest Ads API — mediante token fornecido pelo usuário</li>
   </ul>
-  <p>O acesso é utilizado exclusivamente para leitura de dados de desempenho de campanhas e escrita na planilha do usuário. Não realizamos nenhuma operação de criação, modificação ou exclusão de campanhas nas plataformas.</p>
+  <p>No add-on, o acesso é utilizado exclusivamente para leitura de dados de desempenho de campanhas e escrita na planilha do usuário — nenhuma operação de criação, modificação ou exclusão de campanhas é feita pelo add-on. Na Plataforma, esse acesso é utilizado pra criar, configurar e gerenciar campanhas publicitárias diretamente nas plataformas listadas, sempre a partir de uma ação explícita sua.</p>
 
   <div class="highlight">
-    <strong>Uso limitado:</strong> O uso de dados obtidos via APIs do Google se restringe ao propósito declarado do add-on (extração de métricas para Google Sheets) e está em conformidade com a <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank">Política de Dados do Usuário dos Serviços de API do Google</a>, incluindo os requisitos de Uso Limitado.
+    <strong>Uso limitado:</strong> O uso de dados obtidos via APIs do Google se restringe ao propósito declarado de cada produto e está em conformidade com a <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank">Política de Dados do Usuário dos Serviços de API do Google</a>, incluindo os requisitos de Uso Limitado.
   </div>
 
-  <h2>4. Armazenamento e segurança</h2>
+  <h2>5. Armazenamento e segurança</h2>
+  <p><strong>Add-on:</strong></p>
   <ul>
-    <li>Tokens de acesso a plataformas de terceiros (Meta, TikTok, LinkedIn, Pinterest) são armazenados no <strong>Google Apps Script Properties Service</strong>, que é criptografado e gerenciado pelo Google</li>
-    <li>Dados de verificação de licença são transmitidos via HTTPS ao backend da Rise Up MTech hospedado no Google Cloud Run (região southamerica-east1)</li>
+    <li>Tokens de acesso a plataformas de terceiros (Meta, TikTok, LinkedIn, Pinterest) são armazenados no <strong>Google Apps Script Properties Service</strong>, criptografado e gerenciado pelo Google</li>
     <li>Dados de campanhas extraídos são escritos diretamente na planilha do usuário e não passam por servidores da Rise Up MTech</li>
-    <li>Não armazenamos dados de campanhas em nossos servidores</li>
+  </ul>
+  <p><strong>Plataforma:</strong></p>
+  <ul>
+    <li>Backend hospedado no <strong>Google Cloud Run</strong> (região southamerica-east1), acessado via HTTPS</li>
+    <li>Dados de workspace/campanha/audiência são armazenados no <strong>Firestore</strong> e no <strong>BigQuery</strong> (ambos Google Cloud, região southamerica-east1), segmentados por cliente</li>
+    <li>Criativos (imagens, vídeos) são armazenados no <strong>Google Cloud Storage</strong>, com acesso controlado por URLs assinadas de tempo limitado</li>
+    <li>Tokens de acesso a plataformas de anúncio são armazenados de forma segura no backend (Google Secret Manager / Firestore), nunca expostos no frontend</li>
   </ul>
 
-  <h2>5. Retenção de dados</h2>
+  <h2>6. Retenção de dados</h2>
   <p>Mantemos apenas os dados necessários para o funcionamento do serviço:</p>
   <ul>
-    <li>E-mail e status de licença: pelo período da assinatura + 90 dias</li>
+    <li>E-mail e status de licença/conta: pelo período da assinatura + 90 dias</li>
     <li>Logs de uso: até 12 meses</li>
-    <li>Tokens de plataformas: armazenados localmente pelo usuário e removidos ao desinstalar o add-on ou revogar o acesso</li>
+    <li>Dados de campanha, criativos e públicos-alvo (Plataforma): mantidos enquanto o workspace estiver ativo, e por até 90 dias após o cancelamento, salvo obrigação legal de retenção maior</li>
+    <li>Tokens de plataformas: armazenados enquanto a conexão estiver ativa e removidos ao desconectar (add-on: ao desinstalar ou revogar acesso; Plataforma: na aba Conexões)</li>
   </ul>
 
-  <h2>6. Seus direitos (LGPD)</h2>
+  <h2>7. Seus direitos (LGPD)</h2>
   <p>Em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você tem direito a:</p>
   <ul>
     <li>Confirmar a existência de tratamento de seus dados pessoais</li>
@@ -131,20 +169,21 @@
   </ul>
   <p>Para exercer esses direitos, entre em contato: <a href="mailto:privacidade@riseupmtech.com">privacidade@riseupmtech.com</a></p>
 
-  <h2>7. Revogação de acesso</h2>
-  <p>Você pode revogar o acesso do add-on a qualquer momento:</p>
+  <h2>8. Revogação de acesso</h2>
+  <p>Você pode revogar o acesso a qualquer momento:</p>
   <ul>
-    <li>Para dados Google: acesse <a href="https://myaccount.google.com/permissions" target="_blank">myaccount.google.com/permissions</a> e remova "Rise Up MTech ETL"</li>
-    <li>Para tokens de plataformas (Meta, TikTok, etc.): desinstale o add-on ou remova os tokens na aba Conexões</li>
+    <li>Para dados Google: acesse <a href="https://myaccount.google.com/permissions" target="_blank">myaccount.google.com/permissions</a> e remova "Rise Up MTech ETL" ou "Rise Up MTech"</li>
+    <li>Para tokens de plataformas (Meta, TikTok, LinkedIn, Pinterest): desinstale o add-on, ou remova os tokens na aba Conexões da Plataforma</li>
   </ul>
 
-  <h2>8. Cookies e rastreamento</h2>
-  <p>O site riseupmtech.com não utiliza cookies de rastreamento ou analytics de terceiros. O add-on Rise Up MTech ETL não coleta dados de navegação.</p>
+  <h2>9. Cookies e rastreamento</h2>
+  <p>A Plataforma Rise Up MTech (aplicação web) usa <strong>Google Analytics 4 (GA4)</strong>, via Google Tag Manager, para entender de forma agregada como o produto é usado — quais telas/funcionalidades são mais acessadas — e priorizar melhorias. Isso envolve cookies e identificadores de uso para associar eventos de navegação à mesma sessão/usuário, conforme as práticas padrão do GA4. Não usamos esses dados para publicidade direcionada a terceiros. Você pode saber mais sobre como o Google trata esses dados na <a href="https://policies.google.com/privacy" target="_blank">Política de Privacidade do Google</a>, e pode se opor ao rastreamento do Google Analytics instalando o <a href="https://tools.google.com/dlpage/gaoptout" target="_blank">complemento de desativação do Google Analytics</a> no navegador.</p>
+  <p>O add-on Rise Up MTech ETL não coleta dados de navegação nem usa cookies — roda inteiramente dentro do ambiente do Google Sheets/Apps Script.</p>
 
-  <h2>9. Alterações nesta política</h2>
+  <h2>10. Alterações nesta política</h2>
   <p>Podemos atualizar esta Política de Privacidade periodicamente. Notificaremos usuários ativos por e-mail sobre mudanças significativas. O uso continuado do serviço após a notificação constitui aceitação da política atualizada.</p>
 
-  <h2>10. Contato</h2>
+  <h2>11. Contato</h2>
   <p>Para dúvidas, solicitações ou exercício de direitos relacionados à privacidade:</p>
   <ul>
     <li>E-mail: <a href="mailto:privacidade@riseupmtech.com">privacidade@riseupmtech.com</a></li>
