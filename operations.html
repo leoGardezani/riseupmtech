@@ -3662,7 +3662,7 @@ async function desdGenerateAiVariants(){
         searchKeywords = await desdFetchImplementedKeywords(group.rows[0].campaign_name);
         if(!searchKeywords.length){
           failMsgs.push(`"${group.rows[0].campaign_name}": nenhuma keyword implementada encontrada na aba Audiências pra essa campanha — implemente a audiência de Search primeiro`);
-          desdState.groups[group.key] = { rows: group.rows, isTikTok: false, isText: true, kind: 'text', headlines: [], descriptions: [], headlineMaxChars: 30, descriptionMaxChars: 90, assignments: {} };
+          desdState.groups[group.key] = { rows: group.rows, isTikTok: false, isText: true, kind: 'text', headlines: [], descriptions: [], headlineMaxChars: 30, descriptionMaxChars: 90, selectedHeadlines: [], selectedDescriptions: [] };
           desdRenderAiVariantGrid();
           continue;
         }
@@ -3677,12 +3677,14 @@ async function desdGenerateAiVariants(){
       // texto não manda esse campo (backend não precisa dele pra gerar
       // headline/description).
       if(group.isText){
-        // NÃO TESTADO ainda contra a API real nesta sessão — nome do
-        // campo (search_keywords) é a melhor aposta combinada com o
-        // Leonardo (usar só as keywords implementadas, sem prompt
-        // livre, IA monta o texto por trás); ajustar se o backend
-        // esperar outro nome/formato.
-        body.search_keywords = searchKeywords;
+        // Corrigido — confirmado lendo creative_deploy.py: AiPreviewRequest
+        // NÃO tem campo de keywords nenhum, e generate_text_ad_variations()
+        // só aceita brand_instructions/headline_max_chars/description_max_chars.
+        // Não dá pra mandar as keywords separadas — a solução é montar a
+        // própria brand_instructions automaticamente a partir delas, sem
+        // expor prompt livre nenhum pro usuário (ele nunca vê/edita esse
+        // texto, só o resultado final).
+        body.brand_instructions = `Gere headlines e descriptions de anúncio de pesquisa (Google Ads Search) altamente relevantes para estas palavras-chave, sem inventar tema fora delas: ${searchKeywords.join(', ')}.`;
       } else {
         body.blob_path = desdState.blobPath;
         body.brand_instructions = promptText;
@@ -3711,17 +3713,12 @@ async function desdGenerateAiVariants(){
         const headlineMaxChars = data.headline_max_chars || 30;
         const descriptionMaxChars = data.description_max_chars || 90;
 
+        // Simplificação pedida pelo Leonardo: a seleção de headline/
+        // description é ÚNICA por grupo (não mais uma por linha/anúncio
+        // RSA) — todo anúncio do grupo usa o MESMO conjunto escolhido.
+        // Clique no card seleciona/deseleciona, sem lista duplicada.
         // Auto-seleção inicial: primeiras 3 headlines / 2 descriptions
-        // (mínimo exigido pelo RSA) pra cada linha (=cada anúncio RSA
-        // distinto do grupo) — usuário ajusta manualmente depois.
-        const assignments = {};
-        group.rows.forEach(row => {
-          assignments[row.row_id] = {
-            headlines: headlines.slice(0, Math.min(3, headlines.length)).map(h => h.index),
-            descriptions: descriptions.slice(0, Math.min(2, descriptions.length)).map(d => d.index),
-          };
-        });
-
+        // (mínimo exigido pelo RSA) — usuário ajusta clicando.
         desdState.groups[group.key] = {
           rows: group.rows,
           isTikTok: false,
@@ -3731,7 +3728,8 @@ async function desdGenerateAiVariants(){
           descriptions,
           headlineMaxChars,
           descriptionMaxChars,
-          assignments,
+          selectedHeadlines: headlines.slice(0, Math.min(3, headlines.length)).map(h => h.index),
+          selectedDescriptions: descriptions.slice(0, Math.min(2, descriptions.length)).map(d => d.index),
         };
         if(headlines.length >= 3 && descriptions.length >= 2) okGroups++;
         else failMsgs.push(`"${group.rows[0].campaign_name}": a IA gerou candidatos insuficientes (mínimo 3 headlines / 2 descriptions)`);
@@ -3763,7 +3761,7 @@ async function desdGenerateAiVariants(){
     }catch(e){
       failMsgs.push(`"${group.rows[0].campaign_name}": ${e.message || 'falha ao gerar'}`);
       desdState.groups[group.key] = group.isText
-        ? { rows: group.rows, isTikTok: false, isText: true, kind: 'text', headlines: [], descriptions: [], headlineMaxChars: 30, descriptionMaxChars: 90, assignments: {} }
+        ? { rows: group.rows, isTikTok: false, isText: true, kind: 'text', headlines: [], descriptions: [], headlineMaxChars: 30, descriptionMaxChars: 90, selectedHeadlines: [], selectedDescriptions: [] }
         : { rows: group.rows, isTikTok: group.isTikTok, kind: group.isTikTok ? 'video' : 'image', variants: [], assignments: {} };
     }
     desdRenderAiVariantGrid();
@@ -3871,60 +3869,47 @@ function desdRenderAiVariantGrid(){
 // desses candidatos entram naquele anúncio específico (mínimo 3
 // headlines / 2 descriptions, regra real do RSA). ──
 function desdRenderTextGroupHtml(key, g){
-  const headlinesHtml = g.headlines.map(h => `
-    <div style="display:flex;align-items:center;gap:8px;padding:4px 0">
-      <input class="fi" style="font-size:11px;flex:1" value="${_escHtml(h.text)}" oninput="desdEditHeadlineText('${_escHtml(key)}', ${h.index}, this.value)">
-      <span id="desdHLCount_${_escHtml(key)}_${h.index}" style="font-family:var(--mono);font-size:9px;color:${h.text.length > g.headlineMaxChars ? 'var(--danger)' : 'var(--ink-muted)'};min-width:48px;text-align:right">${h.text.length}/${g.headlineMaxChars}</span>
-    </div>`).join('');
+  const hOk = g.selectedHeadlines.length >= 3;
+  const dOk = g.selectedDescriptions.length >= 2;
 
-  const descriptionsHtml = g.descriptions.map(d => `
-    <div style="display:flex;align-items:center;gap:8px;padding:4px 0">
-      <input class="fi" style="font-size:11px;flex:1" value="${_escHtml(d.text)}" oninput="desdEditDescriptionText('${_escHtml(key)}', ${d.index}, this.value)">
-      <span id="desdDESCCount_${_escHtml(key)}_${d.index}" style="font-family:var(--mono);font-size:9px;color:${d.text.length > g.descriptionMaxChars ? 'var(--danger)' : 'var(--ink-muted)'};min-width:48px;text-align:right">${d.text.length}/${g.descriptionMaxChars}</span>
-    </div>`).join('');
-
-  const rowsHtml = g.rows.map(row => {
-    const assign = g.assignments[row.row_id] || { headlines: [], descriptions: [] };
-    const hCount = assign.headlines.length;
-    const dCount = assign.descriptions.length;
-    const hOk = hCount >= 3, dOk = dCount >= 2;
-    const hChecks = g.headlines.map(h => `
-      <label style="display:flex;align-items:center;gap:6px;font-size:10px;padding:2px 0;cursor:pointer">
-        <input type="checkbox" ${assign.headlines.includes(h.index) ? 'checked' : ''} onchange="desdToggleHeadlineForRow('${_escHtml(key)}','${row.row_id}',${h.index},this.checked)">
-        <span style="font-family:var(--mono)">${_escHtml(h.text) || '(vazio)'}</span>
-      </label>`).join('');
-    const dChecks = g.descriptions.map(d => `
-      <label style="display:flex;align-items:center;gap:6px;font-size:10px;padding:2px 0;cursor:pointer">
-        <input type="checkbox" ${assign.descriptions.includes(d.index) ? 'checked' : ''} onchange="desdToggleDescriptionForRow('${_escHtml(key)}','${row.row_id}',${d.index},this.checked)">
-        <span style="font-family:var(--mono)">${_escHtml(d.text) || '(vazio)'}</span>
-      </label>`).join('');
-
-    return `<div style="padding:10px 0;border-top:1px solid var(--line)">
-      <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mid);margin-bottom:6px">${_escHtml(row.campaign_name)} — anúncio RSA</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-        <div>
-          <div style="font-size:9px;font-family:var(--mono);color:${hOk ? 'var(--success)' : 'var(--danger)'};margin-bottom:4px">Headlines: ${hCount} selecionada(s) (mín. 3)</div>
-          ${hChecks}
-        </div>
-        <div>
-          <div style="font-size:9px;font-family:var(--mono);color:${dOk ? 'var(--success)' : 'var(--danger)'};margin-bottom:4px">Descriptions: ${dCount} selecionada(s) (mín. 2)</div>
-          ${dChecks}
-        </div>
-      </div>
+  // Card clicável — igual ao padrão dos cards de imagem/vídeo (clique
+  // seleciona/deseleciona, borda + fundo destacam o estado). O clique no
+  // <input> não propaga pro card (senão editar o texto também
+  // selecionaria/deselecionaria sem querer).
+  const headlinesHtml = g.headlines.map(h => {
+    const selected = g.selectedHeadlines.includes(h.index);
+    return `<div onclick="desdToggleHeadline('${_escHtml(key)}', ${h.index})" style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:6px;border:1px solid ${selected ? 'var(--ink)' : 'var(--line)'};background:${selected ? 'var(--bg3)' : 'transparent'};cursor:pointer;border-radius:2px">
+      <span style="font-size:14px;line-height:1">${selected ? '✓' : '○'}</span>
+      <input class="fi" style="font-size:11px;flex:1;border:none;background:transparent;padding:2px 0" value="${_escHtml(h.text)}" onclick="event.stopPropagation()" oninput="desdEditHeadlineText('${_escHtml(key)}', ${h.index}, this.value)">
+      <span id="desdHLCount_${_escHtml(key)}_${h.index}" style="font-family:var(--mono);font-size:9px;color:${h.text.length > g.headlineMaxChars ? 'var(--danger)' : 'var(--ink-muted)'};min-width:40px;text-align:right">${h.text.length}/${g.headlineMaxChars}</span>
     </div>`;
   }).join('');
+
+  const descriptionsHtml = g.descriptions.map(d => {
+    const selected = g.selectedDescriptions.includes(d.index);
+    return `<div onclick="desdToggleDescription('${_escHtml(key)}', ${d.index})" style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:6px;border:1px solid ${selected ? 'var(--ink)' : 'var(--line)'};background:${selected ? 'var(--bg3)' : 'transparent'};cursor:pointer;border-radius:2px">
+      <span style="font-size:14px;line-height:1">${selected ? '✓' : '○'}</span>
+      <input class="fi" style="font-size:11px;flex:1;border:none;background:transparent;padding:2px 0" value="${_escHtml(d.text)}" onclick="event.stopPropagation()" oninput="desdEditDescriptionText('${_escHtml(key)}', ${d.index}, this.value)">
+      <span id="desdDESCCount_${_escHtml(key)}_${d.index}" style="font-family:var(--mono);font-size:9px;color:${d.text.length > g.descriptionMaxChars ? 'var(--danger)' : 'var(--ink-muted)'};min-width:40px;text-align:right">${d.text.length}/${g.descriptionMaxChars}</span>
+    </div>`;
+  }).join('');
+
+  // Um conjunto só, compartilhado por todos os anúncios RSA do grupo
+  // (simplificação pedida pelo Leonardo — antes tinha uma seleção por
+  // linha, duplicando a lista inteira de candidatos por anúncio).
+  const rowNames = g.rows.map(r => _escHtml(r.campaign_name)).join(', ');
 
   return `<div class="tbox" style="margin-bottom:16px">
     <div class="tbox-head">
       <div class="tbox-title">${_escHtml(g.rows[0].campaign_name)} · ${_escHtml(g.rows[0].source)} · texto/RSA · ${g.rows.length} anúncio(s)</div>
     </div>
     <div style="padding:12px 20px 0">
-      <div class="desd-step-lbl" style="margin-top:0;font-size:11px">Candidatos de headline <span style="font-weight:400;color:var(--ink-muted)">(edite o texto se quiser antes de escolher abaixo)</span></div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:10px;line-height:1.6">// mesma seleção vale pros ${g.rows.length} anúncio(s) deste grupo: ${rowNames}</div>
+      <div class="desd-step-lbl" style="margin-top:0;font-size:11px;color:${hOk ? 'var(--success)' : 'var(--danger)'}">Headlines — ${g.selectedHeadlines.length} selecionada(s) (mín. 3) <span style="font-weight:400;color:var(--ink-muted)">— clique pra marcar/desmarcar, edite o texto direto no campo</span></div>
       ${headlinesHtml}
-      <div class="desd-step-lbl" style="font-size:11px;margin-top:14px">Candidatos de description</div>
+      <div class="desd-step-lbl" style="font-size:11px;margin-top:14px;color:${dOk ? 'var(--success)' : 'var(--danger)'}">Descriptions — ${g.selectedDescriptions.length} selecionada(s) (mín. 2)</div>
       ${descriptionsHtml}
     </div>
-    <div style="padding:4px 20px 14px">${rowsHtml}</div>
   </div>`;
 }
 
@@ -3957,29 +3942,26 @@ function desdEditDescriptionText(groupKey, index, value){
   }
 }
 
-// Marca/desmarca um candidato de headline/description pra uma linha
-// (=anúncio RSA) específica dentro do grupo. Re-renderiza tudo (troca de
-// checkbox não perde foco de digitação, diferente do input de texto).
-function desdToggleHeadlineForRow(groupKey, rowId, index, checked){
+// Marca/desmarca um candidato de headline/description pro grupo inteiro
+// (seleção única compartilhada por todos os anúncios RSA do grupo — ver
+// desdRenderTextGroupHtml). Clique no card chama isso direto, sem
+// checkbox.
+function desdToggleHeadline(groupKey, index){
   const g = desdState.groups[groupKey];
   if(!g) return;
-  if(!g.assignments[rowId]) g.assignments[rowId] = { headlines: [], descriptions: [] };
-  const arr = g.assignments[rowId].headlines;
-  const pos = arr.indexOf(index);
-  if(checked && pos === -1) arr.push(index);
-  if(!checked && pos !== -1) arr.splice(pos, 1);
+  const pos = g.selectedHeadlines.indexOf(index);
+  if(pos === -1) g.selectedHeadlines.push(index);
+  else g.selectedHeadlines.splice(pos, 1);
   desdRenderAiVariantGrid();
   desdUpdateSubmitButtonState();
 }
 
-function desdToggleDescriptionForRow(groupKey, rowId, index, checked){
+function desdToggleDescription(groupKey, index){
   const g = desdState.groups[groupKey];
   if(!g) return;
-  if(!g.assignments[rowId]) g.assignments[rowId] = { headlines: [], descriptions: [] };
-  const arr = g.assignments[rowId].descriptions;
-  const pos = arr.indexOf(index);
-  if(checked && pos === -1) arr.push(index);
-  if(!checked && pos !== -1) arr.splice(pos, 1);
+  const pos = g.selectedDescriptions.indexOf(index);
+  if(pos === -1) g.selectedDescriptions.push(index);
+  else g.selectedDescriptions.splice(pos, 1);
   desdRenderAiVariantGrid();
   desdUpdateSubmitButtonState();
 }
@@ -4077,15 +4059,14 @@ function desdUpdateSubmitButtonState(){
   // submit parcial sem perceber.
   const allAssigned = keys.length > 0 && keys.every(key => {
     const g = desdState.groups[key];
-    if(g.kind === 'text'){
-      return g.rows.every(row => {
-        const a = g.assignments[row.row_id];
-        return a && a.headlines.length >= 3 && a.descriptions.length >= 2;
-      });
-    }
+    if(g.kind === 'text') return g.selectedHeadlines.length >= 3 && g.selectedDescriptions.length >= 2;
     return g.rows.every(row => g.assignments[row.row_id] !== undefined);
   });
-  btn.disabled = !allAssigned || !desdState.selectedRowIds.size || !hasName;
+  // Backend só aceita um conjunto de text_ad_headlines/descriptions por
+  // submit inteiro — mais de um grupo de texto junto não tem como ir no
+  // mesmo envio (ver desdSubmit).
+  const tooManyTextGroups = keys.filter(key => desdState.groups[key].kind === 'text').length > 1;
+  btn.disabled = !allAssigned || tooManyTextGroups || !desdState.selectedRowIds.size || !hasName;
 }
 
 // ── Envio pra aprovação — 100% backend real (POST /desdobrador/submit) ──
@@ -4098,28 +4079,38 @@ async function desdSubmit(){
   if(!keys.length){ toast('Você precisa gerar as peças com IA antes de enviar para aprovação', 'er'); return; }
 
   const aiVariants = [];
-  // NÃO TESTADO ainda contra a API real nesta sessão — nome de campo
-  // (text_ad_variants) e formato ({row_id, headlines, descriptions}) são
-  // a melhor aposta combinada com o Leonardo, baseada no plano dos dois
-  // endpoints (/ai-preview e /submit) que ele descreveu; ajustar aqui se
-  // o backend esperar outra coisa no primeiro teste ao vivo.
-  const textAdVariants = [];
   const rowIds = [];
   let missing = false;
+
+  // Corrigido — confirmado lendo creative_deploy.py: text_ad_headlines/
+  // text_ad_descriptions são campos ÚNICOS no SubmitRequest (não uma
+  // lista por linha/grupo) — o backend aplica o MESMO conjunto a toda
+  // linha creative_type="text" do envio. Isso bate com a simplificação
+  // que já tínhamos feito no frontend (seleção única por grupo), só que
+  // agora também precisa ser única pro SUBMIT INTEIRO: se houver mais de
+  // um grupo de texto com keywords/seleção diferentes marcados juntos,
+  // não tem como mandar os dois certos na mesma chamada — bloqueia e
+  // pede pra enviar em submits separados, em vez de aplicar a seleção
+  // errada numa das campanhas sem o usuário perceber.
+  const textGroups = keys.filter(key => desdState.groups[key].kind === 'text');
+  let textAdHeadlines = null;
+  let textAdDescriptions = null;
+  if(textGroups.length > 1){
+    toast('Você marcou mais de uma campanha de Search/RSA com keywords diferentes — envie cada uma em um submit separado (o backend só aceita um conjunto de headlines/descriptions por envio)', 'er');
+    return;
+  }
+  if(textGroups.length === 1){
+    const g = desdState.groups[textGroups[0]];
+    if(g.selectedHeadlines.length < 3 || g.selectedDescriptions.length < 2){ missing = true; }
+    textAdHeadlines = g.selectedHeadlines.map(i => (g.headlines.find(h => h.index === i) || {}).text || '');
+    textAdDescriptions = g.selectedDescriptions.map(i => (g.descriptions.find(d => d.index === i) || {}).text || '');
+  }
+
   keys.forEach(key => {
     const g = desdState.groups[key];
     g.rows.forEach(row => {
       rowIds.push(row.row_id);
-      if(g.kind === 'text'){
-        const a = g.assignments[row.row_id];
-        if(!a || a.headlines.length < 3 || a.descriptions.length < 2){ missing = true; return; }
-        textAdVariants.push({
-          row_id: row.row_id,
-          headlines: a.headlines.map(i => (g.headlines.find(h => h.index === i) || {}).text || ''),
-          descriptions: a.descriptions.map(i => (g.descriptions.find(d => d.index === i) || {}).text || ''),
-        });
-        return;
-      }
+      if(g.kind === 'text') return; // já resolvido acima (textAdHeadlines/Descriptions)
       const idx = g.assignments[row.row_id];
       if(idx === undefined){ missing = true; return; }
       const v = g.variants.find(x => x.index === idx);
@@ -4141,15 +4132,16 @@ async function desdSubmit(){
       headers: Object.assign({'Content-Type': 'application/json'}, authHeaders()),
       body: JSON.stringify({
         // blob_path fica null quando o envio é só de anúncios de texto
-        // (RSA nunca teve KV) — backend deve tratar null como "sem peça
-        // visual neste submit", só o array de ai_variants já deixa isso
-        // implícito por linha também.
+        // (RSA nunca teve KV) — o backend não tenta baixar KV nenhum
+        // quando ai_variants vem vazio e blob_path vem null (ver guarda
+        // em submit_pieces, creative_deploy.py).
         blob_path: desdState.blobPath,
         row_ids: rowIds,
         workspace_id: desdWorkspaceId,
         creative_name: creativeName,
         ai_variants: aiVariants,
-        text_ad_variants: textAdVariants,
+        text_ad_headlines: textAdHeadlines,
+        text_ad_descriptions: textAdDescriptions,
         ai_cta_text: desdState.ctaText || '',
         ai_cta_color: desdState.ctaColor || '#0d0d0d',
       }),
