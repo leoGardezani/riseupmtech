@@ -676,9 +676,12 @@
 
       <!-- COLUNA DIREITA: prompt + CTA + metadata -->
       <div class="desd-col">
+        <div id="desdPromptStepWrap">
         <div class="desd-step-lbl" style="margin-top:0">Prompt — o que a IA deve fazer</div>
         <div class="fg"><label class="fl">Características desejadas (texto livre)</label><textarea class="fi" id="desdPromptText" rows="4" style="resize:vertical" placeholder="ex: adicione o texto 'Nova coleção chegou', tom vibrante, paleta azul e branco, deixe o produto em destaque à esquerda">Nova coleção chegou — aproveite o lançamento</textarea></div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:8px;line-height:1.6">// pode incluir headline, tom, paleta de cor, o que priorizar na composição — a IA recebe isso junto com o KV</div>
+        </div>
+        <div id="desdTextPromptNote" style="display:none;padding:10px 12px;background:var(--bg3);border:1px solid var(--line);font-family:var(--mono);font-size:10px;color:var(--ink-muted);margin-bottom:8px;line-height:1.6">// Search/RSA não usa prompt livre — a IA gera as headlines/descriptions a partir das keywords já implementadas na aba Audiências pra essa campanha, sem instrução manual.</div>
 
         <div class="divider" style="margin:20px 0"></div>
 
@@ -3487,9 +3490,13 @@ function desdUpdateKvStepVisibility(){
   const kvWrap = document.getElementById('desdKvStepWrap');
   const note = document.getElementById('desdTextModeNote');
   const durWrap = document.getElementById('desdDurationWrap');
+  const promptWrap = document.getElementById('desdPromptStepWrap');
+  const promptNote = document.getElementById('desdTextPromptNote');
   if(kvWrap) kvWrap.style.display = allText ? 'none' : '';
   if(note) note.style.display = allText ? '' : 'none';
   if(durWrap) durWrap.style.display = allText ? 'none' : '';
+  if(promptWrap) promptWrap.style.display = allText ? 'none' : '';
+  if(promptNote) promptNote.style.display = allText ? '' : 'none';
 }
 
 function desdRenderSelectedSummary(){
@@ -3584,6 +3591,44 @@ function desdDrawCtaBarOnCanvas(ctx, w, h, text, color){
 // creative_type (repetidas pela coluna `volume` do media-plan) formam um
 // grupo e recebem N variações DIFERENTES (N = tamanho do grupo),
 // distribuídas uma por linha automaticamente.
+// Novo (Search/RSA, pedido do Leonardo) — busca as keywords que já foram
+// IMPLEMENTADAS de verdade (não só sugeridas) na aba Audiências pra uma
+// campanha específica, reaproveitando GET /audiences/list (mesmo
+// endpoint que a aba Audiências usa pra "Audiências Criadas"). Um preset
+// conta como "implementado nessa campanha" quando: (1) é da plataforma
+// google_ads, (2) tem search_keywords não vazio, (3) o nome da campanha
+// da linha do Desdobrador aparece (contém/é contido) em algum item de
+// implemented_in — que guarda o NOME do ad group na plataforma, não
+// necessariamente idêntico ao nome interno da linha, por isso o match é
+// por substring nos dois sentidos, não igualdade exata.
+// NÃO TESTADO ainda contra dado real — se o match não achar nada na
+// prática (nomes muito diferentes), a solução é ajustar o critério aqui,
+// não trocar o endpoint.
+async function desdFetchImplementedKeywords(campaignName){
+  if(!desdWorkspaceId || !campaignName) return [];
+  try{
+    const res = await fetch(API_BASE + '/audiences/list?workspace_id=' + encodeURIComponent(desdWorkspaceId), { headers: authHeaders() });
+    if(!res.ok) return [];
+    const data = await res.json();
+    const presets = data.presets || [];
+    const needle = campaignName.trim().toLowerCase();
+    const match = presets.find(p => {
+      if(p.platform !== 'google_ads') return false;
+      const kws = (p.suggestion && p.suggestion.google_ads && p.suggestion.google_ads.search_keywords) || [];
+      if(!kws.length) return false;
+      return (p.implemented_in || []).some(name => {
+        const n = (name || '').toLowerCase();
+        return n && (n.includes(needle) || needle.includes(n));
+      });
+    });
+    if(!match) return [];
+    const kws = (match.suggestion.google_ads.search_keywords || []);
+    return kws.map(k => (typeof k === 'string' ? k : (k.text || k.keyword || ''))).filter(Boolean);
+  }catch(e){
+    return [];
+  }
+}
+
 async function desdGenerateAiVariants(){
   const statusEl = document.getElementById('desdAiStatus');
   const btn = document.getElementById('desdGenerateBtn');
@@ -3604,17 +3649,44 @@ async function desdGenerateAiVariants(){
   let failMsgs = [];
 
   for(const group of groups){
-    if(statusEl) statusEl.innerHTML = `<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Grupo "${_escHtml(group.rows[0].campaign_name)}" (${group.rows.length} linha(s)${group.isTikTok ? ', vídeo TikTok' : ''}${group.isText ? ', texto/RSA' : ''}) — chamando a IA...</div>`;
+    if(statusEl) statusEl.innerHTML = `<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Grupo "${_escHtml(group.rows[0].campaign_name)}" (${group.rows.length} linha(s)${group.isTikTok ? ', vídeo TikTok' : ''}${group.isText ? ', texto/RSA' : ''}) — ${group.isText ? 'buscando keywords implementadas...' : 'chamando a IA...'}</div>`;
     try{
+      let searchKeywords = null;
+      if(group.isText){
+        // Search/RSA: nada de prompt livre — a IA usa as keywords JÁ
+        // IMPLEMENTADAS na aba Audiências pra essa campanha (ver
+        // desdFetchImplementedKeywords). Sem keyword implementada, nem
+        // vale chamar /ai-preview — é melhor avisar aqui do que deixar o
+        // backend gerar algo genérico/sem relação com o que foi de fato
+        // implementado.
+        searchKeywords = await desdFetchImplementedKeywords(group.rows[0].campaign_name);
+        if(!searchKeywords.length){
+          failMsgs.push(`"${group.rows[0].campaign_name}": nenhuma keyword implementada encontrada na aba Audiências pra essa campanha — implemente a audiência de Search primeiro`);
+          desdState.groups[group.key] = { rows: group.rows, isTikTok: false, isText: true, kind: 'text', headlines: [], descriptions: [], headlineMaxChars: 30, descriptionMaxChars: 90, assignments: {} };
+          desdRenderAiVariantGrid();
+          continue;
+        }
+        if(statusEl) statusEl.innerHTML = `<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Grupo "${_escHtml(group.rows[0].campaign_name)}" — ${searchKeywords.length} keyword(s) implementada(s) encontrada(s), chamando a IA...</div>`;
+      }
+
       const body = {
         row_ids: group.rows.map(r => r.row_id),
         workspace_id: desdWorkspaceId,
-        brand_instructions: promptText,
       };
       // blob_path só faz sentido pra grupo com peça visual — grupo de
       // texto não manda esse campo (backend não precisa dele pra gerar
       // headline/description).
-      if(!group.isText) body.blob_path = desdState.blobPath;
+      if(group.isText){
+        // NÃO TESTADO ainda contra a API real nesta sessão — nome do
+        // campo (search_keywords) é a melhor aposta combinada com o
+        // Leonardo (usar só as keywords implementadas, sem prompt
+        // livre, IA monta o texto por trás); ajustar se o backend
+        // esperar outro nome/formato.
+        body.search_keywords = searchKeywords;
+      } else {
+        body.blob_path = desdState.blobPath;
+        body.brand_instructions = promptText;
+      }
       if(group.isTikTok) body.duration_seconds = desdState.durationSeconds || 6;
 
       const res = await fetch(API_BASE + '/desdobrador/ai-preview', {
