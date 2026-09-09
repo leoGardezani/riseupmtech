@@ -1934,8 +1934,41 @@ function renderAudCreatedTable(){
       <td class="td-mono" style="font-size:10px">${a.implementedIn && a.implementedIn.length ? _escHtml(a.implementedIn.join(', ')) : '<span style="color:var(--ink-muted)">nenhuma ainda</span>'}</td>
       <td class="td-mono">${a.statusBadge}</td>
       <td class="td-mono" style="color:var(--ink-muted)">${_escHtml(a.criada)}</td>
-      <td>${a.creationOk ? '<button class="btn-sm ghost" style="padding:5px 10px;font-size:9px;white-space:nowrap" onclick="audOpenImplementModal(' + idx + ')">+ Implementar</button>' : ''}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          ${a.creationOk ? '<button class="btn-sm ghost" style="padding:5px 10px;font-size:9px;white-space:nowrap" onclick="audOpenImplementModal(' + idx + ')">+ Implementar</button>' : ''}
+          <button class="btn-sm ghost" style="padding:5px 10px;font-size:9px;white-space:nowrap;color:var(--danger);border-color:#fecaca" onclick="audDeletePreset(${idx})" title="Remove só o registro/rastreamento — não desfaz nada já aplicado nas plataformas">✕ Excluir</button>
+        </div>
+      </td>
     </tr>`).join('');
+}
+
+// Novo (pedido do Leonardo, achado ao vivo — o backend já tinha o
+// endpoint DELETE /audiences/{preset_id} pronto, o botão no frontend
+// nunca tinha sido conectado). Remove só o REGISTRO/rastreamento
+// (Firestore) — não desfaz nada já aplicado de verdade nas plataformas
+// (Custom Audience no Google, targeting já aplicado no ad set/ad group
+// do Meta/TikTok continuam intactos), mesmo aviso que já está na
+// docstring do endpoint no backend.
+async function audDeletePreset(idx){
+  const entry = AUD_CREATED_SESSION[idx];
+  if(!entry) return;
+  if(!entry.presetId){
+    toast('Essa linha ainda não tem um registro salvo pra excluir (recarregue a lista)', 'er');
+    return;
+  }
+  if(!confirm(`Excluir o registro de "${entry.name}"? Isso NÃO desfaz nada já aplicado nas plataformas — só remove da lista de rastreamento.`)) return;
+  try{
+    const res = await fetch(API_BASE + '/audiences/' + encodeURIComponent(entry.presetId) + '?workspace_id=' + encodeURIComponent(entry.workspaceId || audWorkspaceId), {
+      method: 'DELETE', headers: authHeaders(),
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.detail || 'falha ao excluir');
+    toast('✓ Registro removido', 'ok');
+    await audLoadPresets();
+  }catch(e){
+    toast('✕ ' + (e.message || 'Não foi possível excluir'), 'er');
+  }
 }
 
 async function audGenerateSuggestion(){
