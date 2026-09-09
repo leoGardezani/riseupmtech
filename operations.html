@@ -670,17 +670,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div id="desdSelectedRowsSummary" style="margin-bottom:8px"></div>
         <div id="desdGroupsSummary" style="margin-bottom:8px"></div>
 
-        <div id="desdDurationWrap">
-        <div class="desd-step-lbl">Duração do vídeo <span style="font-weight:400;color:var(--ink-muted);font-size:11px">(só linhas TikTok — TikTok não aceita mais imagem estática)</span></div>
-        <div style="display:flex;gap:16px;margin-bottom:10px;font-size:12px">
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="desdDuration" value="6" checked onchange="desdState.durationSeconds=6"> 6s</label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="desdDuration" value="15" onchange="desdState.durationSeconds=15"> 15s <span style="color:var(--ink-muted);font-size:10px">(não testado ainda contra a API real)</span></label>
-        </div>
-        </div>
-
         <div class="desd-step-lbl">3. Gerar variações com IA</div>
         <button class="btn-full" id="desdGenerateBtn" onclick="desdGenerateAiVariants()">✦ Gerar variações com IA</button>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:6px;line-height:1.6">// pode levar 1-2 min por grupo (imagem via Gemini, vídeo via Veo pro TikTok) — cada grupo recebe sua própria leva de variações, uma por linha</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:6px;line-height:1.6">// pode levar 1-2 min por grupo (imagem via Gemini) — cada grupo recebe sua própria leva de variações, uma por linha. Vídeo (TikTok) não é gerado por IA — envie pronto em Criativos → Upload Direto</div>
         <div id="desdAiStatus" style="margin-top:10px"></div>
         <div id="desdAiGroupsContainer" style="margin-top:12px"></div>
       </div>
@@ -3369,7 +3361,6 @@ let desdState = {
   // Formato de cada entrada: { rowIds: [...], kind: 'image'|'video',
   // variants: [...], assignments: {row_id: variantIndex} }
   groups: {},
-  durationSeconds: 6,  // só usado pros grupos TikTok — seletor 6s/15s na UI
   ctaText: 'Saiba mais',
   ctaColor: '#0d0d0d',
 };
@@ -3560,18 +3551,16 @@ function desdRenderCtaCharHint(){
   el.style.color = cur > maxChar ? 'var(--danger)' : 'var(--ink-muted)';
 }
 
-// Novo (Search/RSA) — esconde o passo de KV + seletor de duração de vídeo
-// quando a seleção atual é só de linhas de texto (RSA não tem peça visual).
+// Novo (Search/RSA) — esconde o passo de KV quando a seleção atual é só
+// de linhas de texto (RSA não tem peça visual).
 function desdUpdateKvStepVisibility(){
   const allText = desdIsAllTextSelected();
   const kvWrap = document.getElementById('desdKvStepWrap');
   const note = document.getElementById('desdTextModeNote');
-  const durWrap = document.getElementById('desdDurationWrap');
   const promptWrap = document.getElementById('desdPromptStepWrap');
   const promptNote = document.getElementById('desdTextPromptNote');
   if(kvWrap) kvWrap.style.display = allText ? 'none' : '';
   if(note) note.style.display = allText ? '' : 'none';
-  if(durWrap) durWrap.style.display = allText ? 'none' : '';
   if(promptWrap) promptWrap.style.display = allText ? 'none' : '';
   if(promptNote) promptNote.style.display = allText ? '' : 'none';
 }
@@ -3711,6 +3700,13 @@ async function desdGenerateAiVariants(){
   const btn = document.getElementById('desdGenerateBtn');
   const groups = desdComputeGroups();
   if(!groups.length){ toast('Marque ao menos uma linha da fila (define o(s) formato(s) da pré-visualização)', 'er'); return; }
+  // Decisão 09/set/2026 (pedido do Leonardo): vídeo não é mais gerado por
+  // IA aqui — TikTok (único formato que exige vídeo) sobe pronto pela
+  // aba Criativos → Upload Direto, produzido fora pela agência/cliente.
+  if(groups.some(g => g.isTikTok)){
+    toast('TikTok (vídeo) não é gerado por IA — envie o vídeo pronto em Criativos → Upload Direto', 'er');
+    return;
+  }
   // KV só é exigido se pelo menos um grupo selecionado NÃO for de texto —
   // RSA (Search) não tem peça visual nenhuma, só headline/description.
   const needsKv = groups.some(g => !g.isText);
@@ -3766,7 +3762,6 @@ async function desdGenerateAiVariants(){
         body.blob_path = desdState.blobPath;
         body.brand_instructions = promptText;
       }
-      if(group.isTikTok) body.duration_seconds = desdState.durationSeconds || 6;
 
       const res = await fetch(API_BASE + '/desdobrador/ai-preview', {
         method: 'POST',
