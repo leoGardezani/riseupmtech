@@ -1656,22 +1656,31 @@ function audUpdateDropdownLabel(platform){
 // fluxo normal, ele não conta mais pra altura rolável da página. Se o
 // botão está perto do fim da tela, o painel abre pra baixo e uma parte
 // fica inalcançável — não dá pra rolar a página até lá, porque a
-// página não "sabe" que precisa de mais espaço. Decide abrir pra CIMA
-// (bottom:100%) em vez de pra baixo (top:100%) quando não sobra altura
-// suficiente abaixo do botão na janela visível.
+// página não "sabe" que precisa de mais espaço.
+//
+// Fix desta sessão, achado ao vivo: a primeira versão usava um limite
+// fixo (280px) pra decidir cima/baixo — não bastava, porque a altura
+// do painel também era fixa (260px via CSS) e não se ajustava ao
+// espaço real; com a página rolada até o fim, sobrava pouco dos dois
+// lados e o painel ainda cortava. Agora sempre escolhe o lado com MAIS
+// espaço livre (nunca fixo) E ajusta a altura máxima do painel pro que
+// sobrar de verdade (com teto de 320px, piso de 120px) — garante que
+// ele sempre caiba inteiro na tela visível, não importa a posição de
+// scroll da página.
 function _audPositionDropdown(btn, panel){
+  const margin = 12; // folga da borda da janela
   const rect = btn.getBoundingClientRect();
-  const spaceBelow = window.innerHeight - rect.bottom;
-  const spaceAbove = rect.top;
-  // Só abre pra cima se embaixo tiver menos de 280px livres E em cima
-  // tiver mais espaço que embaixo — evita trocar de lado à toa quando
-  // os dois lados já são meio apertados.
-  if(spaceBelow < 280 && spaceAbove > spaceBelow){
-    panel.style.top = 'auto';
-    panel.style.bottom = 'calc(100% + 4px)';
-  } else {
+  const spaceBelow = window.innerHeight - rect.bottom - margin;
+  const spaceAbove = rect.top - margin;
+  const openBelow = spaceBelow >= spaceAbove;
+  const available = Math.max(120, Math.min(320, openBelow ? spaceBelow : spaceAbove));
+  panel.style.maxHeight = available + 'px';
+  if(openBelow){
     panel.style.top = 'calc(100% + 4px)';
     panel.style.bottom = 'auto';
+  } else {
+    panel.style.top = 'auto';
+    panel.style.bottom = 'calc(100% + 4px)';
   }
 }
 
