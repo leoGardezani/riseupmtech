@@ -982,7 +982,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   `suggestion` original, com um aviso deixando claro que aquilo pode não
   refletir o que foi de fato implementado. -->
   <div id="audDetailModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(13,13,13,.85);z-index:9998;align-items:center;justify-content:center;padding:24px" onclick="if(event.target===this) audCloseDetailModal()">
-    <div style="background:#fff;max-width:720px;width:100%;max-height:88vh;overflow:auto;padding:24px;position:relative;border-radius:6px">
+    <div style="background:#fff;max-width:1100px;width:100%;max-height:88vh;overflow:auto;padding:24px;position:relative;border-radius:6px">
       <button onclick="audCloseDetailModal()" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:28px;line-height:1;cursor:pointer;color:var(--ink-muted)">×</button>
       <div class="tbox-title" id="audDetailModalTitle" style="margin-bottom:4px">Detalhe da audiência</div>
       <div id="audDetailModalSubtitle" style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);letter-spacing:.08em;margin-bottom:16px"></div>
@@ -1650,11 +1650,39 @@ function audUpdateDropdownLabel(platform){
   btn.textContent = nCamp ? `${nCamp} campanha(s), ${nAg} ad group(s) selecionado(s)` : 'Selecionar campanhas…';
 }
 
+// Novo (pedido do Leonardo, achado ao vivo) — o painel virou
+// position:absolute pra flutuar por cima do conteúdo em vez de
+// empurrar o layout, mas isso tem um efeito colateral: ficando FORA do
+// fluxo normal, ele não conta mais pra altura rolável da página. Se o
+// botão está perto do fim da tela, o painel abre pra baixo e uma parte
+// fica inalcançável — não dá pra rolar a página até lá, porque a
+// página não "sabe" que precisa de mais espaço. Decide abrir pra CIMA
+// (bottom:100%) em vez de pra baixo (top:100%) quando não sobra altura
+// suficiente abaixo do botão na janela visível.
+function _audPositionDropdown(btn, panel){
+  const rect = btn.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const spaceAbove = rect.top;
+  // Só abre pra cima se embaixo tiver menos de 280px livres E em cima
+  // tiver mais espaço que embaixo — evita trocar de lado à toa quando
+  // os dois lados já são meio apertados.
+  if(spaceBelow < 280 && spaceAbove > spaceBelow){
+    panel.style.top = 'auto';
+    panel.style.bottom = 'calc(100% + 4px)';
+  } else {
+    panel.style.top = 'calc(100% + 4px)';
+    panel.style.bottom = 'auto';
+  }
+}
+
 function audToggleDropdown(platform){
   ['meta','google_ads','google_ads_search','tiktok'].forEach(p => {
     const panel = document.getElementById('audDropdown_' + p);
+    const btn = document.getElementById('audDropdownBtn_' + p);
     if(!panel) return;
-    panel.style.display = (p === platform && panel.style.display === 'none') ? 'block' : 'none';
+    const opening = p === platform && panel.style.display === 'none';
+    panel.style.display = opening ? 'block' : 'none';
+    if(opening && btn) _audPositionDropdown(btn, panel);
   });
 }
 document.addEventListener('click', (e) => {
@@ -1775,8 +1803,11 @@ function audToggleImplementDropdown(platform){
   const implPlatforms = audImplementContext.platform === 'google_ads' ? ['google_ads', 'google_ads_search'] : [audImplementContext.platform];
   implPlatforms.forEach(p => {
     const panel = document.getElementById('audImplDropdown_' + p);
+    const btn = document.getElementById('audImplDropdownBtn_' + p);
     if(!panel) return;
-    panel.style.display = (p === platform && panel.style.display === 'none') ? 'block' : 'none';
+    const opening = p === platform && panel.style.display === 'none';
+    panel.style.display = opening ? 'block' : 'none';
+    if(opening && btn) _audPositionDropdown(btn, panel);
   });
 }
 
@@ -2004,7 +2035,11 @@ async function audDeletePreset(idx){
 // dinâmico por plataforma).
 function _audTagsHtml(items){
   if(!items || !items.length) return '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">nenhum</span>';
-  return '<div class="repo-tags">' + items.map(t => '<span class="repo-tag">' + _escHtml(t) + '</span>').join('') + '</div>';
+  // Novo (pedido do Leonardo) — listas longas (ex: 50-100 keywords)
+  // ganham scroll próprio em vez de esticar o modal inteiro na
+  // vertical; abaixo de ~15 itens não vale a pena limitar a altura.
+  const style = items.length > 15 ? ' style="max-height:220px;overflow-y:auto;padding-right:4px"' : '';
+  return '<div class="repo-tags"' + style + '>' + items.map(t => '<span class="repo-tag">' + _escHtml(t) + '</span>').join('') + '</div>';
 }
 
 function _audDemographicsHtml(applied){
