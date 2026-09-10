@@ -1734,7 +1734,7 @@ async function audOpenImplementModal(idx){
     <div style="margin-bottom:14px;position:relative">
       <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px">${_audPlatformLabel(p)}</div>
       <button class="fi" style="text-align:left;cursor:pointer" onclick="audToggleImplementDropdown('${p}')" id="audImplDropdownBtn_${p}">Selecionar campanhas…</button>
-      <div id="audImplDropdown_${p}" class="aud-dropdown-panel" style="display:none">
+      <div id="audImplDropdown_${p}" class="aud-dropdown-panel" style="display:none;position:static;max-height:none;overflow-y:visible;box-shadow:none;margin-top:4px">
         <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);text-transform:uppercase;margin-bottom:4px">Campanhas</div>
         <div id="audImplCampaignList_${p}"></div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);text-transform:uppercase;margin:10px 0 4px;border-top:1px solid var(--border);padding-top:8px">Ad Groups/Ad Sets (das campanhas marcadas acima)</div>
@@ -1812,11 +1812,8 @@ function audToggleImplementDropdown(platform){
   const implPlatforms = audImplementContext.platform === 'google_ads' ? ['google_ads', 'google_ads_search'] : [audImplementContext.platform];
   implPlatforms.forEach(p => {
     const panel = document.getElementById('audImplDropdown_' + p);
-    const btn = document.getElementById('audImplDropdownBtn_' + p);
     if(!panel) return;
-    const opening = p === platform && panel.style.display === 'none';
-    panel.style.display = opening ? 'block' : 'none';
-    if(opening && btn) _audPositionDropdown(btn, panel);
+    panel.style.display = (p === platform && panel.style.display === 'none') ? 'block' : 'none';
   });
 }
 
