@@ -2076,6 +2076,30 @@ function _audDetailCardHtml(sections){
     + '</div>';
 }
 
+// Novo (pedido do Leonardo) — mostra a Estimativa Geral (universo/
+// impressões/frequência/cobertura) no modal de detalhe. Esse dado já
+// era salvo — faz parte do objeto `suggestion` inteiro que sempre foi
+// gravado no preset (campo estimated_metrics, no nível raiz da
+// sugestão, igual aparece na tela de "Sugestão da IA") — só faltava
+// exibir aqui. É a mesma estimativa pras 3 plataformas (é uma soma
+// única, não por plataforma), então aparece igual em qualquer preset
+// dessa mesma audiência.
+function _audEstimatedMetricsHtml(suggestion){
+  const em = (suggestion || {}).estimated_metrics;
+  if(!em) return '';
+  return '<div style="background:var(--bg2);border:1px solid var(--border);padding:16px 18px;margin-bottom:16px">'
+    + '<div class="desd-format-group-lbl" style="margin-top:0">Estimativa Geral (soma das 3 plataformas + Search)</div>'
+    + '<div class="pacing-grid" style="grid-template-columns:repeat(4,1fr);background:var(--bg2);margin-top:8px">'
+    + '<div class="pacing-card" style="padding:12px 14px;background:var(--bg)"><div class="kpi-lbl">Universo estimado</div><div class="kpi-val" style="font-size:16px">' + _escHtml(em.audience_size_estimate || '—') + '</div></div>'
+    + '<div class="pacing-card" style="padding:12px 14px;background:var(--bg)"><div class="kpi-lbl">Impressões no período (est.)</div><div class="kpi-val" style="font-size:16px">' + _escHtml(em.estimated_impressions_for_period || '—') + '</div></div>'
+    + '<div class="pacing-card" style="padding:12px 14px;background:var(--bg)"><div class="kpi-lbl">Frequência ao fim (est.)</div><div class="kpi-val" style="font-size:16px">' + _escHtml(em.estimated_frequency_for_period || '—') + '</div></div>'
+    + '<div class="pacing-card" style="padding:12px 14px;background:var(--bg)"><div class="kpi-lbl">Cobertura ao fim (est.)</div><div class="kpi-val" style="font-size:16px">' + _escHtml(em.estimated_coverage_pct || '—') + '</div></div>'
+    + '</div>'
+    + (em.campaign_days ? '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px">// baseado num período de ' + _escHtml(String(em.campaign_days)) + ' dia(s)</div>' : '')
+    + (em.caveat ? '<div style="font-family:var(--mono);font-size:9px;color:var(--warn);margin-top:4px;line-height:1.6">⚠ ' + _escHtml(em.caveat) + '</div>' : '')
+    + '</div>';
+}
+
 function audOpenDetailModal(idx){
   const entry = AUD_CREATED_SESSION[idx];
   if(!entry) return;
@@ -2092,7 +2116,8 @@ function audOpenDetailModal(idx){
     // falhou na implementação) — cai pra mostrar a sugestão original,
     // com aviso de que pode não refletir o que foi de fato aplicado.
     const raw = (entry.suggestion || {})[entry.platform] || {};
-    let html = '<div style="background:#fef9c3;border:1px solid #fde68a;padding:10px 14px;margin-bottom:16px;font-family:var(--mono);font-size:10px;color:#854d0e;letter-spacing:.04em">'
+    let html = _audEstimatedMetricsHtml(entry.suggestion)
+      + '<div style="background:#fef9c3;border:1px solid #fde68a;padding:10px 14px;margin-bottom:16px;font-family:var(--mono);font-size:10px;color:#854d0e;letter-spacing:.04em">'
       + '// audiência criada antes desse detalhe existir (ou a implementação não teve sucesso) — mostrando a sugestão original, pode não refletir exatamente o que foi aplicado na plataforma.</div>';
     if(entry.platform === 'meta'){
       html += _audDetailCardHtml([
@@ -2118,15 +2143,15 @@ function audOpenDetailModal(idx){
     return;
   }
 
-  let html = '';
+  let html = _audEstimatedMetricsHtml(entry.suggestion);
   if(entry.platform === 'meta'){
-    html = _audDetailCardHtml([
+    html += _audDetailCardHtml([
       {label: 'Interesses aplicados (' + (applied.interests || []).length + ')', html: _audTagsHtml(applied.interests)},
       {label: 'Comportamentos aplicados (' + (applied.behaviors || []).length + ')', html: _audTagsHtml(applied.behaviors)},
       {label: 'Demografia/geo aplicada', html: _audDemographicsHtml(applied)},
     ]);
   } else if(entry.platform === 'google_ads'){
-    html = _audDetailCardHtml([
+    html += _audDetailCardHtml([
       {label: 'Custom Segment — keywords (' + (applied.custom_segment_keywords || []).length + ')', html: _audTagsHtml(applied.custom_segment_keywords)},
       {label: 'Custom Segment — URLs (' + (applied.custom_segment_urls || []).length + ')', html: _audTagsHtml(applied.custom_segment_urls)},
       {label: 'Search — keywords aplicadas (' + (applied.search_keywords || []).length + ')', html: _audTagsHtml((applied.search_keywords || []).slice(0, 50))},
@@ -2136,7 +2161,7 @@ function audOpenDetailModal(idx){
       html += '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:-8px;margin-bottom:16px">// mostrando as 50 primeiras de ' + applied.search_keywords.length + ' keywords aplicadas</div>';
     }
   } else {
-    html = _audDetailCardHtml([
+    html += _audDetailCardHtml([
       {label: 'Categorias de interesse aplicadas (' + (applied.interest_categories || []).length + ')', html: _audTagsHtml(applied.interest_categories)},
       {label: 'Categorias de comportamento aplicadas (' + (applied.behavior_categories || []).length + ')', html: _audTagsHtml(applied.behavior_categories)},
       {label: 'Demografia/geo aplicada', html: _audDemographicsHtml(applied)},
