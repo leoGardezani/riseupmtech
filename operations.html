@@ -965,6 +965,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
   </div>
+  <!-- Modal de detalhe da audiência (pedido do Leonardo) — clica numa
+  linha de "Audiências Criadas" e abre isso: mesmo estilo visual da tela
+  de "Sugestão da IA" (cards por plataforma, tags), mas mostrando só o
+  que foi REALMENTE aplicado na plataforma (campo `applied`, gravado em
+  api/audiences.py na hora do /create) — não a sugestão bruta do Gemini,
+  que pode ter itens descartados na validação. Presets salvos antes
+  desse campo existir (applied=null) caem de volta pra mostrar a
+  `suggestion` original, com um aviso deixando claro que aquilo pode não
+  refletir o que foi de fato implementado. -->
+  <div id="audDetailModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(13,13,13,.85);z-index:9998;align-items:center;justify-content:center;padding:24px" onclick="if(event.target===this) audCloseDetailModal()">
+    <div style="background:#fff;max-width:720px;width:100%;max-height:88vh;overflow:auto;padding:24px;position:relative;border-radius:6px">
+      <button onclick="audCloseDetailModal()" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:28px;line-height:1;cursor:pointer;color:var(--ink-muted)">×</button>
+      <div class="tbox-title" id="audDetailModalTitle" style="margin-bottom:4px">Detalhe da audiência</div>
+      <div id="audDetailModalSubtitle" style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);letter-spacing:.08em;margin-bottom:16px"></div>
+      <div id="audDetailModalBody"></div>
+    </div>
+  </div>
   <!-- ── STATUS / GANTT ── -->
   <div class="tab-page" id="tab-status">
     <div class="section-title">Linha do Tempo de Implementação</div>
@@ -1519,6 +1536,7 @@ async function audLoadPresets(){
       creationOk: p.status_ok,
       criada: p.created_at_iso ? new Date(p.created_at_iso).toLocaleString('pt-BR') : '—',
       suggestion: p.suggestion,
+      applied: p.applied || null,
       googleCustomAudienceResourceName: p.google_custom_audience_resource_name || null,
       presetId: p.id,
     }));
@@ -1925,7 +1943,7 @@ function renderAudCreatedTable(){
     return;
   }
   tbody.innerHTML = AUD_CREATED_SESSION.map((a, idx) => `
-    <tr>
+    <tr class="desd-queue-row" onclick="audOpenDetailModal(${idx})" title="Clique pra ver o que foi implementado de verdade">
       <td class="td-bold">${_escHtml(a.name)}</td>
       <td class="td-mono">${_escHtml(a.platformLabel || '')}</td>
       <td style="font-size:11px;color:var(--ink-mid);max-width:220px" title="${_escHtml(a.description || '')}">${_escHtml((a.description || '').length > 60 ? a.description.slice(0,60) + '…' : (a.description || '—'))}</td>
@@ -1934,7 +1952,7 @@ function renderAudCreatedTable(){
       <td class="td-mono" style="font-size:10px">${a.implementedIn && a.implementedIn.length ? _escHtml(a.implementedIn.join(', ')) : '<span style="color:var(--ink-muted)">nenhuma ainda</span>'}</td>
       <td class="td-mono">${a.statusBadge}</td>
       <td class="td-mono" style="color:var(--ink-muted)">${_escHtml(a.criada)}</td>
-      <td>
+      <td onclick="event.stopPropagation()">
         <div style="display:flex;gap:6px">
           ${a.creationOk ? '<button class="btn-sm ghost" style="padding:5px 10px;font-size:9px;white-space:nowrap" onclick="audOpenImplementModal(' + idx + ')">+ Implementar</button>' : ''}
           <button class="btn-sm ghost" style="padding:5px 10px;font-size:9px;white-space:nowrap;color:var(--danger);border-color:#fecaca" onclick="audDeletePreset(${idx})" title="Remove só o registro/rastreamento — não desfaz nada já aplicado nas plataformas">✕ Excluir</button>
@@ -1969,6 +1987,116 @@ async function audDeletePreset(idx){
   }catch(e){
     toast('✕ ' + (e.message || 'Não foi possível excluir'), 'er');
   }
+}
+
+// Modal de detalhe da audiência (pedido do Leonardo) — mostra o que foi
+// REALMENTE aplicado na plataforma (entry.applied, gravado no /create),
+// não a sugestão bruta. Reaproveita o visual de "repo-tag" já usado na
+// tela de sugestão, mas como HTML montado direto (não injetado num
+// container fixo via audRenderTags, já que esse conteúdo é todo
+// dinâmico por plataforma).
+function _audTagsHtml(items){
+  if(!items || !items.length) return '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">nenhum</span>';
+  return '<div class="repo-tags">' + items.map(t => '<span class="repo-tag">' + _escHtml(t) + '</span>').join('') + '</div>';
+}
+
+function _audDemographicsHtml(applied){
+  const rows = [];
+  if(applied.age_min != null || applied.age_max != null){
+    rows.push('<div><strong>Idade:</strong> ' + (applied.age_min ?? '?') + ' – ' + (applied.age_max ?? '?') + ' anos</div>');
+  }
+  if(applied.genders && applied.genders.length){
+    rows.push('<div><strong>Gênero:</strong> ' + applied.genders.map(g => _escHtml(g)).join(', ') + '</div>');
+  }
+  if(applied.locations && applied.locations.length){
+    rows.push('<div><strong>Local:</strong> ' + applied.locations.map(l => _escHtml(l)).join(', ') + '</div>');
+  }
+  return rows.length ? rows.join('') : '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">nenhuma sobrescrita</span>';
+}
+
+// Um card por seção (mesmo padrão visual dos cards de "Sugestão da IA")
+// — `sections` é uma lista de {label, html}.
+function _audDetailCardHtml(sections){
+  return '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--border);margin-bottom:16px">'
+    + sections.map(s => '<div style="background:var(--bg);padding:16px 18px">'
+      + '<div class="desd-format-group-lbl" style="margin-top:0">' + _escHtml(s.label) + '</div>'
+      + s.html
+      + '</div>').join('')
+    + '</div>';
+}
+
+function audOpenDetailModal(idx){
+  const entry = AUD_CREATED_SESSION[idx];
+  if(!entry) return;
+
+  document.getElementById('audDetailModalTitle').textContent = entry.name;
+  document.getElementById('audDetailModalSubtitle').textContent =
+    entry.platformLabel + ' · ' + (entry.workspaceName || '') + ' · criada ' + (entry.criada || '');
+
+  const bodyEl = document.getElementById('audDetailModalBody');
+  const applied = entry.applied;
+
+  if(!applied){
+    // Preset salvo antes do campo `applied` existir (ou plataforma que
+    // falhou na implementação) — cai pra mostrar a sugestão original,
+    // com aviso de que pode não refletir o que foi de fato aplicado.
+    const raw = (entry.suggestion || {})[entry.platform] || {};
+    let html = '<div style="background:#fef9c3;border:1px solid #fde68a;padding:10px 14px;margin-bottom:16px;font-family:var(--mono);font-size:10px;color:#854d0e;letter-spacing:.04em">'
+      + '// audiência criada antes desse detalhe existir (ou a implementação não teve sucesso) — mostrando a sugestão original, pode não refletir exatamente o que foi aplicado na plataforma.</div>';
+    if(entry.platform === 'meta'){
+      html += _audDetailCardHtml([
+        {label: 'Interesses (sugestão)', html: _audTagsHtml((raw.interests || []).map(i => i.name || i))},
+        {label: 'Comportamentos (sugestão)', html: _audTagsHtml((raw.behaviors || []).map(b => b.name || b))},
+        {label: 'Demografia (sugestão)', html: _audDemographicsHtml(raw.demographics || {})},
+      ]);
+    } else if(entry.platform === 'google_ads'){
+      html += _audDetailCardHtml([
+        {label: 'Custom Segment — keywords (sugestão)', html: _audTagsHtml(raw.custom_segment_keywords || [])},
+        {label: 'Custom Segment — URLs (sugestão)', html: _audTagsHtml(raw.custom_segment_urls || [])},
+        {label: 'Search — keywords (sugestão, ' + ((raw.search_keywords || []).length) + ')', html: _audTagsHtml((raw.search_keywords || []).slice(0, 30))},
+      ]);
+    } else {
+      html += _audDetailCardHtml([
+        {label: 'Categorias de interesse (sugestão)', html: _audTagsHtml((raw.interest_categories || []).map(i => i.name || i))},
+        {label: 'Categorias de comportamento (sugestão)', html: _audTagsHtml((raw.behavior_categories || []).map(b => b.name || b))},
+        {label: 'Demografia (sugestão)', html: _audDemographicsHtml(raw.demographics || {})},
+      ]);
+    }
+    bodyEl.innerHTML = html;
+    document.getElementById('audDetailModalOverlay').style.display = 'flex';
+    return;
+  }
+
+  let html = '';
+  if(entry.platform === 'meta'){
+    html = _audDetailCardHtml([
+      {label: 'Interesses aplicados (' + (applied.interests || []).length + ')', html: _audTagsHtml(applied.interests)},
+      {label: 'Comportamentos aplicados (' + (applied.behaviors || []).length + ')', html: _audTagsHtml(applied.behaviors)},
+      {label: 'Demografia/geo aplicada', html: _audDemographicsHtml(applied)},
+    ]);
+  } else if(entry.platform === 'google_ads'){
+    html = _audDetailCardHtml([
+      {label: 'Custom Segment — keywords (' + (applied.custom_segment_keywords || []).length + ')', html: _audTagsHtml(applied.custom_segment_keywords)},
+      {label: 'Custom Segment — URLs (' + (applied.custom_segment_urls || []).length + ')', html: _audTagsHtml(applied.custom_segment_urls)},
+      {label: 'Search — keywords aplicadas (' + (applied.search_keywords || []).length + ')', html: _audTagsHtml((applied.search_keywords || []).slice(0, 50))},
+      {label: 'Demografia/geo aplicada', html: _audDemographicsHtml(applied)},
+    ]);
+    if((applied.search_keywords || []).length > 50){
+      html += '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:-8px;margin-bottom:16px">// mostrando as 50 primeiras de ' + applied.search_keywords.length + ' keywords aplicadas</div>';
+    }
+  } else {
+    html = _audDetailCardHtml([
+      {label: 'Categorias de interesse aplicadas (' + (applied.interest_categories || []).length + ')', html: _audTagsHtml(applied.interest_categories)},
+      {label: 'Categorias de comportamento aplicadas (' + (applied.behavior_categories || []).length + ')', html: _audTagsHtml(applied.behavior_categories)},
+      {label: 'Demografia/geo aplicada', html: _audDemographicsHtml(applied)},
+    ]);
+  }
+  bodyEl.innerHTML = html;
+  document.getElementById('audDetailModalOverlay').style.display = 'flex';
+}
+
+function audCloseDetailModal(){
+  document.getElementById('audDetailModalOverlay').style.display = 'none';
 }
 
 async function audGenerateSuggestion(){
@@ -2216,6 +2344,7 @@ async function audApprove(){
         creationOk: info.ok,
         criada: 'agora',
         suggestion: audLastSuggestion,
+        applied: info.applied || null,
         googleCustomAudienceResourceName: key === 'google_ads' ? (info.custom_audience_resource_name || null) : null,
         // Novo — id do documento salvo no Firestore (ver
         // /audiences/list) — precisa disso pro "Implementar" saber qual
