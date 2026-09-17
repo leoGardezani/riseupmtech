@@ -804,6 +804,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="repo-tags" id="audGoogleUrlsTags"></div>
           </div>
           <div style="background:var(--bg);padding:16px 18px">
+            <div class="desd-format-group-lbl" style="margin-top:0">Google Ads — Audiências Nativas <span style="text-transform:none;color:var(--ink-muted)">— só Display/Demand Gen</span></div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:4px">Afinidade</div>
+            <div class="repo-tags" id="audGoogleAffinityTags" style="margin-bottom:8px"></div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:4px">No Mercado</div>
+            <div class="repo-tags" id="audGoogleInMarketTags" style="margin-bottom:8px"></div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:4px">Demografia Detalhada</div>
+            <div class="repo-tags" id="audGoogleDemographicsTags"></div>
+          </div>
+          <div style="background:var(--bg);padding:16px 18px">
             <div class="desd-format-group-lbl" style="margin-top:0">Meta Ads — Detailed Targeting</div>
             <div class="repo-tags" id="audMetaInterestsTags" style="margin-bottom:8px"></div>
             <div class="repo-tags" id="audMetaBehaviorsTags" style="margin-bottom:12px"></div>
@@ -2127,6 +2136,9 @@ function audOpenDetailModal(idx){
         {label: 'Custom Segment — keywords (sugestão)', html: _audTagsHtml(raw.custom_segment_keywords || [])},
         {label: 'Custom Segment — URLs (sugestão)', html: _audTagsHtml(raw.custom_segment_urls || [])},
         {label: 'Search — keywords (sugestão, ' + ((raw.search_keywords || []).length) + ')', html: _audTagsHtml((raw.search_keywords || []).slice(0, 30))},
+        {label: 'Afinidade (sugestão)', html: _audTagsHtml((raw.affinity_segments || []).map(i => i.name || i))},
+        {label: 'No Mercado (sugestão)', html: _audTagsHtml((raw.in_market_segments || []).map(i => i.name || i))},
+        {label: 'Demografia Detalhada (sugestão)', html: _audTagsHtml((raw.detailed_demographics || []).map(i => i.name || i))},
       ]);
     } else {
       html += _audDetailCardHtml([
@@ -2152,6 +2164,9 @@ function audOpenDetailModal(idx){
       {label: 'Custom Segment — keywords (' + (applied.custom_segment_keywords || []).length + ')', html: _audTagsHtml(applied.custom_segment_keywords)},
       {label: 'Custom Segment — URLs (' + (applied.custom_segment_urls || []).length + ')', html: _audTagsHtml(applied.custom_segment_urls)},
       {label: 'Search — keywords aplicadas (' + (applied.search_keywords || []).length + ')', html: _audTagsHtml((applied.search_keywords || []).slice(0, 50))},
+      {label: 'Afinidade aplicada (' + (applied.affinity_segments || []).length + ')', html: _audTagsHtml(applied.affinity_segments)},
+      {label: 'No Mercado aplicado (' + (applied.in_market_segments || []).length + ')', html: _audTagsHtml(applied.in_market_segments)},
+      {label: 'Demografia Detalhada aplicada (' + (applied.detailed_demographics || []).length + ')', html: _audTagsHtml(applied.detailed_demographics)},
       {label: 'Demografia/geo aplicada', html: _audDemographicsHtml(applied)},
     ]);
     if((applied.search_keywords || []).length > 50){
@@ -2236,6 +2251,9 @@ function audRenderSuggestion(suggestions){
   const ga = s.google_ads || {};
   audRenderTags('audGoogleKeywordsTags', ga.custom_segment_keywords);
   audRenderTags('audGoogleUrlsTags', ga.custom_segment_urls);
+  audRenderTags('audGoogleAffinityTags', ga.affinity_segments);
+  audRenderTags('audGoogleInMarketTags', ga.in_market_segments);
+  audRenderTags('audGoogleDemographicsTags', ga.detailed_demographics);
   const searchKeywords = ga.search_keywords || [];
   document.getElementById('audSearchKeywordsCount').textContent = searchKeywords.length || '—';
   audRenderTags('audSearchKeywordsTags', searchKeywords);
