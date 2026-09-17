@@ -2329,6 +2329,26 @@ async function audApprove(){
   if(!name){ toast('Dê um nome pra audiência antes de aprovar', 'er'); return; }
   if(!audLastSuggestion){ toast('Nenhuma sugestão carregada', 'er'); return; }
 
+  // Novo (pedido do Leonardo, achado ao vivo — esqueceu de marcar o ad
+  // set do Meta e a audiência simplesmente pulou essa plataforma sem
+  // avisar nada, só apareceu faltando depois). Antes de submeter,
+  // confere se alguma plataforma que TEM ad group/ad set disponível pra
+  // escolher (ou seja, está conectada e tem opções na tela) ficou com
+  // ZERO selecionado. Google Ads conta Display+Search juntos, já que na
+  // tela são dois seletores mas o backend trata como uma coisa só (ver
+  // google_ad_group_resource_names na chamada abaixo). Não bloqueia —
+  // deixar uma plataforma de fora às vezes é intencional — só confirma.
+  const audPlatformGroups = [
+    {label: 'Meta', available: (audTargetsData.meta.ad_groups || []).length, selected: audSelectedTargets.meta.ad_groups.size},
+    {label: 'Google Ads', available: (audTargetsData.google_ads.ad_groups || []).length + (audTargetsData.google_ads_search.ad_groups || []).length, selected: audSelectedTargets.google_ads.ad_groups.size + audSelectedTargets.google_ads_search.ad_groups.size},
+    {label: 'TikTok Ads', available: (audTargetsData.tiktok.ad_groups || []).length, selected: audSelectedTargets.tiktok.ad_groups.size},
+  ];
+  const audMissingPlatforms = audPlatformGroups.filter(p => p.available > 0 && p.selected === 0).map(p => p.label);
+  if(audMissingPlatforms.length){
+    const proceed = confirm(`Nenhum ad group/ad set selecionado em: ${audMissingPlatforms.join(', ')}. Essa(s) plataforma(s) vão ficar de fora da audiência. Continuar mesmo assim?`);
+    if(!proceed) return;
+  }
+
   const statusEl = document.getElementById('audApproveStatus');
   const btns = document.querySelectorAll('#audResultBox .btn-sm');
   btns.forEach(b => b.disabled = true);
