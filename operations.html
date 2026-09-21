@@ -679,7 +679,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <div class="desd-step-lbl">3. Gerar variações com IA</div>
         <button class="btn-full" id="desdGenerateBtn" onclick="desdGenerateAiVariants()">✦ Gerar variações com IA</button>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:6px;line-height:1.6">// pode levar 1-2 min por grupo (imagem via Gemini) — cada grupo recebe sua própria leva de variações, uma por linha. Vídeo (TikTok) não é gerado por IA — envie pronto em Criativos → Upload Direto</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:6px;line-height:1.6">// pode levar 1-2 min por grupo (imagem via Gemini, vídeo TikTok via Veo 3.1 · 6s) — cada grupo recebe sua própria leva de variações, uma por linha</div>
         <div id="desdAiStatus" style="margin-top:10px"></div>
         <div id="desdAiGroupsContainer" style="margin-top:12px"></div>
       </div>
@@ -1111,7 +1111,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       <div class="coll-body open">
         <div style="font-size:13px;color:var(--ink-mid);margin:12px 0 16px;line-height:1.6">
-          Pra quando o criativo já está pronto (ex: vídeo editado externamente — o TikTok em particular é essencialmente uma plataforma de vídeo, e a geração via IA só produz peça estática). Sobe o arquivo do jeito que está, sem nenhum processamento, e manda direto pra fila de aprovação abaixo.
+          Pra quando o criativo já está pronto (ex: vídeo editado externamente, ou qualquer peça que você não quer passar pela IA). Sobe o arquivo do jeito que está, sem nenhum processamento, e manda direto pra fila de aprovação abaixo.
         </div>
         <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px">
           <div class="fg" style="flex:1;margin-bottom:0"><label class="fl">Workspace</label><select class="fs_" id="upfWorkspaceSelect" onchange="upfOnWorkspaceChange()"><option value="">Carregando...</option></select></div>
@@ -3973,13 +3973,13 @@ async function desdGenerateAiVariants(){
   const btn = document.getElementById('desdGenerateBtn');
   const groups = desdComputeGroups();
   if(!groups.length){ toast('Marque ao menos uma linha da fila (define o(s) formato(s) da pré-visualização)', 'er'); return; }
-  // Decisão 09/set/2026 (pedido do Leonardo): vídeo não é mais gerado por
-  // IA aqui — TikTok (único formato que exige vídeo) sobe pronto pela
-  // aba Criativos → Upload Direto, produzido fora pela agência/cliente.
-  if(groups.some(g => g.isTikTok)){
-    toast('TikTok (vídeo) não é gerado por IA — envie o vídeo pronto em Criativos → Upload Direto', 'er');
-    return;
-  }
+  // Vídeo TikTok (Veo 3.1, 6s — único valor validado ao vivo) é gerado
+  // por IA normalmente aqui, a partir do mesmo KV. 15s ficou de fora
+  // (nunca testado contra a API real) — por isso não existe seletor de
+  // duração no desdobrador, o backend sempre usa 6s por padrão pra
+  // grupos TikTok. Upload Direto (aba Criativos) continua existindo como
+  // alternativa pra quando o vídeo já vem pronto por fora, não é mais a
+  // única opção pro TikTok.
   // KV só é exigido se pelo menos um grupo selecionado NÃO for de texto —
   // RSA (Search) não tem peça visual nenhuma, só headline/description.
   const needsKv = groups.some(g => !g.isText);
@@ -4034,6 +4034,12 @@ async function desdGenerateAiVariants(){
       } else {
         body.blob_path = desdState.blobPath;
         body.brand_instructions = promptText;
+        // TikTok sempre gera vídeo via Veo — fixo em 6s (único valor
+        // validado ao vivo; 15s fica de fora até ser testado contra a
+        // API real). O backend já teria esse default sozinho, mas manda
+        // explícito aqui pra deixar claro no payload o que está sendo
+        // pedido.
+        if(group.isTikTok){ body.duration_seconds = 6; }
       }
 
       const res = await fetch(API_BASE + '/desdobrador/ai-preview', {
