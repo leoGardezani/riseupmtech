@@ -383,10 +383,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .desd-motion-card.on{border-color:var(--ink);background:var(--bg2);}
   .desd-motion-name{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:3px;}
   .desd-motion-desc{font-size:10px;color:var(--ink-mid);line-height:1.4;}
-  .desd-preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1px;background:var(--border);margin-top:16px;}
+  .desd-preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,200px));gap:1px;background:var(--border);margin-top:16px;}
   .desd-preview-card{background:var(--bg);padding:12px;}
   .desd-preview-card canvas{width:100%;height:auto;display:block;background:#000;margin-bottom:8px;}
   .desd-preview-lbl{font-family:var(--mono);font-size:9px;color:var(--ink-mid);letter-spacing:.04em;}
+  /* Fix 21/set/2026 (pedido do Leonardo, tela muito carregada): a grade de
+     atribuição (linha -> variação) agora espelha as mesmas colunas da grade
+     de miniaturas acima, em vez de uma lista vertical de linhas full-width
+     — cada seletor fica alinhado embaixo da miniatura correspondente, sem
+     repetir nome de campanha (já está no título do card) nem texto solto
+     "alinhado à esquerda" ocupando a largura toda. */
+  .desd-assign-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,200px));gap:1px;background:var(--border);}
+  .desd-assign-cell{background:var(--bg);padding:8px 12px 12px;}
+  .desd-assign-lbl{font-family:var(--mono);font-size:9px;color:var(--ink-muted);letter-spacing:.04em;margin-bottom:4px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .desd-toggle-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
   .desd-toggle{position:relative;width:34px;height:18px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;flex-shrink:0;}
   .desd-toggle.on{background:var(--ink);}
@@ -4167,16 +4176,22 @@ function desdRenderAiVariantGrid(){
       </div>`;
     }).join('');
 
-    const rowsHtml = g.rows.map(row => {
+    // Fix 21/set/2026 (pedido do Leonardo — tela carregada demais): rótulo
+    // por linha não repete mais campanha inteira (já está no tbox-title
+    // acima, uma vez só) — só "Linha N · tamanho", e o layout virou grade
+    // (.desd-assign-grid) com as MESMAS colunas da grade de miniaturas
+    // logo acima, em vez de uma lista vertical de itens full-width — cada
+    // seletor fica alinhado embaixo da miniatura correspondente.
+    const rowsHtml = g.rows.map((row, i) => {
       const okVariants = g.variants.filter(v => v.data_base64);
       const optionsHtml = okVariants.map(v =>
         `<option value="${v.index}" ${g.assignments[row.row_id] === v.index ? 'selected' : ''}>Variação ${v.index + 1}</option>`
       ).join('');
-      return `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--line)">
-        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-mid)">${_escHtml(row.campaign_name)} · ${_escHtml(row.creative_size || '')}</span>
+      return `<div class="desd-assign-cell">
+        <span class="desd-assign-lbl" title="${_escHtml(row.campaign_name)} · ${_escHtml(row.creative_size || '')}">Linha ${i + 1} · ${_escHtml(row.creative_size || '')}</span>
         ${okVariants.length
-          ? `<select class="fs_" style="font-size:10px;padding:4px 8px" onchange="desdAssignVariantToRow('${_escHtml(key)}','${row.row_id}', parseInt(this.value,10))">${optionsHtml}</select>`
-          : `<span style="font-family:var(--mono);font-size:9px;color:var(--danger)">sem variação disponível</span>`}
+          ? `<select class="fs_" style="font-size:10px;padding:4px 8px;width:100%" onchange="desdAssignVariantToRow('${_escHtml(key)}','${row.row_id}', parseInt(this.value,10))">${optionsHtml}</select>`
+          : `<span style="font-family:var(--mono);font-size:9px;color:var(--danger)">sem variação</span>`}
       </div>`;
     }).join('');
 
@@ -4185,7 +4200,7 @@ function desdRenderAiVariantGrid(){
         <div class="tbox-title">${_escHtml(g.rows[0].campaign_name)} · ${_escHtml(g.rows[0].source)}${isVideo ? ' · vídeo' : ''} · ${g.rows.length} linha(s)</div>
       </div>
       <div class="desd-preview-grid" style="padding:12px 20px 0">${cardsHtml}</div>
-      <div style="padding:4px 20px 14px">${rowsHtml}</div>
+      <div class="desd-assign-grid" style="padding:8px 20px 14px">${rowsHtml}</div>
     </div>`;
   }).join('');
 
