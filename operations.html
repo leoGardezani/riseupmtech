@@ -3627,6 +3627,14 @@ const API_BASE = document.querySelector('#rp-config .fi[value*="southamerica-eas
 // creative_width, creative_title, creative_description, request_date,
 // delivery_date.
 let DESD_QUEUE = [];
+// Novo (21/set/2026, pedido do Leonardo): quantas variações de IA gerar por
+// grupo (chave = desdGroupKey), vindo de GET /desdobrador/variant-counts —
+// que lê o media-plan fresco (ver plan_sync.get_variant_counts_by_key no
+// backend), o MAIOR `volume` entre as linhas que caem em cada chave, não a
+// soma. Carregado junto com a fila (desdLoadQueue); se a chamada falhar ou
+// uma chave não aparecer aqui, o fallback é group.rows.length (ver uso em
+// desdGenerateAiVariants).
+let DESD_VARIANT_COUNTS = {};
 let desdWorkspaceId = '';
 
 let desdState = {
@@ -3747,6 +3755,14 @@ async function desdLoadQueue(){
     DESD_QUEUE = [];
     if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--danger);font-family:var(--mono);font-size:11px;padding:20px">Não foi possível carregar a fila — verifique login/conexão.</td></tr>';
     return;
+  }
+  // Não bloqueia a fila se essa chamada falhar — fallback pro group.rows.length
+  // de sempre (ver desdGenerateAiVariants).
+  try{
+    const vcRes = await fetch(API_BASE + '/desdobrador/variant-counts?workspace_id=' + encodeURIComponent(desdWorkspaceId), { headers: authHeaders() });
+    DESD_VARIANT_COUNTS = vcRes.ok ? ((await vcRes.json()).counts || {}) : {};
+  }catch(e){
+    DESD_VARIANT_COUNTS = {};
   }
   renderDesdQueue();
   desdRenderSelectedSummary();
@@ -4045,14 +4061,13 @@ async function desdGenerateAiVariants(){
         body.brand_instructions = promptText;
         // Fix 21/set/2026 (pedido do Leonardo): duas linhas DISTINTAS do
         // media-plan podem cair no mesmo grupo (mesma campanha/source/
-        // medium/creative_type, ex: dois públicos diferentes) — antes
-        // disso o backend gerava uma variação por RÉPLICA (soma dos
-        // volumes das linhas, default = len(row_ids)). Agora manda o
-        // MAIOR line_volume entre as linhas do grupo — as de volume menor
-        // reaproveitam as primeiras N variações desse conjunto (ver
-        // variant_position no auto-assignment logo abaixo). Fallback
-        // "|| 1" cobre linha sincronizada antes dessa coluna existir.
-        body.n_variants = Math.max(...group.rows.map(r => r.line_volume || 1));
+        // medium/creative_type, ex: dois públicos diferentes) — gerar uma
+        // variação por RÉPLICA (soma dos volumes das linhas) gera peça
+        // demais. Usa o MAIOR volume entre as linhas do grupo, vindo de
+        // GET /desdobrador/variant-counts (lê o media-plan fresco, ver
+        // DESD_VARIANT_COUNTS). Fallback pro comportamento de sempre
+        // (uma por linha) se a chave não aparecer lá por algum motivo.
+        body.n_variants = DESD_VARIANT_COUNTS[group.key] || group.rows.length;
         // TikTok sempre gera vídeo via Veo — fixo em 6s (único valor
         // validado ao vivo; 15s fica de fora até ser testado contra a
         // API real). O backend já teria esse default sozinho, mas manda
@@ -4108,19 +4123,16 @@ async function desdGenerateAiVariants(){
       }
 
       const variants = data.variants || [];
-      // Fix 21/set/2026 (pedido do Leonardo): auto-atribuição agora usa a
-      // POSIÇÃO DA LINHA DENTRO DA SUA PRÓPRIA LINHA DE ORIGEM
-      // (row.variant_position, 0-based), não mais a posição sequencial no
-      // grupo combinado — é isso que faz linhas de volume menor
-      // reaproveitarem as primeiras N variações em vez de cada réplica
-      // "roubar" uma variação nova. `% okVariants.length` continua como
-      // rede de segurança (ex: alguma variação falhou e sobraram menos
-      // que o esperado). O usuário pode reatribuir manualmente pelo
-      // seletor de cada linha depois (ver desdAssignVariantToRow).
+      // Auto-atribuição sequencial: variação i vai pra linha i do grupo,
+      // ciclando se vieram menos variações OK do que linhas (ex: várias
+      // linhas reaproveitando o mesmo conjunto menor de N variações — ver
+      // n_variants/DESD_VARIANT_COUNTS acima — ou alguma variação falhou).
+      // O usuário pode reatribuir manualmente pelo seletor de cada linha
+      // depois (ver desdAssignVariantToRow).
       const okVariants = variants.filter(v => v.data_base64);
       const assignments = {};
-      group.rows.forEach(row => {
-        if(okVariants.length) assignments[row.row_id] = okVariants[(row.variant_position || 0) % okVariants.length].index;
+      group.rows.forEach((row, i) => {
+        if(okVariants.length) assignments[row.row_id] = okVariants[i % okVariants.length].index;
       });
 
       desdState.groups[group.key] = {
