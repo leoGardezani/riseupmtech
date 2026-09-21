@@ -395,7 +395,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
      "alinhado à esquerda" ocupando a largura toda. */
   .desd-assign-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,200px));gap:1px;background:var(--border);}
   .desd-assign-cell{background:var(--bg);padding:8px 12px 12px;}
-  .desd-assign-lbl{font-family:var(--mono);font-size:9px;color:var(--ink-muted);letter-spacing:.04em;margin-bottom:4px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .desd-assign-lbl{font-family:var(--mono);font-size:9px;color:var(--ink);font-weight:700;letter-spacing:.04em;margin-bottom:4px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .desd-toggle-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
   .desd-toggle{position:relative;width:34px;height:18px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;flex-shrink:0;}
   .desd-toggle.on{background:var(--ink);}
@@ -4043,6 +4043,16 @@ async function desdGenerateAiVariants(){
       } else {
         body.blob_path = desdState.blobPath;
         body.brand_instructions = promptText;
+        // Fix 21/set/2026 (pedido do Leonardo): duas linhas DISTINTAS do
+        // media-plan podem cair no mesmo grupo (mesma campanha/source/
+        // medium/creative_type, ex: dois públicos diferentes) — antes
+        // disso o backend gerava uma variação por RÉPLICA (soma dos
+        // volumes das linhas, default = len(row_ids)). Agora manda o
+        // MAIOR line_volume entre as linhas do grupo — as de volume menor
+        // reaproveitam as primeiras N variações desse conjunto (ver
+        // variant_position no auto-assignment logo abaixo). Fallback
+        // "|| 1" cobre linha sincronizada antes dessa coluna existir.
+        body.n_variants = Math.max(...group.rows.map(r => r.line_volume || 1));
         // TikTok sempre gera vídeo via Veo — fixo em 6s (único valor
         // validado ao vivo; 15s fica de fora até ser testado contra a
         // API real). O backend já teria esse default sozinho, mas manda
@@ -4098,14 +4108,19 @@ async function desdGenerateAiVariants(){
       }
 
       const variants = data.variants || [];
-      // Auto-atribuição sequencial: variação i vai pra linha i do grupo,
-      // ciclando se vieram menos variações OK do que linhas (ex: alguma
-      // falhou). O usuário pode reatribuir manualmente pelo seletor de
-      // cada linha depois (ver desdAssignVariantToRow).
+      // Fix 21/set/2026 (pedido do Leonardo): auto-atribuição agora usa a
+      // POSIÇÃO DA LINHA DENTRO DA SUA PRÓPRIA LINHA DE ORIGEM
+      // (row.variant_position, 0-based), não mais a posição sequencial no
+      // grupo combinado — é isso que faz linhas de volume menor
+      // reaproveitarem as primeiras N variações em vez de cada réplica
+      // "roubar" uma variação nova. `% okVariants.length` continua como
+      // rede de segurança (ex: alguma variação falhou e sobraram menos
+      // que o esperado). O usuário pode reatribuir manualmente pelo
+      // seletor de cada linha depois (ver desdAssignVariantToRow).
       const okVariants = variants.filter(v => v.data_base64);
       const assignments = {};
-      group.rows.forEach((row, i) => {
-        if(okVariants.length) assignments[row.row_id] = okVariants[i % okVariants.length].index;
+      group.rows.forEach(row => {
+        if(okVariants.length) assignments[row.row_id] = okVariants[(row.variant_position || 0) % okVariants.length].index;
       });
 
       desdState.groups[group.key] = {
@@ -4188,7 +4203,7 @@ function desdRenderAiVariantGrid(){
         `<option value="${v.index}" ${g.assignments[row.row_id] === v.index ? 'selected' : ''}>Variação ${v.index + 1}</option>`
       ).join('');
       return `<div class="desd-assign-cell">
-        <span class="desd-assign-lbl" title="${_escHtml(row.campaign_name)} · ${_escHtml(row.creative_size || '')}">Linha ${i + 1} · ${_escHtml(row.creative_size || '')}</span>
+        <span class="desd-assign-lbl" title="${_escHtml(row.campaign_name)} · ${_escHtml(row.creative_size || '')}">→ Anúncio ${i + 1}</span>
         ${okVariants.length
           ? `<select class="fs_" style="font-size:10px;padding:4px 8px;width:100%" onchange="desdAssignVariantToRow('${_escHtml(key)}','${row.row_id}', parseInt(this.value,10))">${optionsHtml}</select>`
           : `<span style="font-family:var(--mono);font-size:9px;color:var(--danger)">sem variação</span>`}
