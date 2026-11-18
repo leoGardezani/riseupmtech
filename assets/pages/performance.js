@@ -23,6 +23,9 @@ function pfPacing(p){
   return '<span style="color:' + col + ';font-weight:600">' + pfPct(p) + '</span> <span style="font-size:9px;color:var(--ink-muted)">' + lbl + '</span>';
 }
 
+const PF_METRICS = [['spend','Investimento',pfMoney],['impressions','Impressões',pfInt],['reach','Alcance',pfInt],
+  ['clicks','Cliques',pfInt],['video_views','Views de vídeo',pfInt],['leads','Leads',pfInt],['conversions','Conversões',pfInt]];
+
 function pfRow(r, first){
   return first
     + '<td class="td-mono">' + pfMoney(r.spend) + '</td>'
@@ -32,6 +35,9 @@ function pfRow(r, first){
     + '<td class="td-mono">' + pfInt(r.clicks) + '</td>'
     + '<td class="td-mono">' + pfPct(pfDiv(r.clicks, r.impressions)) + '</td>';
 }
+
+// Mesma ordem de colunas de pfRow, sem fechar a linha (a tabela de criativo/audiência acrescenta CPC e leads).
+function pfRow2(r, first){ return pfRow(r, first); }
 
 function pfRender(){
   const ok = PF_STATE === 'ok';
@@ -43,6 +49,10 @@ function pfRender(){
     ['k-spend','k-imp','k-reach','k-freq','k-clk','k-ctr','k-cpm','k-cpc','k-vv','k-leads','k-conv','k-pace'].forEach(id => set(id, '—'));
     document.getElementById('pfSource').innerHTML = empty;
     document.getElementById('pfCamp').innerHTML = empty;
+    document.getElementById('pfPacing').innerHTML = empty;
+    document.getElementById('pfMatrix').innerHTML = empty;
+    document.getElementById('pfCreative').innerHTML = empty;
+    document.getElementById('pfAudience').innerHTML = empty;
     if(PF_CHART){ PF_CHART.destroy(); PF_CHART = null; }
     return;
   }
@@ -54,9 +64,20 @@ function pfRender(){
   set('k-ctr', pfPct(pfDiv(t.clk, t.imp)));
   set('k-cpm', pfMoney(pfDiv(t.spend * 1000, t.imp))); set('k-cpc', pfMoney(pfDiv(t.spend, t.clk)));
   set('k-vv', pfInt(t.vv)); set('k-leads', pfInt(t.leads)); set('k-conv', pfInt(t.conv));
-  const spent = PF.by_campaign.reduce((a, c) => a + (Number(c.spent_total) || 0), 0);
-  const exp = PF.by_campaign.reduce((a, c) => a + (c.pacing ? (Number(c.spent_total) || 0) / c.pacing : 0), 0);
-  set('k-pace', exp ? pfPct(spent / exp) : '—');
+  const po = PF.pacing_overall || {};
+  set('k-pace', po.spend && po.spend.pacing != null ? pfPct(po.spend.pacing) : '—');
+  const prow = PF_METRICS.filter(m => po[m[0]]).map(m => {
+    const o = po[m[0]];
+    return '<tr><td class="td-bold">' + m[1] + '</td><td class="td-mono">' + m[2](o.goal) + '</td><td class="td-mono">' + m[2](o.expected)
+      + '</td><td class="td-mono">' + m[2](o.actual) + '</td><td>' + pfPacing(o.pacing) + '</td></tr>';
+  });
+  document.getElementById('pfPacing').innerHTML = prow.length ? prow.join('')
+    : '<tr><td colspan="5"><div style="padding:24px 20px;font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Nenhuma meta cadastrada para este plano ainda.</div></td></tr>';
+  document.getElementById('pfMatrix').innerHTML = PF.by_campaign.map(c => {
+    const pm = c.pacing_by_metric || {};
+    return '<tr><td class="td-bold">' + _escHtml(c.campaign_name || '—') + '</td><td class="td-mono">' + _escHtml(pfSrc(c.source)) + '</td>'
+      + PF_METRICS.map(m => '<td>' + pfPacing(pm[m[0]]) + '</td>').join('') + '</tr>';
+  }).join('');
 
   document.getElementById('pfSource').innerHTML = PF.by_source.map(s =>
     pfRow(s, '<tr><td class="td-bold">' + _escHtml(pfSrc(s.source)) + '</td>')
@@ -67,20 +88,34 @@ function pfRender(){
     + '<td class="td-mono">' + pfInt(c.impressions) + '</td><td class="td-mono">' + pfInt(c.reach) + '</td>'
     + '<td class="td-mono">' + pfDec(pfDiv(c.impressions, c.reach)) + '</td><td class="td-mono">' + pfInt(c.clicks) + '</td>'
     + '<td class="td-mono">' + pfPct(pfDiv(c.clicks, c.impressions)) + '</td><td>' + pfPacing(c.pacing) + '</td></tr>').join('');
+  const tail = r => '<td class="td-mono">' + pfMoney(pfDiv(r.spend, r.clicks)) + '</td><td class="td-mono">' + pfInt(r.leads) + '</td></tr>';
+  const lst = (arr, f) => arr && arr.length ? arr.map(f).join('') : '<tr><td colspan="12"><div style="padding:24px 20px;font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Sem dados no período.</div></td></tr>';
+  document.getElementById('pfCreative').innerHTML = lst(PF.by_creative, r =>
+    pfRow2(r, '<tr><td class="td-bold">' + _escHtml(r.creative_name || '—') + '</td><td class="td-mono">' + _escHtml(r.creative_type || '—')
+      + '</td><td>' + _escHtml(r.campaign_name || '—') + '</td><td class="td-mono">' + _escHtml(pfSrc(r.source)) + '</td>') + tail(r));
+  document.getElementById('pfAudience').innerHTML = lst(PF.by_audience, r =>
+    pfRow2(r, '<tr><td class="td-bold">' + _escHtml(r.audience || '—') + '</td><td class="td-mono">' + _escHtml(pfSrc(r.source)) + '</td>') + tail(r));
   pfChart();
 }
 
+const PF_LABEL = {impressions:'Impressões', reach:'Alcance', clicks:'Cliques', spend:'Investimento', video_views:'Views de vídeo', leads:'Leads', conversions:'Conversões'};
+
 function pfChart(){
   if(PF_STATE !== 'ok') return;
-  const m = document.getElementById('pfMetric').value;
+  const mb = document.getElementById('pfMetricBar').value, ml = document.getElementById('pfMetricLine').value;
   const labels = PF.daily.map(d => RU.fmtDate(d.date));
-  const data = PF.daily.map(d => Number(d[m]) || 0);
+  const vals = m => PF.daily.map(d => Number(d[m]) || 0);
   if(PF_CHART) PF_CHART.destroy();
   PF_CHART = new Chart(document.getElementById('pfChart'), {
-    type: 'line',
-    data: {labels, datasets: [{data, borderColor: '#111', backgroundColor: 'rgba(17,17,17,.06)', fill: true, tension: .25, pointRadius: 0, borderWidth: 2}]},
-    options: {responsive: true, maintainAspectRatio: false, plugins: {legend: {display: false}},
-              scales: {x: {grid: {display: false}, ticks: {maxTicksLimit: 10}}, y: {beginAtZero: true}}}
+    data: {labels, datasets: [
+      {type: 'bar', label: PF_LABEL[mb], data: vals(mb), backgroundColor: 'rgba(17,17,17,.18)', yAxisID: 'y', order: 2},
+      {type: 'line', label: PF_LABEL[ml], data: vals(ml), borderColor: '#111', backgroundColor: '#111', tension: .25, pointRadius: 0, borderWidth: 2, yAxisID: 'y1', order: 1}
+    ]},
+    options: {responsive: true, maintainAspectRatio: false, interaction: {mode: 'index', intersect: false},
+      plugins: {legend: {display: true, position: 'bottom', labels: {boxWidth: 12, font: {size: 10}}}},
+      scales: {x: {grid: {display: false}, ticks: {maxTicksLimit: 10}},
+        y: {beginAtZero: true, position: 'left', title: {display: true, text: PF_LABEL[mb], font: {size: 10}}},
+        y1: {beginAtZero: true, position: 'right', grid: {drawOnChartArea: false}, title: {display: true, text: PF_LABEL[ml], font: {size: 10}}}}}
   });
 }
 
@@ -97,6 +132,7 @@ async function pfLoad(wsId, why){
   pfRender();
 }
 
-document.getElementById('pfMetric').addEventListener('change', pfChart);
+document.getElementById('pfMetricBar').addEventListener('change', pfChart);
+document.getElementById('pfMetricLine').addEventListener('change', pfChart);
 document.getElementById('pfDays').addEventListener('change', () => pfLoad(document.getElementById('pfWorkspace').value));
 RU.initWorkspaceSelect(document.getElementById('pfWorkspace'), pfLoad);

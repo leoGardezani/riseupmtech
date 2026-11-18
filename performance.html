@@ -14,11 +14,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link rel="stylesheet" href="assets/shared.css?v=20261118f">
+<link rel="stylesheet" href="assets/shared.css?v=20261118i">
 </head>
 <body data-page="performance" data-nofilters>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<script src="assets/shell.js?v=20261118f"></script>
+<script src="assets/shell.js?v=20261118i"></script>
 <div class="main" id="main">
   <div class="tab-page active" id="tab-performance">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
@@ -55,11 +55,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     <div class="tbox" style="margin-top:24px">
       <div class="tbox-head">
+        <div class="tbox-title">Pacing por indicador</div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// realizado ÷ esperado até hoje, com a meta distribuída ao longo do período da linha</span>
+      </div>
+      <table><thead><tr>
+        <th>Indicador</th><th>Meta total</th><th>Esperado até hoje</th><th>Realizado</th><th>Pacing</th>
+      </tr></thead>
+      <tbody id="pfPacing"></tbody></table>
+    </div>
+
+    <div class="tbox" style="margin-top:24px">
+      <div class="tbox-head">
         <div class="tbox-title">Evolução diária</div>
-        <select class="fs_" id="pfMetric" style="width:auto;min-width:150px;margin:0">
-          <option value="impressions">Impressões</option><option value="reach">Alcance</option>
-          <option value="clicks">Cliques</option><option value="spend">Investimento</option>
-        </select>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--ink-muted)">BARRA</span><select class="fs_" id="pfMetricBar" style="width:auto;min-width:140px;margin:0"><option value="impressions">Impressões</option><option value="reach">Alcance</option><option value="clicks">Cliques</option><option value="spend">Investimento</option><option value="video_views">Views de vídeo</option><option value="leads">Leads</option><option value="conversions">Conversões</option></select><span style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--ink-muted)">LINHA</span><select class="fs_" id="pfMetricLine" style="width:auto;min-width:140px;margin:0"><option value="impressions">Impressões</option><option value="reach">Alcance</option><option value="clicks" selected>Cliques</option><option value="spend">Investimento</option><option value="video_views">Views de vídeo</option><option value="leads">Leads</option><option value="conversions">Conversões</option></select></div>
       </div>
       <div style="padding:16px 20px;height:280px"><canvas id="pfChart"></canvas></div>
     </div>
@@ -78,14 +86,40 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// pacing = gasto ÷ gasto esperado até hoje</span>
       </div>
       <table><thead><tr>
-        <th>Campanha</th><th>Plataforma</th><th>Investimento</th><th>Planejado</th><th>Impressões</th><th>Alcance</th><th>Freq.</th><th>Cliques</th><th>CTR</th><th>Pacing</th>
+        <th>Campanha</th><th>Plataforma</th><th>Investimento</th><th>Planejado</th><th>Impressões</th><th>Alcance</th><th>Freq.</th><th>Cliques</th><th>CTR</th><th>Pacing invest.</th>
       </tr></thead>
       <tbody id="pfCamp"></tbody></table>
+    </div>
+
+    <div class="tbox" style="margin-bottom:24px">
+      <div class="tbox-head">
+        <div class="tbox-title">Pacing por campanha e indicador</div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// "—" = sem meta cadastrada para o indicador</span>
+      </div>
+      <table><thead><tr>
+        <th>Campanha</th><th>Plataforma</th><th>Investimento</th><th>Impressões</th><th>Alcance</th><th>Cliques</th><th>Views de vídeo</th><th>Leads</th><th>Conversões</th>
+      </tr></thead>
+      <tbody id="pfMatrix"></tbody></table>
+    </div>
+    <div class="tbox" style="margin-bottom:24px">
+      <div class="tbox-head"><div class="tbox-title">Performance por criativo</div></div>
+      <table><thead><tr>
+        <th>Criativo</th><th>Tipo</th><th>Campanha</th><th>Plataforma</th><th>Investimento</th><th>Impressões</th><th>Alcance</th><th>Freq.</th><th>Cliques</th><th>CTR</th><th>CPC</th><th>Leads</th>
+      </tr></thead>
+      <tbody id="pfCreative"></tbody></table>
+    </div>
+
+    <div class="tbox" style="margin-bottom:24px">
+      <div class="tbox-head"><div class="tbox-title">Performance por audiência</div></div>
+      <table><thead><tr>
+        <th>Audiência</th><th>Plataforma</th><th>Investimento</th><th>Impressões</th><th>Alcance</th><th>Freq.</th><th>Cliques</th><th>CTR</th><th>CPC</th><th>Leads</th>
+      </tr></thead>
+      <tbody id="pfAudience"></tbody></table>
     </div>
   </div>
 </div>
 
-<script src="assets/core.js?v=20261118f"></script>
-<script src="assets/pages/performance.js?v=20261118f"></script>
+<script src="assets/core.js?v=20261118i"></script>
+<script src="assets/pages/performance.js?v=20261118i"></script>
 </body>
 </html>
