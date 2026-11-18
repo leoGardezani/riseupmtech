@@ -403,7 +403,7 @@
 
 
   /* Barra superior responsiva: logo à esquerda, menus centralizados, usuário e botões à direita */
-  @media(max-width:1600px){.topbar-user{display:none;}}
+    .topbar-user{display:none;}
   .topbar-right .btn-menu{white-space:nowrap;flex-shrink:0;}
   @media(max-width:1280px){.topbar{padding:0 16px;column-gap:10px;}.topbar-user{display:none;}.tab-btn{font-size:9px;}}
   @media(max-width:1020px){.topbar-logo .jp{font-size:11px;}.tab-btn{font-size:8.5px;padding:8px 7px;}.btn-menu.btn-logout{padding-left:10px;padding-right:10px;}}
