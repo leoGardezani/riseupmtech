@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rise Up MTech — Início</title>
+<title>Rise Up MTech — Yōkoso</title>
 <script>
 (function(){
   const params = new URLSearchParams(window.location.search);
@@ -36,7 +36,7 @@
   // Links antigos (operations.html#desdobrador etc.) abriam uma aba dentro do SPA.
   // Agora cada aba é uma página: redireciona o hash antigo para o arquivo novo.
   if(window.__oauthReturnHandled) return;
-  var map={dashboard:'overview.html',campanhas:'campanhas.html',audiencias:'audiencias.html',desdobrador:'desdobrador.html',criativos:'criativos.html',status:'status.html',bigtable:'bigtable.html'};
+  var map={dashboard:'campanhas.html',campanhas:'campanhas.html',audiencias:'audiencias.html',desdobrador:'desdobrador.html',criativos:'criativos.html',status:'status.html',bigtable:'bigtable.html'};
   var h=(location.hash||'').replace('#','');
   if(map[h]) location.replace(map[h]);
 })();
@@ -78,26 +78,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <div class="home-hello" id="homeHello">Início</div>
     <div class="home-hello-sub">// escolha por onde começar</div>
     <div class="section-title">Criação</div>
-    <div class="section-sub">// 3 páginas</div>
+    <div class="section-sub">3 páginas</div>
     <div class="home-grid">
       <a class="home-card" href="desdobrador.html"><span class="hc-n">01</span><span class="hc-t">Desdobrador</span><span class="hc-d">KV → todos os formatos, com variações geradas por IA e envio para aprovação.</span><span class="hc-arrow">→</span></a>
       <a class="home-card" href="criativos.html"><span class="hc-n">02</span><span class="hc-t">Criativos</span><span class="hc-d">Fila de aprovação, upload direto e repositório de peças.</span><span class="hc-arrow">→</span></a>
       <a class="home-card" href="audiencias.html"><span class="hc-n">03</span><span class="hc-t">Audiências</span><span class="hc-d">Sugerir, refinar e criar audiências em Meta, Google Ads e TikTok.</span><span class="hc-arrow">→</span></a>
     </div>
     <div class="section-title">Operação</div>
-    <div class="section-sub">// 3 páginas</div>
+    <div class="section-sub">3 páginas</div>
     <div class="home-grid">
-      <a class="home-card" href="campanhas.html"><span class="hc-n">04</span><span class="hc-t">Campanhas</span><span class="hc-d">Rodar o pipeline, escolher contas de anúncio e acompanhar o pacing.</span><span class="hc-arrow">→</span></a>
+      <a class="home-card" href="campanhas.html"><span class="hc-n">04</span><span class="hc-t">Campanhas</span><span class="hc-d">Resultados, pacing e criativos à esquerda; subir novos planos e rodar o pipeline à direita.</span><span class="hc-arrow">→</span></a>
       <a class="home-card" href="status.html"><span class="hc-n">05</span><span class="hc-t">Status</span><span class="hc-d">Situação da implementação por linha do plano de mídia e Gantt.</span><span class="hc-arrow">→</span></a>
       <a class="home-card" href="bigtable.html"><span class="hc-n">06</span><span class="hc-t">Big Table</span><span class="hc-d">Tabela completa de dados, com filtro, ordenação e download.</span><span class="hc-arrow">→</span></a>
     </div>
-    <div class="section-title">Análise</div>
-    <div class="section-sub">// 1 página</div>
-    <div class="home-grid">
-      <a class="home-card" href="overview.html"><span class="hc-n">07</span><span class="hc-t">Overview</span><span class="hc-d">KPIs consolidados, resultados do período e resumo de implementação.</span><span class="hc-arrow">→</span></a>
-    </div>
     <div class="section-title">Conta</div>
-    <div class="section-sub">// abre o menu lateral</div>
+    <div class="section-sub">abre o menu lateral</div>
     <div class="home-grid home-grid-3">
       <button class="home-card" onclick="togglePanel();openRpPage('planilha')"><span class="hc-n">A</span><span class="hc-t">Plano de Mídia</span><span class="hc-d">Criar, sincronizar e excluir os planos de mídia (workspaces).</span><span class="hc-arrow">→</span></button>
       <button class="home-card" onclick="togglePanel();openRpPage('conexoes')"><span class="hc-n">B</span><span class="hc-t">Conexões</span><span class="hc-d">Conectar uma vez as contas de Google Ads, Meta e TikTok da empresa.</span><span class="hc-arrow">→</span></button>
@@ -108,7 +103,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </div>
 <script src="assets/core.js?v=20261118"></script>
 <script>
-RU.PAGES.home = 'Início';
+RU.PAGES.home = 'Yōkoso';
 RU.ready(function(){
   if(window.__oauthReturnHandled) return;
   RU.trackPage('home');

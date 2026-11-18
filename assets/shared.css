@@ -391,3 +391,12 @@
   a.tab-btn{text-decoration:none;display:inline-block;}
   body[data-nofilters] .filters{display:none;}
   body[data-nofilters] .main{top:var(--topbar-h);}
+  /* ── Campanhas: dados à esquerda, subir novos planos à direita ── */
+  .camp-split{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:28px;align-items:start;}
+  .camp-data{min-width:0;}
+  .camp-side .tbox-head{flex-wrap:wrap;gap:4px 12px;}
+  .camp-side{position:sticky;top:0;max-height:calc(100vh - var(--topbar-h) - var(--filter-h) - 56px);overflow-y:auto;}
+  .camp-data .kpi-grid:not([style*="grid-template-columns"]){grid-template-columns:repeat(3,1fr);}
+  .camp-data .pacing-grid{grid-template-columns:repeat(3,1fr);}
+  .camp-data #ov-top3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr)) !important;}
+  @media(max-width:1100px){.camp-split{grid-template-columns:1fr;}.camp-side{position:static;max-height:none;order:-1;}}

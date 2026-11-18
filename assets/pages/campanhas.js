@@ -154,7 +154,78 @@ function renderSocialPyramid(){
     + '</div>'
   ).join('');
 }
+const TOP3_AUD=[
+  {name:'Carrossel_V2',plat:'Meta Ads',img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=400&fit=crop',audience:'Remarketing — Site',aud_size:'180k pessoas',ctr:'7,2%',cpm:'R$18',leads:'920',score:99,insight:'Melhor combinação do período. Alta intenção + formato carrossel geram CTR 3× acima da média.'},
+  {name:'Feed_1080x1080',plat:'Meta Ads',img:'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=400&h=400&fit=crop',audience:'Remarketing — Site',aud_size:'180k pessoas',ctr:'6,8%',cpm:'R$19',leads:'840',score:99,insight:'Feed estático performa bem em audiências quentes de remarketing.'},
+  {name:'Carrossel_V2',plat:'Meta Ads',img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=400&fit=crop',audience:'Interesse — Tecnologia',aud_size:'2,4M pessoas',ctr:'5,1%',cpm:'R$10',leads:'510',score:95,insight:'Melhor custo-benefício: audiência grande + CPM baixo + CTR alto. Alto potencial de escala.'},
+];
+function renderOverviewTop3(){
+  const el=document.getElementById('ov-top3');
+  if(!el) return;
+  const cards = TOP3_AUD.map((t,i)=>{
+    const d=document.createElement('div');
+    d.style.cssText='background:var(--bg);overflow:hidden';
+    d.innerHTML=[
+      '<div style="position:relative">',
+        '<img src="'+t.img+'" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block" loading="lazy">',
+        '<div style="position:absolute;top:10px;left:10px;background:var(--ink);color:#fff;font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:3px 10px">#'+(i+1)+'</div>',
+        '<div style="position:absolute;top:10px;right:10px;background:var(--bg);font-family:var(--mono);font-size:9px;color:var(--ink);padding:3px 8px;border:1px solid var(--border)">Score '+t.score+'</div>',
+      '</div>',
+      '<div style="padding:18px 20px">',
+        '<div style="font-family:var(--fh);font-weight:700;font-size:16px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">'+t.name+'</div>',
+        '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);letter-spacing:.08em;margin-bottom:12px">'+t.plat+'</div>',
+        '<div style="background:var(--bg2);padding:10px 12px;margin-bottom:12px;border-left:2px solid var(--ink)">',
+          '<div style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:4px">// audiência</div>',
+          '<div style="font-size:12px;font-weight:600">'+t.audience+'</div>',
+          '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:2px">'+t.aud_size+'</div>',
+        '</div>',
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px">',
+          '<div style="background:var(--bg2);padding:8px 10px"><div style="font-family:var(--mono);font-size:8px;color:var(--ink-muted)">CTR</div><div style="font-family:var(--fh);font-weight:700;font-size:18px">'+t.ctr+'</div></div>',
+          '<div style="background:var(--bg2);padding:8px 10px"><div style="font-family:var(--mono);font-size:8px;color:var(--ink-muted)">LEADS</div><div style="font-family:var(--fh);font-weight:700;font-size:18px">'+t.leads+'</div></div>',
+          '<div style="background:var(--bg2);padding:8px 10px"><div style="font-family:var(--mono);font-size:8px;color:var(--ink-muted)">CPM</div><div style="font-family:var(--fh);font-weight:700;font-size:18px">'+t.cpm+'</div></div>',
+        '</div>',
+        '<div style="font-size:12px;color:var(--ink-soft);line-height:1.6;border-top:1px solid var(--border-d);padding-top:10px">'+t.insight+'</div>',
+      '</div>'
+    ].join('');
+    return d;
+  });
+  el.innerHTML='';
+  cards.forEach(card=>el.appendChild(card));
+}
+function renderOverviewStatus(){
+  document.getElementById('ov-stI').textContent=STATUS_DATA.filter(s=>s.status==='implemented').length;
+  document.getElementById('ov-stP').textContent=STATUS_DATA.filter(s=>s.status==='pending').length;
+  document.getElementById('ov-stE').textContent=STATUS_DATA.filter(s=>s.status==='error').length;
+  document.getElementById('ov-stS').textContent=STATUS_DATA.filter(s=>s.status==='stand_by').length;
+  const recent=STATUS_DATA.slice(0,6);
+  document.getElementById('ov-statusTable').innerHTML=recent.map(s=>`
+    <tr>
+      <td class="td-bold">${s.criativo}</td>
+      <td class="td-mono">${s.plat}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.camp}</td>
+      <td>${badgeH(s.status)}</td>
+      <td class="td-mono" style="color:var(--ink-muted)">${s.upd}</td>
+    </tr>`).join('');
+}
+const MONO_FONT = {family:'Share Tech Mono', size:9};
+const GRID_COLOR = '#f0f0ec';
+const labels30 = Array.from({length:30}, (_,i) => (i+1)+' Mar');
+const inv30  = [7.2,8.1,6.8,9.4,10.2,9.8,11.1,8.4,10.8,12.1,11.4,9.2,13.2,11.8,10.4,14.2,12.8,11.2,15.4,13.8,12.4,16.2,14.8,13.2,17.4,15.8,14.2,18.6,16.8,15.2];
 const clk30  = [5.1,5.8,4.9,6.8,7.4,7.0,8.0,6.1,7.8,8.8,8.2,6.6,9.5,8.5,7.5,10.2,9.2,8.1,11.0,9.9,8.9,11.6,10.6,9.5,12.4,11.3,10.2,13.2,12.0,10.9];
+function chartBaseOpts(){
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: {duration:800, easing:'easeInOutQuart'},
+    plugins: {legend:{labels:{font:{family:'Share Tech Mono',size:10}, boxWidth:10, padding:14}}}
+  };
+}
+function chartScales(yLbl, y1Lbl){
+  return {scales:{
+    y:  {position:'left',  title:{display:true, text:yLbl,  font:MONO_FONT, color:'#bbb'}, grid:{color:GRID_COLOR}, ticks:{font:MONO_FONT, color:'#bbb'}},
+    y1: {position:'right', title:{display:true, text:y1Lbl, font:MONO_FONT, color:'#bbb'}, grid:{display:false},    ticks:{font:MONO_FONT, color:'#bbb'}}
+  }};
+}
 function initChartsCamp(){
   const lineEl  = document.getElementById('chartLine');
   const doughEl = document.getElementById('chartDough');
@@ -179,6 +250,14 @@ function initChartsCamp(){
       plugins: {legend:{position:'right', labels:{font:{family:'Share Tech Mono',size:9}, boxWidth:10, padding:10}}}
     })
   });
+}
+// ── CHART RESIZE ──
+function setupChartResize(){
+  if(!window.ResizeObserver) return;
+  const obs = new ResizeObserver(()=>{
+    Object.values(Chart.instances).forEach(ch=>ch.resize());
+  });
+  document.querySelectorAll('.chart-canvas-wrap').forEach(el=>obs.observe(el));
 }
 
 // ── Seletores de conta por plataforma (topo da aba) ────────────────────
@@ -613,6 +692,8 @@ function campRenderRunResult(data){
 RU.ready(() => {
   if(window.__oauthReturnHandled) return;
   RU.trackPage('campanhas');
+  renderOverviewStatus();
+  renderOverviewTop3();
   renderPacing();
   renderCamps();
   renderCreatives();

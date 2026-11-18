@@ -2,67 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rise Up MTech — Overview</title>
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-NG9TFZ74');</script>
-<!-- End Google Tag Manager -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link rel="stylesheet" href="assets/shared.css?v=20261118">
+<title>Rise Up MTech — Campanhas</title>
+<meta http-equiv="refresh" content="0; url=campanhas.html">
+<script>location.replace('campanhas.html' + location.search + location.hash);</script>
 </head>
-<body data-page="dashboard">
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
-<script src="assets/shell.js?v=20261118"></script>
-<div class="main" id="main">
-  <div class="tab-page active" id="tab-dashboard">
-    <!-- KPIs summary -->
-    <div class="section-title">Overview Geral</div>
-    <div class="section-sub">Resumo consolidado do período selecionado</div>
-    <div class="kpi-grid" style="margin-bottom:24px" id="ov-kpis"></div>
-    <!-- two col: charts left, gantt summary right -->
-    <div class="charts-row" style="margin-bottom:24px">
-      <div class="chart-box">
-        <div class="chart-title">Investimento × Cliques</div>
-        <div class="chart-sub">Evolução diária — 30 dias</div>
-        <div class="chart-canvas-wrap"><canvas id="chartDash"></canvas></div>
-      </div>
-      <div class="chart-box">
-        <div class="chart-title">Distribuição por Plataforma</div>
-        <div class="chart-sub">% investimento total</div>
-        <div class="chart-canvas-wrap"><canvas id="chartBar"></canvas></div>
-      </div>
-    </div>
-    <!-- Gantt summary -->
-    <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">Resumo de Implementação <button onclick="location.href='status.html'" style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;background:none;border:1px solid var(--border);padding:5px 12px;cursor:pointer;color:var(--ink-mid);transition:all .2s" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-mid)'">Ver Status →</button></div>
-    <div class="section-sub">Status do pipeline de criativos</div>
-    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
-      <div class="kpi feat"><div class="kpi-lbl">Implementados</div><div class="kpi-val" id="ov-stI">—</div></div>
-      <div class="kpi"><div class="kpi-lbl">Na fila</div><div class="kpi-val" id="ov-stP">—</div></div>
-      <div class="kpi"><div class="kpi-lbl">Com erro</div><div class="kpi-val" id="ov-stE">—</div></div>
-      <div class="kpi"><div class="kpi-lbl">Stand by</div><div class="kpi-val" id="ov-stS">—</div></div>
-    </div>
-    <div class="tbox" style="margin-bottom:24px">
-      <div class="tbox-head"><div class="tbox-title">Status por Criativo</div><span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// últimas atualizações</span></div>
-      <table><thead><tr><th>Criativo</th><th>Plataforma</th><th>Campanha</th><th>Status</th><th>Atualizado</th></tr></thead>
-      <tbody id="ov-statusTable"></tbody></table>
-    </div>
-    <div class="divider"></div>
-    <!-- Top 3 criativos x audiência -->
-    <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">Top 3 Criativos × Audiência <button onclick="location.href='campanhas.html'" style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;background:none;border:1px solid var(--border);padding:5px 12px;cursor:pointer;color:var(--ink-mid);transition:all .2s" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-mid)'">Ver Campanhas →</button></div>
-    <div class="section-sub">Combinações com melhor performance no período</div>
-    <div id="ov-top3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:24px"></div>
-  </div>
-</div>
-
-<script src="assets/core.js?v=20261118"></script>
-<script src="assets/pages/dashboard.js?v=20261118"></script>
-</body>
+<body>Esta página agora faz parte de <a href="campanhas.html">Campanhas</a>.</body>
 </html>

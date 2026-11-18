@@ -7,7 +7,7 @@
 window.RU = window.RU || {};
 RU.workspaceRefreshers = [];   // cada página põe aqui o loader de workspaces dela
 RU.oauthListeners = [];        // callbacks chamados quando uma conexão OAuth volta
-RU.PAGES = {"dashboard":"Overview","campanhas":"Campanhas","audiencias":"Audiências","desdobrador":"Desdobrador","criativos":"Criativos","status":"Status","bigtable":"Big Table"};
+RU.PAGES = {"campanhas":"Campanhas","audiencias":"Audiências","desdobrador":"Desdobrador","criativos":"Criativos","status":"Status","bigtable":"Big Table"};
 window.dataLayer = window.dataLayer || [];
 // Página real = pageview real no GA4/GTM (GitHub Pages serve cada .html).
 // Mantém o evento virtual_page_view que já existia, com o mesmo formato,
@@ -129,32 +129,8 @@ function badgeH(s){
 }
 function fmt(n){return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'k':n.toFixed(0);}
 function refreshAll(){toast('Filtros aplicados','ok');}
-const MONO_FONT = {family:'Share Tech Mono', size:9};
-const GRID_COLOR = '#f0f0ec';
-const labels30 = Array.from({length:30}, (_,i) => (i+1)+' Mar');
-const inv30  = [7.2,8.1,6.8,9.4,10.2,9.8,11.1,8.4,10.8,12.1,11.4,9.2,13.2,11.8,10.4,14.2,12.8,11.2,15.4,13.8,12.4,16.2,14.8,13.2,17.4,15.8,14.2,18.6,16.8,15.2];
-function chartBaseOpts(){
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: {duration:800, easing:'easeInOutQuart'},
-    plugins: {legend:{labels:{font:{family:'Share Tech Mono',size:10}, boxWidth:10, padding:14}}}
-  };
-}
-function chartScales(yLbl, y1Lbl){
-  return {scales:{
-    y:  {position:'left',  title:{display:true, text:yLbl,  font:MONO_FONT, color:'#bbb'}, grid:{color:GRID_COLOR}, ticks:{font:MONO_FONT, color:'#bbb'}},
-    y1: {position:'right', title:{display:true, text:y1Lbl, font:MONO_FONT, color:'#bbb'}, grid:{display:false},    ticks:{font:MONO_FONT, color:'#bbb'}}
-  }};
-}
-// ── CHART RESIZE ──
-function setupChartResize(){
-  if(!window.ResizeObserver) return;
-  const obs = new ResizeObserver(()=>{
-    Object.values(Chart.instances).forEach(ch=>ch.resize());
-  });
-  document.querySelectorAll('.chart-canvas-wrap').forEach(el=>obs.observe(el));
-}
+const imp30  = [0.4,0.5,0.4,0.6,0.6,0.6,0.7,0.5,0.7,0.8,0.7,0.6,0.9,0.8,0.7,1.0,0.9,0.8,1.1,1.0,0.9,1.1,1.1,1.0,1.2,1.1,1.0,1.3,1.2,1.1];
+const leads30= [84,98,76,120,134,128,148,110,138,160,150,118,172,156,140,188,170,152,204,184,164,218,198,178,232,212,190,248,226,204];
 // ── DESDOBRADOR DE PEÇAS ──
 // Espelha api/creative_deploy.py + services/creative_ai_engine.py (backend)
 // — ver desdobrador-arquitetura.md. A fila (DESD_QUEUE) vem 100% de
