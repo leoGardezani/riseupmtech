@@ -388,7 +388,7 @@
   @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr);}.creative-grid{grid-template-columns:repeat(2,1fr);}.charts-row{grid-template-columns:1fr;}.pacing-grid{grid-template-columns:repeat(2,1fr);}.chart-canvas-wrap{min-height:220px;}}
   @media(max-width:700px){:root{--panel-w:100vw;}.topbar-center{display:none;}.kpi-grid{grid-template-columns:repeat(2,1fr);}.pacing-grid{grid-template-columns:1fr;}.creative-grid{grid-template-columns:1fr;}.main.panel-open{right:0;}.tab-page{padding:16px;}}
   /* ── navegação por páginas (antes eram botões que trocavam de aba) ── */
-  a.tab-btn{text-decoration:none;display:inline-block;}
+  a.tab-btn{text-decoration:none;display:inline-block;white-space:nowrap;}
   body[data-nofilters] .filters{display:none;}
   body[data-nofilters] .main{top:var(--topbar-h);}
   /* ── Campanhas: dados à esquerda, subir novos planos à direita ── */
