@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rise Up MTech — Desdobrador</title>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NG9TFZ74');</script>
+<!-- End Google Tag Manager -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css?v=20261118">
+</head>
+<body data-page="desdobrador">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<script src="assets/shell.js?v=20261118"></script>
+<div class="main" id="main">
+  <div class="tab-page active" id="tab-desdobrador">
+    <div class="section-title">Desdobrador de Peças</div>
+    <div class="section-sub">Um KV vira todos os formatos — a IA recompõe a cena pra cada tamanho, você escreve o que quiser mudar e define o CTA</div>
+
+    <!-- Workspace do desdobrador -->
+    <div class="tbox" style="margin-bottom:20px">
+      <div class="tbox-head">
+        <div class="tbox-title">Workspace</div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// a fila abaixo é carregada do material-request deste workspace</span>
+      </div>
+      <div style="padding:16px 20px">
+        <select class="fs_" id="desdWorkspaceSelect" onchange="desdOnWorkspaceChange()" style="max-width:360px"><option value="">Carregando...</option></select>
+      </div>
+    </div>
+
+    <!-- Fila de material-request aguardando peça -->
+    <div class="tbox">
+      <div class="tbox-head">
+        <div class="tbox-title">Fila — Peças Pendentes</div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// linhas de material-request sem criativo</span>
+      </div>
+      <table><thead><tr>
+        <th><input type="checkbox" class="desd-queue-check" id="desdSelectAllCheckbox" onchange="desdToggleSelectAll(this.checked)" title="Selecionar tudo"></th><th>Campanha</th><th>Marca</th><th>Plataforma</th><th>Formato pedido</th><th>Entrega</th>
+      </tr></thead>
+      <tbody id="desdQueueTable"></tbody></table>
+    </div>
+
+    <div class="desd-layout">
+      <!-- COLUNA ESQUERDA: KV + geração via IA -->
+      <div class="desd-col">
+        <div id="desdKvStepWrap">
+        <div class="desd-step-lbl">1. KV de origem</div>
+        <div class="uz" id="desdDropzone" style="margin-bottom:16px" onclick="document.getElementById('desdFileInput').click()">
+          <div class="uz-icon">🖼️</div>
+          <div class="uz-text"><strong id="desdUzText">Clique ou arraste o KV</strong></div>
+          <div class="uz-hint">.jpg .png — a IA recompõe esse KV pra cada formato</div>
+        </div>
+        <input type="file" id="desdFileInput" accept="image/png,image/jpeg" style="display:none" onchange="desdOnFileSelected(event)">
+        <div class="desd-canvas-wrap" id="desdKvPreviewWrap" style="display:none">
+          <img id="desdKvPreviewImg" style="max-width:100%;max-height:220px;display:block;margin:0 auto">
+        </div>
+        </div>
+        <div id="desdTextModeNote" style="display:none;padding:10px 12px;background:var(--bg3);border:1px solid var(--line);font-family:var(--mono);font-size:10px;color:var(--ink-muted);margin-bottom:16px;line-height:1.6">// linha(s) selecionada(s) são de Search (RSA) — anúncio de texto, sem peça visual. KV não é necessário, pulado.</div>
+
+        <div class="desd-step-lbl">2. Peças a gerar</div>
+        <div style="font-size:12px;color:var(--ink-mid);margin-bottom:10px;line-height:1.6">O formato de cada peça vem da própria linha de material-request — marque acima quais linhas da fila este KV vai atender. Linhas idênticas (mesma campanha+plataforma+meio+tipo, repetidas pela coluna <code>volume</code> do media-plan) formam um grupo e recebem uma variação DIFERENTE cada uma automaticamente.</div>
+        <div id="desdSelectedRowsSummary" style="margin-bottom:8px"></div>
+        <div id="desdGroupsSummary" style="margin-bottom:8px"></div>
+
+        <div class="desd-step-lbl">3. Gerar variações com IA</div>
+        <button class="btn-full" id="desdGenerateBtn" onclick="desdGenerateAiVariants()">✦ Gerar variações com IA</button>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:6px;line-height:1.6">// pode levar 1-2 min por grupo (imagem via Gemini, vídeo TikTok via Veo 3.1 · 6s) — cada grupo recebe sua própria leva de variações, uma por linha</div>
+        <div id="desdAiStatus" style="margin-top:10px"></div>
+        <div id="desdAiGroupsContainer" style="margin-top:12px"></div>
+      </div>
+
+      <!-- COLUNA DIREITA: prompt + CTA + metadata -->
+      <div class="desd-col">
+        <div id="desdPromptStepWrap">
+        <div class="desd-step-lbl" style="margin-top:0">Prompt — o que a IA deve fazer</div>
+        <div class="fg"><label class="fl">Características desejadas (texto livre)</label><textarea class="fi" id="desdPromptText" rows="4" style="resize:vertical" placeholder="ex: adicione o texto 'Nova coleção chegou', tom vibrante, paleta azul e branco, deixe o produto em destaque à esquerda">Nova coleção chegou — aproveite o lançamento</textarea></div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:8px;line-height:1.6">// pode incluir headline, tom, paleta de cor, o que priorizar na composição — a IA recebe isso junto com o KV</div>
+        </div>
+        <div id="desdTextPromptNote" style="display:none;padding:10px 12px;background:var(--bg3);border:1px solid var(--line);font-family:var(--mono);font-size:10px;color:var(--ink-muted);margin-bottom:8px;line-height:1.6">// Search/RSA não usa prompt livre — a IA gera as headlines/descriptions a partir das keywords já implementadas na aba Audiências pra essa campanha, sem instrução manual.</div>
+
+        <div class="divider" style="margin:20px 0"></div>
+
+        <div class="desd-step-lbl" style="margin-top:0">Call to Action</div>
+        <div class="fg"><label class="fl">Texto do botão (deixe vazio pra não ter CTA)</label><input class="fi" id="desdCtaText" value="Saiba mais" oninput="desdOnCtaInputsChanged()"></div>
+        <div id="desdCtaCharHint" style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin:-8px 0 8px"></div>
+        <div class="fg"><label class="fl">Cor de fundo do CTA</label><input class="fi" type="color" id="desdCtaBg" value="#0d0d0d" oninput="desdOnCtaInputsChanged()" style="padding:4px;height:36px"></div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:8px;line-height:1.6">// sempre na parte inferior, largura total, 15% da altura — desenhado por código (não pela IA), garante posição/cor exatas</div>
+
+        <div class="divider" style="margin:20px 0"></div>
+
+        <div class="desd-step-lbl" style="margin-top:0">Vínculo da peça</div>
+        <div class="fg"><label class="fl">Nome do criativo <span style="color:var(--danger)">*</span></label><input class="fi" id="desdCreativeName" placeholder="ex: awareness_q1_lancamento" oninput="desdUpdateSubmitButtonState()"></div>
+        <div class="fg"><label class="fl">Campanha</label><input class="fi" id="desdCampaignName" placeholder="ex: Awareness Q1"></div>
+        <div class="fg"><label class="fl">Marca</label><input class="fi" id="desdBrand" placeholder="ex: Produto A"></div>
+
+        <button class="btn-full" style="margin-top:8px" id="desdSubmitBtn" onclick="desdSubmit()" disabled>Enviar para Aprovação →</button>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:8px;line-height:1.6">// escolha uma variação gerada à esquerda e dê um nome ao criativo antes de enviar. Envia pro backend real (/desdobrador/submit) e alimenta a fila real de Aguardando Aprovação (/desdobrador/pending)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal de peça ampliada (pedido do Leonardo) — clica num card de
+  variação no Desdobrador e abre isso: peça em tamanho grande, com toggle
+  Desktop/Mobile pra revisar copy/imagem com mais espaço. Independente do
+  painel lateral (#rPanel/#overlay) que já existe — modal centralizado
+  próprio, não interfere com nada existente. ── -->
+  <div id="desdModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(13,13,13,.85);z-index:9999;align-items:center;justify-content:center;padding:24px" onclick="if(event.target===this) desdCloseVariantModal()">
+    <div style="background:#fff;max-width:95vw;max-height:92vh;overflow:auto;position:relative;padding:24px;border-radius:6px">
+      <button onclick="desdCloseVariantModal()" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:28px;line-height:1;cursor:pointer;color:var(--ink-muted)">×</button>
+      <div style="display:flex;gap:8px;margin-bottom:16px;justify-content:center">
+        <button id="desdModalDeskBtn" onclick="desdSetModalDevice('desktop')" style="padding:8px 20px;border:1px solid var(--ink);background:#fff;color:var(--ink);font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">🖥 Desktop</button>
+        <button id="desdModalMobileBtn" onclick="desdSetModalDevice('mobile')" style="padding:8px 20px;border:1px solid var(--ink);background:#fff;color:var(--ink);font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">📱 Mobile</button>
+      </div>
+      <div id="desdModalMediaWrap" style="display:flex;justify-content:center"></div>
+      <div id="desdModalMeta" style="text-align:center;margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--ink-muted)"></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="assets/core.js?v=20261118"></script>
+<script src="assets/pages/desdobrador.js?v=20261118"></script>
+</body>
+</html>

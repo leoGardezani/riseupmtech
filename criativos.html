@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rise Up MTech — Criativos</title>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NG9TFZ74');</script>
+<!-- End Google Tag Manager -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css?v=20261118">
+</head>
+<body data-page="criativos">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<script src="assets/shell.js?v=20261118"></script>
+<div class="main" id="main">
+  <div class="tab-page active" id="tab-criativos">
+    <div class="section-title">Repositório de Criativos</div>
+    <div class="section-sub">Assets aprovados — gerados a partir do KV por campanha e plataforma</div>
+    <!-- Filters -->
+    <div class="repo-filters">
+      <div class="fg-" style="margin:0"><span class="flbl" style="margin-right:8px">Campanha</span>
+        <select class="repo-filter-sel" id="rf-camp" onchange="filterRepo()">
+          <option value="">Todas as campanhas</option>
+          <option>Awareness Q1</option>
+          <option>Performance — Leads</option>
+          <option>Retargeting</option>
+          <option>Brand Search</option>
+          <option>TikTok — Gen Z</option>
+        </select>
+      </div>
+      <div class="fg-" style="margin:0"><span class="flbl" style="margin-right:8px">Plataforma</span>
+        <select class="repo-filter-sel" id="rf-plat" onchange="filterRepo()">
+          <option value="">Todas</option>
+          <option>Google Ads</option>
+          <option>Meta Ads</option>
+          <option>TikTok Ads</option>
+          <option>YouTube</option>
+          <option>LinkedIn</option>
+          <option>OOH</option>
+          <option>Rádio</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:4px;margin-left:8px" id="typePills">
+        <button class="repo-type-pill on" onclick="setType('',this)">Todos</button>
+        <button class="repo-type-pill" onclick="setType('image',this)">🖼 Imagem</button>
+        <button class="repo-type-pill" onclick="setType('video',this)">▶ Vídeo</button>
+        <button class="repo-type-pill" onclick="setType('html5',this)">⟨/⟩ HTML5</button>
+        <button class="repo-type-pill" onclick="setType('audio',this)">♪ Áudio</button>
+      </div>
+      <div style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink-muted)" id="repo-count"></div>
+    </div>
+    <!-- Upload Direto — novo nesta sessão -->
+    <div class="collapsible" id="coll-upload" style="margin-bottom:20px">
+      <div class="coll-header open" onclick="toggleColl('upload')">
+        <div>
+          <div class="coll-title">Upload Direto</div>
+          <div class="coll-meta">criativo já pronto por fora — vídeo, ou qualquer arquivo, sem passar pela IA</div>
+        </div>
+        <span class="coll-arrow">▼</span>
+      </div>
+      <div class="coll-body open">
+        <div style="font-size:13px;color:var(--ink-mid);margin:12px 0 16px;line-height:1.6">
+          Pra quando o criativo já está pronto (ex: vídeo editado externamente, ou qualquer peça que você não quer passar pela IA). Sobe o arquivo do jeito que está, sem nenhum processamento, e manda direto pra fila de aprovação abaixo.
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px">
+          <div class="fg" style="flex:1;margin-bottom:0"><label class="fl">Workspace</label><select class="fs_" id="upfWorkspaceSelect" onchange="upfOnWorkspaceChange()"><option value="">Carregando...</option></select></div>
+        </div>
+        <table><thead><tr>
+          <th><input type="checkbox" class="desd-queue-check" id="upfSelectAllCheckbox" onchange="upfToggleSelectAll(this.checked)" title="Selecionar tudo"></th><th>Campanha</th><th>Marca</th><th>Plataforma</th><th>Formato pedido</th><th>Entrega</th>
+        </tr></thead>
+        <tbody id="upfQueueTable"></tbody></table>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+          <div>
+            <div class="uz" id="upfDropzone" onclick="document.getElementById('upfFileInput').click()">
+              <div class="uz-icon">📁</div>
+              <div class="uz-text"><strong id="upfUzText">Clique ou arraste o arquivo pronto</strong></div>
+              <div class="uz-hint">vídeo, imagem — qualquer formato que a plataforma aceite</div>
+            </div>
+            <input type="file" id="upfFileInput" style="display:none" onchange="upfOnFileSelected(event)">
+          </div>
+          <div>
+            <div class="fg"><label class="fl">Nome do criativo <span style="color:var(--danger)">*</span></label><input class="fi" id="upfCreativeName" placeholder="ex: tiktok_video_lancamento" oninput="upfUpdateSubmitButtonState()"></div>
+            <button class="btn-full" id="upfSubmitBtn" onclick="upfSubmit()" disabled>Enviar para Aprovação →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Pending Approval -->
+    <div class="collapsible" id="coll-pending" style="margin-bottom:20px;border-color:#f59e0b">
+      <div class="coll-header open" onclick="toggleColl('pending')" style="border-left:3px solid #f59e0b">
+        <div>
+          <div class="coll-title">Aguardando Aprovação</div>
+          <div class="coll-meta" id="pending-count">carregando…</div>
+        </div>
+        <span class="coll-arrow">▼</span>
+      </div>
+      <div class="coll-body open">
+        <div style="font-size:13px;color:var(--ink-mid);margin:12px 0 16px;line-height:1.6">
+          Criativos gerados pelo Desdobrador aguardando revisão. Ao aprovar, o backend sobe o ad de verdade na plataforma (Google/Meta/TikTok) e o status vira "implemented"; ao reprovar, vira "creative_rejected".
+        </div>
+        <div class="fg" style="max-width:360px;margin-bottom:16px"><label class="fl">Workspace</label><select class="fs_" id="pendWorkspaceSelect" onchange="pendOnWorkspaceChange()"><option value="">Carregando...</option></select></div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border)">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
+            <input type="checkbox" id="pendingSelectAllCheckbox" onchange="pendingToggleSelectAll(this.checked)"> Selecionar tudo
+          </label>
+          <span id="pendingSelectedCount" style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">0 selecionado(s)</span>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="btn-sm" id="pendingBulkApproveBtn" onclick="pendingBulkApprove()" disabled>✓ Aprovar selecionados</button>
+            <button class="btn-sm ghost" id="pendingBulkRejectBtn" onclick="pendingBulkReject()" disabled style="color:var(--danger);border-color:#fecaca">✕ Reprovar selecionados</button>
+          </div>
+        </div>
+        <div id="pendingRunResult" style="margin-bottom:16px"></div>
+        <div class="repo-grid" id="pendingGrid"></div>
+      </div>
+    </div>
+    <!-- Approved Repo -->
+    <div class="collapsible" id="coll-approved">
+      <div class="coll-header open" onclick="toggleColl('approved')">
+        <div>
+          <div class="coll-title">Repositório — Assets Aprovados</div>
+          <div class="coll-meta" id="repo-count-header">16 assets</div>
+        </div>
+        <span class="coll-arrow">▼</span>
+      </div>
+      <div class="coll-body open">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:8px;line-height:1.6">// ainda em modo demo — o backend não tem endpoint de listagem de assets aprovados ainda, só de pendentes (GET /desdobrador/pending). A seção "Aguardando Aprovação" acima já é 100% real.</div>
+        <!-- Grid -->
+        <div class="repo-grid" id="repoGrid" style="margin-top:16px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- DETAIL MODAL -->
+<!-- Fica FORA de #main de propósito: #main é position:fixed, e todo
+     position:fixed sempre cria seu próprio contexto de empilhamento no CSS
+     atual — se o modal ficasse dentro de #main, o z-index dele só valeria
+     dentro do contexto de #main, e nunca conseguiria ficar acima de
+     elementos irmãos de #main como #overlay (menu lateral). Bug real
+     encontrado e corrigido nesta sessão (testado com Playwright). -->
+<div class="detail-modal" id="detailModal" onclick="closeDetail(event)">
+  <div class="detail-box" id="detailBox">
+    <div class="detail-header">
+      <div>
+        <div class="detail-title" id="dm-title">—</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.08em;margin-top:4px" id="dm-meta">—</div>
+      </div>
+      <button class="detail-close" onclick="closeDetailBtn()">×</button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-preview"><img id="dm-img" src="" alt=""></div>
+      <div class="detail-spec-group" id="dm-specs"></div>
+      <div class="detail-spec-group" id="dm-specs2"></div>
+      <div class="detail-actions" id="dm-actions"></div>
+    </div>
+  </div>
+</div>
+<script src="assets/core.js?v=20261118"></script>
+<script src="assets/pages/criativos.js?v=20261118"></script>
+</body>
+</html>

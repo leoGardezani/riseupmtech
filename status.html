@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rise Up MTech — Status</title>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NG9TFZ74');</script>
+<!-- End Google Tag Manager -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css?v=20261118">
+</head>
+<body data-page="status">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<script src="assets/shell.js?v=20261118"></script>
+<div class="main" id="main">
+  <div class="tab-page active" id="tab-status">
+    <div class="section-title">Linha do Tempo de Implementação</div>
+
+    <div class="section-sub">Visualização estilo Gantt — 30 dias correntes</div>
+    <div class="gantt-wrap" id="ganttWrap"></div>
+    <!-- Status summary -->
+    <div class="kpi-grid" style="margin-top:24px;grid-template-columns:repeat(4,1fr)">
+      <div class="kpi feat"><div class="kpi-lbl">Implementados</div><div class="kpi-val" id="stI">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Na fila</div><div class="kpi-val" id="stP">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Com erro</div><div class="kpi-val" id="stE">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Stand by</div><div class="kpi-val" id="stS">—</div></div>
+    </div>
+    <!-- Detail table -->
+    <div class="tbox" style="margin-top:24px">
+      <div class="tbox-head">
+        <div class="tbox-title">Detalhe de Implementação</div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// pipeline em tempo real</span>
+      </div>
+      <table><thead><tr>
+        <th>Criativo</th><th>Plataforma</th><th>Campanha</th><th>Status</th>
+        <th>Ad ID</th><th>Início</th><th>Fim</th><th>Atualizado</th>
+      </tr></thead>
+      <tbody id="statusTable"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<script src="assets/core.js?v=20261118"></script>
+<script src="assets/pages/status.js?v=20261118"></script>
+</body>
+</html>

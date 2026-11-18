@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rise Up MTech — Big Table</title>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NG9TFZ74');</script>
+<!-- End Google Tag Manager -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css?v=20261118">
+</head>
+<body data-page="bigtable">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<script src="assets/shell.js?v=20261118"></script>
+<div class="main" id="main">
+  <div class="tab-page active" id="tab-bigtable">
+    <div class="section-title">Big Table</div>
+    <div class="section-sub">Todos os dados do período — taxonomia completa + métricas</div>
+    <div class="bt-toolbar">
+      <input class="bt-search" id="btSearch" placeholder="Buscar campanha, criativo, plataforma..." oninput="btFilter()">
+      <select class="repo-filter-sel" id="bt-fplat" onchange="btFilter()">
+        <option value="">Todas as plataformas</option>
+        <option>Google Ads</option><option>Meta Ads</option><option>TikTok Ads</option>
+        <option>YouTube</option><option>LinkedIn</option><option>DV360</option>
+      </select>
+      <select class="repo-filter-sel" id="bt-fcamp" onchange="btFilter()">
+        <option value="">Todas as campanhas</option>
+        <option>Awareness Q1</option><option>Performance — Leads</option>
+        <option>Retargeting</option><option>Brand Search</option><option>TikTok — Gen Z</option>
+      </select>
+      <button class="bt-btn ghost" onclick="btDownload('csv')">↓ CSV</button>
+      <button class="bt-btn" onclick="btDownload('xlsx')">↓ Excel</button>
+      <span class="bt-info" id="bt-info">— linhas</span>
+    </div>
+    <div class="bt-wrap">
+      <table class="bt-table" id="btTable">
+        <thead>
+          <tr>
+            <!-- TAXONOMIA -->
+            <th rowspan="2" onclick="btSort('creative_name')" style="min-width:180px">Criativo</th>
+            <th colspan="8" class="bt-col-group-taxonomy" style="text-align:center">TAXONOMIA</th>
+            <!-- ENTREGA -->
+            <th colspan="5" class="bt-col-group-delivery" style="text-align:center">ENTREGA</th>
+            <!-- ENGAJAMENTO -->
+            <th colspan="3" class="bt-col-group-engagement" style="text-align:center">ENGAJAMENTO</th>
+            <!-- CUSTO -->
+            <th colspan="4" class="bt-col-group-cost" style="text-align:center">CUSTO</th>
+            <!-- CONVERSÃO -->
+            <th colspan="4" class="bt-col-group-conversion" style="text-align:center">CONVERSÃO</th>
+          </tr>
+          <tr>
+            <!-- Taxonomia sub-headers -->
+            <th onclick="btSort('country')" class="bt-col-group-taxonomy">País</th>
+            <th onclick="btSort('bu')" class="bt-col-group-taxonomy">BU</th>
+            <th onclick="btSort('brand')" class="bt-col-group-taxonomy">Marca</th>
+            <th onclick="btSort('campaign_name')" class="bt-col-group-taxonomy">Campanha</th>
+            <th onclick="btSort('campaign_type')" class="bt-col-group-taxonomy">Tipo</th>
+            <th onclick="btSort('source')" class="bt-col-group-taxonomy">Plataforma</th>
+            <th onclick="btSort('medium')" class="bt-col-group-taxonomy">Meio</th>
+            <th onclick="btSort('audience')" class="bt-col-group-taxonomy">Audiência</th>
+            <!-- Entrega -->
+            <th onclick="btSort('impressions')" class="bt-col-group-delivery num">Impressões</th>
+            <th onclick="btSort('reach')" class="bt-col-group-delivery num">Alcance</th>
+            <th onclick="btSort('frequency')" class="bt-col-group-delivery num">Freq.</th>
+            <th onclick="btSort('investment')" class="bt-col-group-delivery num">Invest. (R$)</th>
+            <th onclick="btSort('start_date')" class="bt-col-group-delivery">Início</th>
+            <!-- Engajamento -->
+            <th onclick="btSort('clicks')" class="bt-col-group-engagement num">Cliques</th>
+            <th onclick="btSort('ctr')" class="bt-col-group-engagement num">CTR</th>
+            <th onclick="btSort('engagements')" class="bt-col-group-engagement num">Engaj.</th>
+            <!-- Custo -->
+            <th onclick="btSort('cpm')" class="bt-col-group-cost num">CPM</th>
+            <th onclick="btSort('cpc')" class="bt-col-group-cost num">CPC</th>
+            <th onclick="btSort('cpv')" class="bt-col-group-cost num">CPV</th>
+            <th onclick="btSort('cpe')" class="bt-col-group-cost num">CPE</th>
+            <!-- Conversão -->
+            <th onclick="btSort('leads')" class="bt-col-group-conversion num">Leads</th>
+            <th onclick="btSort('cpl')" class="bt-col-group-conversion num">CPL</th>
+            <th onclick="btSort('conversions')" class="bt-col-group-conversion num">Conv.</th>
+            <th onclick="btSort('roas')" class="bt-col-group-conversion num">ROAS</th>
+          </tr>
+        </thead>
+        <tbody id="btBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="assets/core.js?v=20261118"></script>
+<script src="assets/pages/bigtable.js?v=20261118"></script>
+</body>
+</html>
