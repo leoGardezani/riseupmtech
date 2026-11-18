@@ -1,6 +1,6 @@
 /* Rise Up MTech — Performance: métricas e pacing a partir de GET /performance/summary. */
 
-let PF = null, PF_STATE = 'loading', PF_CHART = null; // loading | ok | error | nows | nodata
+let PF = null, PF_STATE = 'loading', PF_CHART = null; // loading | ok | error | nows | nodata | soon
 
 const pfInt = v => (v == null ? '—' : Math.round(v).toLocaleString('pt-BR'));
 const pfMoney = v => (v == null ? '—' : 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
@@ -11,6 +11,7 @@ const pfSrc = s => ({google: 'Google Ads', meta: 'Meta Ads', tiktok: 'TikTok Ads
 
 function pfMessage(){
   if(PF_STATE === 'loading') return 'Carregando…';
+  if(PF_STATE === 'soon') return 'Os dados de performance ainda não foram ativados para a sua conta. Assim que forem, eles aparecem aqui.';
   if(PF_STATE === 'error') return 'Não foi possível carregar a performance agora. Tente atualizar a página.';
   if(PF_STATE === 'nows') return 'Nenhum plano de mídia criado ainda. Crie um em Campanhas → "Subir novo plano".';
   return 'Ainda não há dados de desempenho para este plano no período. Eles aparecem aqui quando as métricas das plataformas chegarem.';
@@ -138,6 +139,7 @@ async function pfLoad(wsId, why){
   try{
     const days = document.getElementById('pfDays').value;
     const res = await fetch(API_BASE + '/performance/summary?workspace_id=' + encodeURIComponent(wsId) + '&days=' + days, {headers: authHeaders()});
+    if(res.status === 404){ PF = null; PF_STATE = 'soon'; pfRender(); return; }
     if(!res.ok) throw new Error(res.status);
     PF = await res.json();
     PF_STATE = PF.has_data ? 'ok' : 'nodata';
