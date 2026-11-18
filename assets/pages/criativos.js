@@ -345,7 +345,7 @@ async function approveAsset(rowId, btnEl){
     });
     const data = await res.json().catch(() => ({}));
     if(!res.ok) throw new Error(data.detail || 'falha ao aprovar');
-    toast('✓ [' + (data.source || '?').toUpperCase() + '] Ad criado (' + (data.platform_ad_id || '—') + ') — status "implemented"', 'ok');
+    toast('✓ [' + (data.source || '?').toUpperCase() + '] Anúncio criado (' + (data.platform_ad_id || '—') + ')', 'ok');
   }catch(e){
     toast('✕ ' + (e.message || 'Não foi possível aprovar'), 'er');
   }

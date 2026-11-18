@@ -893,7 +893,7 @@ async function desdSubmit(){
   let textAdHeadlines = null;
   let textAdDescriptions = null;
   if(textGroups.length > 1){
-    toast('Você marcou mais de uma campanha de Search/RSA com keywords diferentes — envie cada uma em um submit separado (o backend só aceita um conjunto de headlines/descriptions por envio)', 'er');
+    toast('Você marcou mais de uma campanha de Search/RSA com keywords diferentes — envie cada uma em um submit separado (só é possível enviar um conjunto de headlines/descriptions por envio)', 'er');
     return;
   }
   if(textGroups.length === 1){

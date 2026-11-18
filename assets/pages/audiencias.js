@@ -1002,7 +1002,7 @@ const AUD_DATA=[];
 const HEATMAP_CREATIVES=[];
 const HEATMAP_DATA=[];
 const HEATMAP_AUDS=[];
-const AUD_NO_PERF = '<div style="padding:22px 20px;font-family:var(--mono);font-size:10px;color:var(--ink-muted);line-height:1.7">Sem dados de desempenho ainda. Aparece aqui quando as métricas das plataformas passarem a chegar no BigQuery.</div>';
+const AUD_NO_PERF = '<div style="padding:22px 20px;font-family:var(--mono);font-size:10px;color:var(--ink-muted);line-height:1.7">Sem dados de desempenho ainda. Aparece aqui quando as métricas das plataformas forem integradas.</div>';
 function renderAudHeatmap(){
   const el = document.getElementById('audHeatmap');
   if(!el) return;

@@ -472,7 +472,7 @@ async function updateMemberRole(email, role, usingBackend) {
       renderUsers();
       return;
     } catch (e) {
-      toast('✕ ' + (e.message || 'Não foi possível atualizar (backend)'), 'er');
+      toast('✕ ' + (e.message || 'Não foi possível atualizar agora'), 'er');
       renderUsers();
       return;
     }
@@ -491,7 +491,7 @@ async function removeMember(email, usingBackend) {
       renderUsers();
       return;
     } catch (e) {
-      toast('✕ ' + (e.message || 'Não foi possível remover (backend)'), 'er');
+      toast('✕ ' + (e.message || 'Não foi possível remover agora'), 'er');
       return;
     }
   }
@@ -648,7 +648,7 @@ async function planSync(workspaceId, btnEl){
       method: 'POST', headers: authHeaders(),
     });
     if(!res.ok) throw new Error('falha na sincronização');
-    toast('✓ Sincronizado com o BigQuery', 'ok');
+    toast('✓ Plano sincronizado', 'ok');
   }catch(e){
     toast('✕ Não foi possível sincronizar agora', 'er');
   }
