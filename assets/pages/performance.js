@@ -53,6 +53,7 @@ function pfRender(){
     document.getElementById('pfMatrix').innerHTML = empty;
     document.getElementById('pfCreative').innerHTML = empty;
     document.getElementById('pfAudience').innerHTML = empty;
+    document.getElementById('pfSide').innerHTML = '';
     if(PF_CHART){ PF_CHART.destroy(); PF_CHART = null; }
     return;
   }
@@ -100,11 +101,32 @@ function pfRender(){
 
 const PF_LABEL = {impressions:'Impressões', reach:'Alcance', clicks:'Cliques', spend:'Investimento', video_views:'Views de vídeo', leads:'Leads', conversions:'Conversões'};
 
+// Valor de um indicador (bruto ou derivado) para um conjunto de somas.
+function pfVal(k, t){
+  if(k === 'freq') return pfDec(pfDiv(t.impressions, t.reach));
+  if(k === 'ctr') return pfPct(pfDiv(t.clicks, t.impressions));
+  if(k === 'cpc') return pfMoney(pfDiv(t.spend, t.clicks));
+  if(k === 'cpm') return pfMoney(pfDiv(t.spend * 1000, t.impressions));
+  return (k === 'spend' ? pfMoney : pfInt)(t[k]);
+}
+const PF_ALL = [['spend','Investimento'],['impressions','Impressões'],['reach','Alcance'],['freq','Frequência'],['clicks','Cliques'],
+  ['ctr','CTR'],['cpc','CPC'],['cpm','CPM'],['video_views','Views de vídeo'],['leads','Leads'],['conversions','Conversões']];
+function pfTotals(){
+  const t = {}; ['spend','impressions','reach','clicks','video_views','leads','conversions'].forEach(k => { t[k] = PF.daily.reduce((a, d) => a + (Number(d[k]) || 0), 0); });
+  return t;
+}
+function pfSide(){
+  const t = pfTotals();
+  document.getElementById('pfSide').innerHTML = '<div class="pf-side-t">Totais do período</div>'
+    + PF_ALL.map(m => '<div class="pf-side-row"><span>' + m[1] + '</span><b>' + pfVal(m[0], t) + '</b></div>').join('');
+}
+
 function pfChart(){
   if(PF_STATE !== 'ok') return;
   const mb = document.getElementById('pfMetricBar').value, ml = document.getElementById('pfMetricLine').value;
   const labels = PF.daily.map(d => RU.fmtDate(d.date));
   const vals = m => PF.daily.map(d => Number(d[m]) || 0);
+  pfSide();
   if(PF_CHART) PF_CHART.destroy();
   PF_CHART = new Chart(document.getElementById('pfChart'), {
     data: {labels, datasets: [
@@ -112,7 +134,14 @@ function pfChart(){
       {type: 'line', label: PF_LABEL[ml], data: vals(ml), borderColor: '#111', backgroundColor: '#111', tension: .25, pointRadius: 0, borderWidth: 2, yAxisID: 'y1', order: 1}
     ]},
     options: {responsive: true, maintainAspectRatio: false, interaction: {mode: 'index', intersect: false},
-      plugins: {legend: {display: true, position: 'bottom', labels: {boxWidth: 12, font: {size: 10}}}},
+      plugins: {legend: {display: true, position: 'bottom', labels: {boxWidth: 12, font: {size: 10}}},
+        tooltip: {filter: i => i.datasetIndex === 0, displayColors: false, padding: 12, bodyFont: {family: 'monospace', size: 11}, titleFont: {size: 12},
+          callbacks: {
+            label: () => [],
+            title: items => items.length ? RU.fmtDate(PF.daily[items[0].dataIndex].date) : '',
+            afterBody: items => { if(!items.length) return []; const d = PF.daily[items[0].dataIndex]; const t = {};
+              Object.keys(d).forEach(k => { t[k] = Number(d[k]) || 0; });
+              return PF_ALL.map(m => m[1] + ': ' + pfVal(m[0], t)); } } }},
       scales: {x: {grid: {display: false}, ticks: {maxTicksLimit: 10}},
         y: {beginAtZero: true, position: 'left', title: {display: true, text: PF_LABEL[mb], font: {size: 10}}},
         y1: {beginAtZero: true, position: 'right', grid: {drawOnChartArea: false}, title: {display: true, text: PF_LABEL[ml], font: {size: 10}}}}}
