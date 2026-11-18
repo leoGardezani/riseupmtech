@@ -25,7 +25,7 @@ function renderCampOverview(){
   else{
     body.innerHTML = list.map(g => {
       const c = st => g.rows.filter(r => r.status === st).length;
-      const overall = c('error') ? 'error' : c('pending') ? 'pending' : c('stand_by') ? 'stand_by' : 'implemented';
+      const overall = c('error') ? 'error' : c('pending') ? 'pending' : c('stand_by') ? 'stand_by' : c('implemented') ? 'implemented' : 'finished';
       const starts = g.rows.map(r => RU.parseDate(r.start)).filter(Boolean), ends = g.rows.map(r => RU.parseDate(r.end)).filter(Boolean);
       const f = d => d ? RU.fmtDate(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0')) : '—';
       return '<tr><td class="td-bold" style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _escHtml(g.camp) + '</td>'

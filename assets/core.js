@@ -39,11 +39,15 @@ RU.ready = function(fn){
 // Nada aqui é de exemplo: sem workspace/sem linhas → listas vazias.
 RU.SOURCE_LABEL = { google: 'Google Ads', google_ads: 'Google Ads', googleads: 'Google Ads', meta: 'Meta Ads', facebook: 'Meta Ads', instagram: 'Meta Ads', tiktok: 'TikTok Ads', youtube: 'YouTube', linkedin: 'LinkedIn', dv360: 'DV360' };
 RU.normStatus = function(raw){
+  // Ciclo de vida real da tabela de implementação (ver services/campaigns_engine.py):
+  // in creation · ready to setup · created - campaign · created - campaign | adset ·
+  // implemented · running · paused · set to pause · set to run · stand by · finished · error - *
   const t = String(raw || '').trim().toLowerCase();
-  if(t === 'implemented') return 'implemented';
   if(t.indexOf('error') === 0) return 'error';
-  if(t === 'stand by' || t === 'stand_by' || t === 'standby') return 'stand_by';
-  return 'pending'; // "ready to setup" e qualquer outro valor ainda não implementado
+  if(t === 'implemented' || t === 'running' || t === 'created - campaign | adset') return 'implemented';
+  if(t === 'stand by' || t === 'stand_by' || t === 'standby' || t === 'paused' || t === 'set to pause') return 'stand_by';
+  if(t === 'finished') return 'finished';
+  return 'pending'; // in creation, ready to setup, created - campaign, set to run, pending - *, vazio
 };
 RU.fmtDate = function(v){
   if(!v) return '—';

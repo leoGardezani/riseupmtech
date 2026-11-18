@@ -70,7 +70,7 @@ function renderGantt(){
         + '<div class="gantt-bar-area"><div class="gantt-today-line" style="left:' + todayPct + '%"></div>'
         + (outside
             ? '<div style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:9px;color:var(--ink-muted)">fora da janela · ' + RU.fmtDate(s.start) + ' → ' + RU.fmtDate(s.end) + '</div>'
-            : '<div class="gantt-bar ' + s.status + '" style="left:' + leftPct + '%;width:' + widthPct + '%">' + (s.id !== '—' ? _escHtml(s.id) : _escHtml(s.rawStatus || s.status)) + '</div>')
+            : '<div class="gantt-bar ' + (s.status === 'finished' ? 'implemented' : s.status) + '" style="left:' + leftPct + '%;width:' + widthPct + '%">' + (s.id !== '—' ? _escHtml(s.id) : _escHtml(s.rawStatus || s.status)) + '</div>')
         + '</div></div>';
     });
   });
