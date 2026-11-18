@@ -49,7 +49,6 @@ function pfRender(){
     ['k-spend','k-imp','k-reach','k-freq','k-clk','k-ctr','k-cpm','k-cpc','k-vv','k-leads','k-conv','k-pace'].forEach(id => set(id, '—'));
     document.getElementById('pfSource').innerHTML = empty;
     document.getElementById('pfCamp').innerHTML = empty;
-    document.getElementById('pfPacing').innerHTML = empty;
     document.getElementById('pfMatrix').innerHTML = empty;
     document.getElementById('pfCreative').innerHTML = empty;
     document.getElementById('pfAudience').innerHTML = empty;
@@ -67,28 +66,13 @@ function pfRender(){
   set('k-vv', pfInt(t.vv)); set('k-leads', pfInt(t.leads)); set('k-conv', pfInt(t.conv));
   const po = PF.pacing_overall || {};
   set('k-pace', po.spend && po.spend.pacing != null ? pfPct(po.spend.pacing) : '—');
-  const prow = PF_METRICS.filter(m => po[m[0]]).map(m => {
-    const o = po[m[0]];
-    return '<tr><td class="td-bold">' + m[1] + '</td><td class="td-mono">' + m[2](o.goal) + '</td><td class="td-mono">' + m[2](o.expected)
-      + '</td><td class="td-mono">' + m[2](o.actual) + '</td><td>' + pfPacing(o.pacing) + '</td></tr>';
-  });
-  document.getElementById('pfPacing').innerHTML = prow.length ? prow.join('')
-    : '<tr><td colspan="5"><div style="padding:24px 20px;font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Nenhuma meta cadastrada para este plano ainda.</div></td></tr>';
-  document.getElementById('pfMatrix').innerHTML = PF.by_campaign.map(c => {
+  const totalRow = '<tr style="background:var(--bg-soft,#f7f7f5)"><td class="td-bold">Total do plano</td><td class="td-mono">—</td>'
+    + PF_METRICS.map(m => '<td>' + pfPacing(po[m[0]] ? po[m[0]].pacing : null) + '</td>').join('') + '</tr>';
+  document.getElementById('pfMatrix').innerHTML = totalRow + PF.by_campaign.map(c => {
     const pm = c.pacing_by_metric || {};
     return '<tr><td class="td-bold">' + _escHtml(c.campaign_name || '—') + '</td><td class="td-mono">' + _escHtml(pfSrc(c.source)) + '</td>'
       + PF_METRICS.map(m => '<td>' + pfPacing(pm[m[0]]) + '</td>').join('') + '</tr>';
   }).join('');
-
-  document.getElementById('pfSource').innerHTML = PF.by_source.map(s =>
-    pfRow(s, '<tr><td class="td-bold">' + _escHtml(pfSrc(s.source)) + '</td>')
-    + '<td class="td-mono">' + pfMoney(pfDiv(s.spend, s.clicks)) + '</td></tr>').join('');
-  document.getElementById('pfCamp').innerHTML = PF.by_campaign.map(c =>
-    '<tr><td class="td-bold">' + _escHtml(c.campaign_name || '—') + '</td><td class="td-mono">' + _escHtml(pfSrc(c.source)) + '</td>'
-    + '<td class="td-mono">' + pfMoney(c.spend) + '</td><td class="td-mono">' + pfMoney(c.planned) + '</td>'
-    + '<td class="td-mono">' + pfInt(c.impressions) + '</td><td class="td-mono">' + pfInt(c.reach) + '</td>'
-    + '<td class="td-mono">' + pfDec(pfDiv(c.impressions, c.reach)) + '</td><td class="td-mono">' + pfInt(c.clicks) + '</td>'
-    + '<td class="td-mono">' + pfPct(pfDiv(c.clicks, c.impressions)) + '</td><td>' + pfPacing(c.pacing) + '</td></tr>').join('');
   const tail = r => '<td class="td-mono">' + pfMoney(pfDiv(r.spend, r.clicks)) + '</td><td class="td-mono">' + pfInt(r.leads) + '</td></tr>';
   const lst = (arr, f) => arr && arr.length ? arr.map(f).join('') : '<tr><td colspan="12"><div style="padding:24px 20px;font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Sem dados no período.</div></td></tr>';
   document.getElementById('pfCreative').innerHTML = lst(PF.by_creative, r =>
