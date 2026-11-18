@@ -36,7 +36,7 @@
   // Links antigos (operations.html#desdobrador etc.) abriam uma aba dentro do SPA.
   // Agora cada aba é uma página: redireciona o hash antigo para o arquivo novo.
   if(window.__oauthReturnHandled) return;
-  var map={dashboard:'campanhas.html',campanhas:'campanhas.html',audiencias:'audiencias.html',desdobrador:'desdobrador.html',criativos:'criativos.html',status:'status.html',bigtable:'bigtable.html'};
+  var map={dashboard:'campanhas.html',campanhas:'campanhas.html',performance:'performance.html',audiencias:'audiencias.html',desdobrador:'desdobrador.html',criativos:'criativos.html',status:'status.html',bigtable:'bigtable.html'};
   var h=(location.hash||'').replace('#','');
   if(map[h]) location.replace(map[h]);
 })();
@@ -50,7 +50,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/shared.css?v=20261118e">
+<link rel="stylesheet" href="assets/shared.css?v=20261118f">
 <style>
   /* Home (Yōkoso) — mescla do desenho aprovado (rise-up-home) com os cards de navegação */
   :root{--ink-mid:#666;--ink-muted:#767676;}
@@ -117,7 +117,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-<script src="assets/shell.js?v=20261118e"></script>
+<script src="assets/shell.js?v=20261118f"></script>
 <div class="main" id="main">
   <div class="tab-page active" id="tab-home">
   <div class="h-page">
@@ -188,7 +188,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     </div>
     <div class="home-group">Operação</div>
     <div class="home-grid">
-      <a class="home-card" href="campanhas.html"><span class="hc-n">04</span><span class="hc-t">Campanhas</span><span class="hc-d">Resultados, pacing e criativos à esquerda; subir novos planos e rodar o pipeline à direita.</span><span class="hc-arrow">→</span></a>
+      <a class="home-card" href="campanhas.html"><span class="hc-n">04</span><span class="hc-t">Campanhas</span><span class="hc-d">Situação do plano à esquerda; subir novos planos e rodar o pipeline à direita.</span><span class="hc-arrow">→</span></a>
       <a class="home-card" href="status.html"><span class="hc-n">05</span><span class="hc-t">Status</span><span class="hc-d">Situação da implementação por linha do plano de mídia e Gantt.</span><span class="hc-arrow">→</span></a>
       <a class="home-card" href="bigtable.html"><span class="hc-n">06</span><span class="hc-t">Big Table</span><span class="hc-d">Tabela completa de dados, com filtro, ordenação e download.</span><span class="hc-arrow">→</span></a>
     </div>
@@ -211,7 +211,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   </div>
   </div>
 </div>
-<script src="assets/core.js?v=20261118e"></script>
-<script src="assets/pages/home.js?v=20261118e"></script>
+<script src="assets/core.js?v=20261118f"></script>
+<script src="assets/pages/home.js?v=20261118f"></script>
 </body>
 </html>

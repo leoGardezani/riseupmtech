@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rise Up MTech — Performance</title>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NG9TFZ74');</script>
+<!-- End Google Tag Manager -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="assets/shared.css?v=20261118f">
+</head>
+<body data-page="performance" data-nofilters>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script src="assets/shell.js?v=20261118f"></script>
+<div class="main" id="main">
+  <div class="tab-page active" id="tab-performance">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+      <div>
+        <div class="section-title">Performance</div>
+        <div class="section-sub">Métricas de mídia e pacing do plano escolhido</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <select class="fs_" id="pfDays" style="width:auto;min-width:150px;margin-bottom:16px">
+          <option value="7">Últimos 7 dias</option><option value="30" selected>Últimos 30 dias</option><option value="90">Últimos 90 dias</option>
+        </select>
+        <select class="fs_" id="pfWorkspace" style="width:auto;min-width:220px;margin-bottom:16px"><option value="">Carregando...</option></select>
+      </div>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(6,1fr)">
+      <div class="kpi feat"><div class="kpi-lbl">Investimento</div><div class="kpi-val" id="k-spend">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Impressões</div><div class="kpi-val" id="k-imp">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Alcance</div><div class="kpi-val" id="k-reach">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Frequência</div><div class="kpi-val" id="k-freq">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Cliques</div><div class="kpi-val" id="k-clk">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">CTR</div><div class="kpi-val" id="k-ctr">—</div></div>
+    </div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(6,1fr);margin-top:12px">
+      <div class="kpi"><div class="kpi-lbl">CPM</div><div class="kpi-val" id="k-cpm">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">CPC</div><div class="kpi-val" id="k-cpc">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Views de vídeo</div><div class="kpi-val" id="k-vv">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Leads</div><div class="kpi-val" id="k-leads">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Conversões</div><div class="kpi-val" id="k-conv">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Pacing geral</div><div class="kpi-val" id="k-pace">—</div></div>
+    </div>
+
+    <div id="pfMsg"></div>
+
+    <div class="tbox" style="margin-top:24px">
+      <div class="tbox-head">
+        <div class="tbox-title">Evolução diária</div>
+        <select class="fs_" id="pfMetric" style="width:auto;min-width:150px;margin:0">
+          <option value="impressions">Impressões</option><option value="reach">Alcance</option>
+          <option value="clicks">Cliques</option><option value="spend">Investimento</option>
+        </select>
+      </div>
+      <div style="padding:16px 20px;height:280px"><canvas id="pfChart"></canvas></div>
+    </div>
+
+    <div class="tbox" style="margin-top:24px">
+      <div class="tbox-head"><div class="tbox-title">Por plataforma</div></div>
+      <table><thead><tr>
+        <th>Plataforma</th><th>Investimento</th><th>Impressões</th><th>Alcance</th><th>Freq.</th><th>Cliques</th><th>CTR</th><th>CPC</th>
+      </tr></thead>
+      <tbody id="pfSource"></tbody></table>
+    </div>
+
+    <div class="tbox" style="margin-top:24px;margin-bottom:24px">
+      <div class="tbox-head">
+        <div class="tbox-title">Por campanha e pacing</div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// pacing = gasto ÷ gasto esperado até hoje</span>
+      </div>
+      <table><thead><tr>
+        <th>Campanha</th><th>Plataforma</th><th>Investimento</th><th>Planejado</th><th>Impressões</th><th>Alcance</th><th>Freq.</th><th>Cliques</th><th>CTR</th><th>Pacing</th>
+      </tr></thead>
+      <tbody id="pfCamp"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<script src="assets/core.js?v=20261118f"></script>
+<script src="assets/pages/performance.js?v=20261118f"></script>
+</body>
+</html>
