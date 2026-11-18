@@ -12,10 +12,22 @@ window.dataLayer = window.dataLayer || [];
 // Página real = pageview real no GA4/GTM (GitHub Pages serve cada .html).
 // Mantém o evento virtual_page_view que já existia, com o mesmo formato,
 // pra não quebrar o trigger do GTM.
+RU.PAGE_FILES = {"home":"operations.html","campanhas":"campanhas.html","audiencias":"audiencias.html","desdobrador":"desdobrador.html","criativos":"criativos.html","status":"status.html","bigtable":"bigtable.html"};
+// Histórico local de páginas visitadas (alimenta o "Continue de onde parou" da Home).
+RU.recordVisit = function(id){
+  try{
+    const k = 'riseup_recent_pages';
+    let a = JSON.parse(localStorage.getItem(k) || '[]');
+    a = a.filter(x => x && x.id !== id);
+    a.unshift({ id: id, ts: Date.now() });
+    localStorage.setItem(k, JSON.stringify(a.slice(0, 8)));
+  }catch(e){}
+};
 RU.trackPage = function(id){
   const label = RU.PAGES[id] || id;
   const title = 'Rise Up MTech — ' + label;
   document.title = title;
+  RU.recordVisit(id);
   window.dataLayer.push({ event: 'virtual_page_view', page_title: title, page_path: location.pathname, page_location: location.href });
 };
 RU.ready = function(fn){

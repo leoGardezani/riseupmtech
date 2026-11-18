@@ -50,69 +50,168 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/shared.css?v=20261118">
+<link rel="stylesheet" href="assets/shared.css?v=20261118b">
 <style>
-  .home-wrap{max-width:1080px;margin:0 auto;}
-  .home-hello{font-family:var(--fh);font-weight:700;font-size:28px;letter-spacing:.02em;color:var(--ink);margin-bottom:4px;}
-  .home-hello-sub{font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--ink-muted);text-transform:uppercase;margin-bottom:32px;}
-  .home-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:28px;}
+  /* Home (Yōkoso) — mescla do desenho aprovado (rise-up-home) com os cards de navegação */
+  :root{--ink-mid:#666;--ink-muted:#767676;}
+  .h-page{max-width:1600px;margin:0 auto;}
+  .h-blk{margin-bottom:28px;}
+  .h-hello{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:28px;}
+  .h-hello h1{font-family:var(--fh);font-weight:700;font-size:40px;line-height:1;letter-spacing:.01em;margin-bottom:8px;}
+  .h-hello .section-sub{margin-bottom:0;}
+  .h-btn{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:var(--ink);border:1px solid var(--ink);padding:10px 18px;transition:all .2s;display:inline-block;text-decoration:none;}
+  .h-btn:hover{background:#333;}
+  #hKpis{border:1px solid var(--border);margin-bottom:0;}
+  .h-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);}
+  .h-step{background:var(--bg);padding:20px 22px;display:flex;flex-direction:column;gap:8px;transition:background .2s;min-height:128px;text-decoration:none;color:var(--ink);}
+  .h-step:hover{background:var(--bg2);}
+  .h-step-n{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-muted);}
+  .h-step-t{font-family:var(--fh);font-weight:700;font-size:18px;text-transform:uppercase;letter-spacing:.04em;line-height:1.1;}
+  .h-step-d{font-size:12px;color:var(--ink-soft);line-height:1.5;}
+  .h-step-go{margin-top:auto;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;}
+  .h-two{display:grid;grid-template-columns:1.5fr 1fr;gap:24px;align-items:start;}
+  .h-two .tbox{margin-bottom:0;}
+  .h-tscroll{overflow-x:auto;}
+  .td-bold{font-weight:600;color:var(--ink);} .td-mono{font-family:var(--mono);font-size:10px;}
+  .h-resume{display:flex;flex-direction:column;}
+  .h-res{padding:16px 20px;border-bottom:1px solid var(--border-d);display:flex;flex-direction:column;gap:6px;transition:background .2s;text-decoration:none;color:var(--ink);}
+  .h-res:last-child{border-bottom:none;} .h-res:hover{background:var(--bg2);}
+  .h-res-top{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-muted);}
+  .h-res-title{font-family:var(--fh);font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.04em;}
+  .h-res-meta{font-size:12px;color:var(--ink-soft);}
+  .h-empty{padding:18px 20px;font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--ink-muted);line-height:1.6;}
+  .h-link{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-mid);text-decoration:underline;cursor:pointer;background:none;border:none;}
+  .h-sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;}
+  .h-sec-head .h-link{margin-bottom:16px;}
+  .h-conns{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);}
+  .h-conn{background:var(--bg);padding:16px 18px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;}
+  .h-conn b{font-family:var(--fh);font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:.04em;}
+  .h-conn small{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--ink-muted);}
+  .h-clients{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);}
+  .h-cl{background:var(--bg);padding:20px 22px;display:flex;flex-direction:column;gap:14px;transition:background .2s;text-decoration:none;color:var(--ink);}
+  .h-cl:hover{background:var(--bg2);}
+  .h-cl-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+  .h-cl-name{font-family:var(--fh);font-weight:700;font-size:16px;text-transform:uppercase;letter-spacing:.04em;}
+  .h-cl-plat{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--ink-muted);white-space:nowrap;}
+  .h-cl-nums{display:flex;gap:28px;}
+  .h-cl-nums div{display:flex;flex-direction:column;gap:3px;}
+  .h-cl-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-muted);}
+  .h-cl-val{font-family:var(--fh);font-weight:700;font-size:22px;line-height:1;}
+  .home-group{font-family:var(--fh);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);margin:0 0 10px;display:flex;gap:12px;align-items:baseline;}
+  .home-group span{font-family:var(--mono);font-weight:400;font-size:9px;letter-spacing:.15em;color:var(--ink-muted);}
+  .home-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:24px;}
   .home-card{background:var(--bg);padding:20px 22px 18px;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;gap:6px;text-align:left;border:none;cursor:pointer;font:inherit;position:relative;min-height:128px;transition:background .2s;}
   .home-card:hover{background:var(--bg2);}
   .home-card:hover .hc-arrow{transform:translateX(4px);color:var(--ink);}
   .hc-n{font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--ink-muted);}
   .hc-t{font-family:var(--fh);font-weight:700;font-size:18px;letter-spacing:.03em;text-transform:uppercase;}
-  .hc-d{font-family:var(--ff);font-size:13px;font-weight:300;line-height:1.5;color:var(--ink-soft);max-width:30ch;}
+  .hc-d{font-family:var(--ff);font-size:13px;font-weight:300;line-height:1.5;color:var(--ink-soft);max-width:34ch;}
   .hc-arrow{position:absolute;right:20px;bottom:16px;font-family:var(--mono);font-size:14px;color:var(--ink-muted);transition:all .2s;}
-  @media(max-width:1100px){.home-grid{grid-template-columns:repeat(2,1fr);}}
-  @media(max-width:700px){.home-grid{grid-template-columns:1fr;}.home-hello{font-size:22px;}}
+  .h-soon{border:1px dashed var(--ink-muted);background:var(--bg2);padding:22px;display:flex;flex-direction:column;gap:10px;}
+  .h-soon .h-step-t{font-size:20px;}
+  @media(max-width:1100px){.h-steps{grid-template-columns:repeat(2,1fr);}.h-two{grid-template-columns:1fr;}.h-conns{grid-template-columns:repeat(3,1fr);}.h-clients{grid-template-columns:repeat(2,1fr);}.home-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:700px){.h-hello h1{font-size:28px;}.h-steps,.h-conns,.h-clients,.home-grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body data-page="home" data-nofilters>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-<script src="assets/shell.js?v=20261118"></script>
+<script src="assets/shell.js?v=20261118b"></script>
 <div class="main" id="main">
   <div class="tab-page active" id="tab-home">
-  <div class="home-wrap">
-    <div class="home-hello" id="homeHello">Início</div>
-    <div class="home-hello-sub">// escolha por onde começar</div>
-    <div class="section-title">Criação</div>
-    <div class="section-sub">3 páginas</div>
+  <div class="h-page">
+
+    <section class="h-hello">
+      <div>
+        <h1 id="hHello">Olá</h1>
+        <div class="section-sub" id="hHelloSub">carregando…</div>
+      </div>
+      <a class="h-btn" href="campanhas.html">+ Nova campanha</a>
+    </section>
+
+    <section class="h-blk">
+      <div class="kpi-grid" id="hKpis"></div>
+    </section>
+
+    <section class="h-blk">
+      <div class="section-title">Fluxo de campanha</div>
+      <div class="section-sub">Do plano de mídia ao ar</div>
+      <div class="h-steps">
+        <a class="h-step" href="#" onclick="togglePanel();openRpPage('planilha');return false;"><span class="h-step-n">01 · Plano</span><span class="h-step-t">Importar plano de mídia</span><span class="h-step-d">Crie ou importe o plano e valide as linhas antes de seguir.</span><span class="h-step-go">Abrir →</span></a>
+        <a class="h-step" href="audiencias.html"><span class="h-step-n">02 · Públicos</span><span class="h-step-t">Gerar audiências</span><span class="h-step-d">Sugestões para Meta, Google Ads e TikTok a partir do plano.</span><span class="h-step-go">Abrir →</span></a>
+        <a class="h-step" href="desdobrador.html"><span class="h-step-n">03 · Peças</span><span class="h-step-t">Desdobrar peças</span><span class="h-step-d">Do KV aos formatos de cada plataforma.</span><span class="h-step-go">Abrir →</span></a>
+        <a class="h-step" href="campanhas.html"><span class="h-step-n">04 · No ar</span><span class="h-step-t">Implementar campanhas</span><span class="h-step-d">Criar e aplicar tudo nas contas, com revisão antes.</span><span class="h-step-go">Abrir →</span></a>
+      </div>
+    </section>
+
+    <section class="h-blk h-two">
+      <div class="tbox">
+        <div class="tbox-head"><div class="tbox-title">Precisa da sua atenção</div></div>
+        <div class="h-tscroll">
+          <table>
+            <thead><tr><th>Nível</th><th>Item</th><th>Cliente</th><th></th></tr></thead>
+            <tbody id="hAttn"><tr><td colspan="4" class="h-empty">Carregando…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="tbox">
+        <div class="tbox-head"><div class="tbox-title">Continue de onde parou</div></div>
+        <div class="h-resume" id="hResume"></div>
+      </div>
+    </section>
+
+    <section class="h-blk">
+      <div class="h-sec-head">
+        <div><div class="section-title">Saúde das conexões</div><div class="section-sub">Plataformas e fontes de dados</div></div>
+        <button class="h-link" onclick="togglePanel();openRpPage('conexoes')">Gerenciar conexões</button>
+      </div>
+      <div class="h-conns" id="hConns"></div>
+    </section>
+
+    <section class="h-blk">
+      <div class="h-sec-head">
+        <div><div class="section-title">Clientes e planos de mídia</div><div class="section-sub">O que está esperando em cada plano</div></div>
+        <button class="h-link" onclick="togglePanel();openRpPage('planilha')">Gerenciar planos</button>
+      </div>
+      <div class="h-clients" id="hClients"></div>
+    </section>
+
+    <section class="h-blk">
+      <div class="section-title">Todas as páginas</div>
+      <div class="section-sub">Atalhos para cada área da plataforma</div>
+    <div class="home-group">Criação</div>
     <div class="home-grid">
       <a class="home-card" href="desdobrador.html"><span class="hc-n">01</span><span class="hc-t">Desdobrador</span><span class="hc-d">KV → todos os formatos, com variações geradas por IA e envio para aprovação.</span><span class="hc-arrow">→</span></a>
       <a class="home-card" href="criativos.html"><span class="hc-n">02</span><span class="hc-t">Criativos</span><span class="hc-d">Fila de aprovação, upload direto e repositório de peças.</span><span class="hc-arrow">→</span></a>
       <a class="home-card" href="audiencias.html"><span class="hc-n">03</span><span class="hc-t">Audiências</span><span class="hc-d">Sugerir, refinar e criar audiências em Meta, Google Ads e TikTok.</span><span class="hc-arrow">→</span></a>
     </div>
-    <div class="section-title">Operação</div>
-    <div class="section-sub">3 páginas</div>
+    <div class="home-group">Operação</div>
     <div class="home-grid">
       <a class="home-card" href="campanhas.html"><span class="hc-n">04</span><span class="hc-t">Campanhas</span><span class="hc-d">Resultados, pacing e criativos à esquerda; subir novos planos e rodar o pipeline à direita.</span><span class="hc-arrow">→</span></a>
       <a class="home-card" href="status.html"><span class="hc-n">05</span><span class="hc-t">Status</span><span class="hc-d">Situação da implementação por linha do plano de mídia e Gantt.</span><span class="hc-arrow">→</span></a>
       <a class="home-card" href="bigtable.html"><span class="hc-n">06</span><span class="hc-t">Big Table</span><span class="hc-d">Tabela completa de dados, com filtro, ordenação e download.</span><span class="hc-arrow">→</span></a>
     </div>
-    <div class="section-title">Conta</div>
-    <div class="section-sub">abre o menu lateral</div>
-    <div class="home-grid home-grid-3">
+    <div class="home-group">Conta <span>abre o menu lateral</span></div>
+    <div class="home-grid">
       <button class="home-card" onclick="togglePanel();openRpPage('planilha')"><span class="hc-n">A</span><span class="hc-t">Plano de Mídia</span><span class="hc-d">Criar, sincronizar e excluir os planos de mídia (workspaces).</span><span class="hc-arrow">→</span></button>
       <button class="home-card" onclick="togglePanel();openRpPage('conexoes')"><span class="hc-n">B</span><span class="hc-t">Conexões</span><span class="hc-d">Conectar uma vez as contas de Google Ads, Meta e TikTok da empresa.</span><span class="hc-arrow">→</span></button>
       <button class="home-card" onclick="togglePanel();openRpPage('usuarios')"><span class="hc-n">C</span><span class="hc-t">Usuários</span><span class="hc-d">Papéis e acessos: analista, editor e admin.</span><span class="hc-arrow">→</span></button>
     </div>
+    </section>
+
+    <section class="h-blk">
+      <div class="h-soon">
+        <span class="h-step-n">Em breve · Listening</span>
+        <span class="h-step-t">Social, geo e IA: como as marcas dos seus clientes aparecem</span>
+        <span class="h-step-d">Cruze o que está sendo dito sobre a marca com a mídia que você já opera, sem sair da plataforma.</span>
+      </div>
+    </section>
+
   </div>
   </div>
 </div>
-<script src="assets/core.js?v=20261118"></script>
-<script>
-RU.PAGES.home = 'Yōkoso';
-RU.ready(function(){
-  if(window.__oauthReturnHandled) return;
-  RU.trackPage('home');
-  try{
-    var u = JSON.parse(localStorage.getItem('riseup_user') || 'null');
-    var n = u && (u.name || u.email);
-    if(n) document.getElementById('homeHello').textContent = 'Olá, ' + n.split(' ')[0];
-  }catch(e){}
-});
-</script>
+<script src="assets/core.js?v=20261118b"></script>
+<script src="assets/pages/home.js?v=20261118b"></script>
 </body>
 </html>
