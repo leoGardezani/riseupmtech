@@ -1356,11 +1356,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Relatórios</div><div class="rp-page-sub">Envie um .pptx para gerar report dinâmico.</div><div class="uz" onclick="toast('Selecione um arquivo','')"><div class="uz-icon">📄</div><div class="uz-text"><strong>Selecione o .pptx</strong></div><div class="uz-hint">máx. 50MB</div></div><button class="btn-full" onclick="toast('Processando...','ok')">Processar</button></div>
   </div>
   <div class="rp-page" id="rp-conexoes">
-    <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Conexões</div><div class="rp-page-sub">Autorizações de páginas e contas de anúncio — compartilhadas com todo o time do cliente. A escolha de conta/página específica fica na aba Campanhas, junto do botão de rodar o pipeline.</div>
-      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:4px">
-        <div class="fg" style="flex:1;margin-bottom:0"><label class="fl">Workspace</label><select class="fs_" id="connWorkspaceSelect" onchange="connOnWorkspaceChange()"><option value="">Carregando...</option></select></div>
-        <button class="btn-sm ghost" id="connSyncBtn" onclick="connSyncWorkspace()" title="Sincroniza plano de mídia + BigQuery com verificação de consistência">↻ Sincronizar</button>
-      </div>
+    <div class="rp-content"><button class="rp-back" onclick="openRpPage('nav')">← Voltar</button><div class="rp-page-title">Conexões</div><div class="rp-page-sub">Conecte uma vez as contas de anúncio da sua empresa — valem para todos os planos de mídia (workspaces) e ficam visíveis só para o time da sua empresa. A escolha de conta/página de cada plano fica na aba Campanhas.</div>
+      <div id="connCompanyInfo" style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);margin-bottom:10px"></div>
       <div id="connList"></div>
     </div>
   </div>
@@ -4893,54 +4890,40 @@ window.addEventListener('load', checkAuth);
 // ── CONEXÕES ────────────────────────────────────────────────────────────
 
 const PLATFORM_KEYS = { 'Google Ads': 'google_ads', 'Meta Ads': 'meta', 'TikTok Ads': 'tiktok' };
-let connWorkspacesLoaded = false;
-
-async function connLoadWorkspaceSelect(){
-  const sel = document.getElementById('connWorkspaceSelect');
-  if(!sel) return;
-  try{
-    const res = await fetch(API_BASE + '/plan/workspaces', { headers: authHeaders() });
-    if(!res.ok) throw new Error();
-    const list = await res.json();
-    const prev = sel.value;
-    if(!list.length){ sel.innerHTML = '<option value="">Nenhum workspace</option>'; return; }
-    sel.innerHTML = list.map(w =>
-      '<option value="' + w.workspace_id + '">' + _escHtml(w.client_name || w.workspace_id) + '</option>'
-    ).join('');
-    if(prev && list.some(w => w.workspace_id === prev)) sel.value = prev;
-  }catch(e){
-    sel.innerHTML = '<option value="">Falha ao carregar</option>';
-  }
-}
+let connCompany = { company: '', can_manage: false, platforms: null, error: '' };
 
 async function renderConns() {
   const el = document.getElementById('connList');
   if (!el) return;
 
-  if(!connWorkspacesLoaded){
-    connWorkspacesLoaded = true;
-    await connLoadWorkspaceSelect();
-  }
-  const workspaceId = document.getElementById('connWorkspaceSelect')?.value || '';
-
+  // Conexões são da EMPRESA (domínio do e-mail de login), não de um
+  // workspace: a empresa vem do login no backend, o front não escolhe.
   el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);padding:12px 0">Carregando conexões...</div>';
-  if(!workspaceId){
-    el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);padding:12px 0">Selecione um workspace acima</div>';
+  connCompany = { company: '', can_manage: false, platforms: null, error: '' };
+  try {
+    const res = await fetch(API_BASE + '/connect/company/status', { headers: authHeaders() });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) {
+      connCompany = { company: data.company, can_manage: !!data.can_manage, platforms: data.platforms || {}, error: '' };
+    } else {
+      connCompany.error = data.detail || 'Não foi possível carregar as conexões.';
+    }
+  } catch (e) { connCompany.error = 'Não foi possível carregar as conexões.'; }
+
+  const info = document.getElementById('connCompanyInfo');
+  if (info) {
+    info.textContent = connCompany.company
+      ? ('Empresa: ' + connCompany.company + (connCompany.can_manage ? '' : ' — somente leitura (conectar exige papel editor ou admin)'))
+      : '';
+  }
+  if (connCompany.error) {
+    el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--warn);padding:12px 0">' + _escHtml(connCompany.error) + '</div>';
     return;
   }
-
-  let backendStatus = null;
-  try {
-    const res = await fetch(API_BASE + '/connect/status?workspace_id=' + encodeURIComponent(workspaceId), { headers: authHeaders() });
-    if (res.ok) backendStatus = await res.json();
-  } catch (e) { /* segue no modo demo */ }
-
-  if (backendStatus) {
-    PLATS.forEach(p => {
-      const key = PLATFORM_KEYS[p.name];
-      if (key && key in backendStatus) p.on = !!backendStatus[key];
-    });
-  }
+  PLATS.forEach(p => {
+    const key = PLATFORM_KEYS[p.name];
+    if (key && connCompany.platforms && key in connCompany.platforms) p.on = !!connCompany.platforms[key].connected;
+  });
 
   el.innerHTML = PLATS.map(p => {
     const key = PLATFORM_KEYS[p.name];
@@ -4957,14 +4940,22 @@ async function renderConns() {
         + '<span style="font-family:var(--mono);font-size:9px;color:var(--ink-muted)">via login</span>'
         + '</div>';
     }
-    const actions = p.on
+    const canManage = !key || connCompany.can_manage;
+    const actions = !canManage ? ''
+      : p.on
       ? '<div style="display:flex;gap:6px">'
         + '<button class="btn-sm ghost" onclick="disconnectPlatform(\'' + p.name + '\',\'' + (key || '') + '\')">Desconectar</button>'
         + '</div>'
       : '<button class="btn-sm" onclick="connectPlatform(\'' + p.name + '\',\'' + (key || '') + '\')">Conectar</button>';
+    const pinfo = key && connCompany.platforms ? connCompany.platforms[key] : null;
+    const detail = (pinfo && pinfo.connected)
+      ? '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-top:2px">'
+        + ((pinfo.accounts || []).length) + ' conta(s)/página(s) disponível(is)'
+        + (pinfo.connected_by ? ' · por ' + _escHtml(pinfo.connected_by) : '') + '</div>'
+      : '';
     return '<div class="conn-item">'
       + '<div><div class="conn-name">' + p.name + '</div>'
-      + '<div class="conn-status ' + (p.on ? 'on' : 'off') + '">' + (p.on ? '● Conectado' : '○ Desconectado') + '</div></div>'
+      + '<div class="conn-status ' + (p.on ? 'on' : 'off') + '">' + (p.on ? '● Conectado' : '○ Desconectado') + '</div>' + detail + '</div>'
       + actions
       + '</div>';
   }).join('');
@@ -5298,8 +5289,7 @@ function connectPlatform(name, key) {
     toast('✓ ' + name + ' conectado (demo — integração real ainda não existe)', 'ok');
     return;
   }
-  const workspaceId = document.getElementById('connWorkspaceSelect')?.value || '';
-  if(!workspaceId){ toast('Selecione um workspace primeiro', 'er'); return; }
+  if(!connCompany.can_manage){ toast('Conectar plataformas exige papel editor ou admin', 'er'); return; }
   // OAuth real precisa abrir em nova aba (o backend redireciona pro provedor).
   // Bug corrigido nesta sessão: window.open() é navegação de aba comum, NÃO
   // manda o header Authorization — então token e workspace_id vão como
@@ -5308,9 +5298,9 @@ function connectPlatform(name, key) {
   // visível na URL desta aba/nos logs de acesso do navegador — aceitável
   // aqui porque é um fluxo de poucos segundos até o redirect pro provedor,
   // mas vale saber que não é o padrão usado no resto do app.
+  // A empresa NÃO vai na URL: o backend deriva do login (token).
   const url = API_BASE + '/connect/' + key
-    + '?workspace_id=' + encodeURIComponent(workspaceId)
-    + '&token=' + encodeURIComponent(AUTH_TOKEN || '');
+    + '?token=' + encodeURIComponent(AUTH_TOKEN || '');
   window.open(url, '_blank');
 }
 
@@ -5322,57 +5312,26 @@ function onOAuthConnected(platform){
   // Reaproveita os refreshes que já existem — cada um já é no-op se o
   // elemento não estiver na tela (usuário podia estar em outra aba do
   // app quando clicou "Conectar").
-  if(document.getElementById('connWorkspaceSelect')) renderConns();
+  if(document.getElementById('connList')) renderConns();
   if(document.getElementById('campWorkspaceSelect')) campOnWorkspaceChange();
   const label = { google_ads: 'Google Ads', meta: 'Meta Ads', tiktok: 'TikTok Ads' }[platform] || platform;
   toast('✓ ' + label + ' conectado', 'ok');
 }
 
-function connOnWorkspaceChange(){
-  renderConns();
-}
-
-// Botão de sincronizar na aba Conexões — pedido do Leonardo: chama o
-// MESMO /plan/sync robusto (com verificação de consistência planilha <->
-// BigQuery, retry embutido — ver services/plan_sync.sync_and_verify())
-// usado pelo pipeline de campanhas, só que disparável manualmente aqui,
-// sem precisar ir até a aba Planilha.
-async function connSyncWorkspace(){
-  const workspaceId = document.getElementById('connWorkspaceSelect')?.value || '';
-  if(!workspaceId){ toast('Selecione um workspace primeiro', 'er'); return; }
-  const btn = document.getElementById('connSyncBtn');
-  if(btn){ btn.disabled = true; btn.textContent = 'Sincronizando...'; }
-  try{
-    const res = await fetch(API_BASE + '/plan/sync?workspace_id=' + encodeURIComponent(workspaceId), {
-      method: 'POST', headers: authHeaders(),
-    });
-    const data = await res.json().catch(() => ({}));
-    if(!res.ok) throw new Error(data.detail || 'falha ao sincronizar');
-    // Fix desta sessão (pedido do Leonardo) — antes mostrava só "✓
-    // Sincronizado" genérico, sem confirmar se algo de fato mudou. Agora
-    // mostra as contagens reais que o backend já devolve
-    // (run_full_sync), pra confirmar visualmente que o sync rodou de
-    // verdade e o que ele encontrou.
-    const mr = data.bq_material_request_upserted ?? data.material_request_rows ?? '?';
-    const imp = data.bq_implementation_upserted ?? data.implementation_rows ?? '?';
-    toast(`✓ Sincronizado — ${mr} linha(s) de material-request, ${imp} de implementation`, 'ok');
-  }catch(e){
-    toast('✕ ' + (e.message || 'Não foi possível sincronizar agora'), 'er');
-  }
-  if(btn){ btn.disabled = false; btn.textContent = '↻ Sincronizar'; }
-}
-
 async function disconnectPlatform(name, key) {
-  const workspaceId = document.getElementById('connWorkspaceSelect')?.value || '';
-  if (key && workspaceId) {
+  if (key) {
+    if(!confirm('Desconectar ' + name + ' de toda a empresa? Todos os planos de mídia deixam de poder usar essa conexão até reconectar.')) return;
     try {
-      const res = await fetch(API_BASE + '/connect/' + key + '?workspace_id=' + encodeURIComponent(workspaceId), { method: 'DELETE', headers: authHeaders() });
+      const res = await fetch(API_BASE + '/connect/company/' + key, { method: 'DELETE', headers: authHeaders() });
       if (res.ok) {
         toast('✓ ' + name + ' desconectado', 'ok');
         renderConns();
         return;
       }
-    } catch (e) { /* cai no demo abaixo */ }
+      const d = await res.json().catch(() => ({}));
+      toast('✕ ' + (d.detail || 'Não foi possível desconectar'), 'er');
+      return;
+    } catch (e) { toast('✕ Não foi possível desconectar agora', 'er'); return; }
   }
   const p = PLATS.find(x => x.name === name);
   if (p) p.on = false;
@@ -5678,7 +5637,7 @@ function campRenderRunResult(data){
 // getElementById simplesmente dão null nesse caso, sem erro).
 async function refreshAllWorkspaceSelectors(){
   if(document.getElementById('campWorkspaceSelect')) await campLoadWorkspaces();
-  if(document.getElementById('connWorkspaceSelect')){ connWorkspacesLoaded = false; await renderConns(); }
+  if(document.getElementById('connList')) await renderConns();
   if(document.getElementById('desdWorkspaceSelect')) await desdLoadWorkspaces();
   if(document.getElementById('audWorkspaceSelect')) await audLoadWorkspaces();
 }
