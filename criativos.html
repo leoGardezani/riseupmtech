@@ -13,13 +13,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/shared.css?v=20261118">
+<link rel="stylesheet" href="assets/shared.css?v=20261118c">
 </head>
-<body data-page="criativos">
+<body data-page="criativos" data-nofilters>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-<script src="assets/shell.js?v=20261118"></script>
+<script src="assets/shell.js?v=20261118c"></script>
 <div class="main" id="main">
   <div class="tab-page active" id="tab-criativos">
     <div class="section-title">Repositório de Criativos</div>
@@ -29,11 +29,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       <div class="fg-" style="margin:0"><span class="flbl" style="margin-right:8px">Campanha</span>
         <select class="repo-filter-sel" id="rf-camp" onchange="filterRepo()">
           <option value="">Todas as campanhas</option>
-          <option>Awareness Q1</option>
-          <option>Performance — Leads</option>
-          <option>Retargeting</option>
-          <option>Brand Search</option>
-          <option>TikTok — Gen Z</option>
         </select>
       </div>
       <div class="fg-" style="margin:0"><span class="flbl" style="margin-right:8px">Plataforma</span>
@@ -126,12 +121,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       <div class="coll-header open" onclick="toggleColl('approved')">
         <div>
           <div class="coll-title">Repositório — Assets Aprovados</div>
-          <div class="coll-meta" id="repo-count-header">16 assets</div>
+          <div class="coll-meta" id="repo-count-header">0 assets</div>
         </div>
         <span class="coll-arrow">▼</span>
       </div>
       <div class="coll-body open">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:8px;line-height:1.6">// ainda em modo demo — o backend não tem endpoint de listagem de assets aprovados ainda, só de pendentes (GET /desdobrador/pending). A seção "Aguardando Aprovação" acima já é 100% real.</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-muted);margin-bottom:8px;line-height:1.6">// a listagem de assets aprovados ainda não existe no backend (só a de pendentes, que aparece acima). Quando existir, os aprovados aparecem aqui.</div>
         <!-- Grid -->
         <div class="repo-grid" id="repoGrid" style="margin-top:16px"></div>
       </div>
@@ -162,7 +157,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     </div>
   </div>
 </div>
-<script src="assets/core.js?v=20261118"></script>
-<script src="assets/pages/criativos.js?v=20261118"></script>
+<script src="assets/core.js?v=20261118c"></script>
+<script src="assets/pages/criativos.js?v=20261118c"></script>
 </body>
 </html>

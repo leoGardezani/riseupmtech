@@ -1,58 +1,77 @@
-/* Rise Up MTech — Status (gerado da separação do operations.html em páginas, 18/nov/2026) */
+/* Rise Up MTech — Status: tabela e Gantt a partir de GET /status/campaigns (dados reais do workspace). */
+
+let STATUS_ROWS = [];
+let STATUS_STATE = 'loading'; // loading | ok | error | nows
+
+function stEmpty(msg){ return '<div class="h-empty" style="padding:24px 20px;font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.04em;line-height:1.6">' + msg + '</div>'; }
+function stMessage(){
+  if(STATUS_STATE === 'loading') return 'Carregando…';
+  if(STATUS_STATE === 'error') return 'Não foi possível carregar o status agora. Tente atualizar a página.';
+  if(STATUS_STATE === 'nows') return 'Nenhum plano de mídia criado ainda. Crie um em Campanhas → "Subir novo plano".';
+  return 'Nenhuma linha de implementação neste plano ainda.';
+}
 
 function renderStatus(){
-  document.getElementById('statusTable').innerHTML = STATUS_DATA.map(s =>
-    '<tr>'
-    + '<td class="td-bold">' + s.criativo + '</td>'
-    + '<td class="td-mono">' + s.plat + '</td>'
-    + '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + s.camp + '</td>'
-    + '<td>' + badgeH(s.status) + '</td>'
-    + '<td class="td-mono" style="color:var(--ink-muted)">' + s.id + '</td>'
-    + '<td class="td-mono">' + s.start + '</td>'
-    + '<td class="td-mono">' + s.end + '</td>'
-    + '<td class="td-mono" style="color:var(--ink-muted)">' + s.upd + '</td>'
-    + '</tr>'
-  ).join('');
-  document.getElementById('stI').textContent = STATUS_DATA.filter(s=>s.status==='implemented').length;
-  document.getElementById('stP').textContent = STATUS_DATA.filter(s=>s.status==='pending').length;
-  document.getElementById('stE').textContent = STATUS_DATA.filter(s=>s.status==='error').length;
-  document.getElementById('stS').textContent = STATUS_DATA.filter(s=>s.status==='stand_by').length;
+  const tb = document.getElementById('statusTable');
+  if(!STATUS_ROWS.length){
+    tb.innerHTML = '<tr><td colspan="7">' + stEmpty(stMessage()) + '</td></tr>';
+  }else{
+    tb.innerHTML = STATUS_ROWS.map(s =>
+      '<tr>'
+      + '<td class="td-bold">' + _escHtml(s.criativo) + '</td>'
+      + '<td class="td-mono">' + _escHtml(s.plat) + '</td>'
+      + '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _escHtml(s.camp) + '</td>'
+      + '<td title="' + _escHtml(s.rawStatus) + '">' + badgeH(s.status) + '</td>'
+      + '<td class="td-mono" style="color:var(--ink-muted)">' + _escHtml(s.id) + '</td>'
+      + '<td class="td-mono">' + RU.fmtDate(s.start) + '</td>'
+      + '<td class="td-mono">' + RU.fmtDate(s.end) + '</td>'
+      + '</tr>'
+    ).join('');
+  }
+  const n = st => STATUS_ROWS.length ? STATUS_ROWS.filter(s => s.status === st).length : '—';
+  document.getElementById('stI').textContent = n('implemented');
+  document.getElementById('stP').textContent = n('pending');
+  document.getElementById('stE').textContent = n('error');
+  document.getElementById('stS').textContent = n('stand_by');
 }
+
 function renderGantt(){
-  const days = [];
-  const today = new Date();
-  const start = new Date(today); start.setDate(today.getDate()-14);
-  for(let i=0;i<31;i++){const d=new Date(start);d.setDate(start.getDate()+i);days.push(d);}
-  const todayIdx = 14;
-  const totalDays = 31;
-  const todayPct = (todayIdx/totalDays)*100;
+  const wrap = document.getElementById('ganttWrap');
+  const dated = STATUS_ROWS.filter(s => RU.parseDate(s.start) && RU.parseDate(s.end));
+  if(!dated.length){
+    wrap.innerHTML = stEmpty(STATUS_ROWS.length ? 'Nenhuma linha com data de início e fim para mostrar na linha do tempo.' : stMessage());
+    return;
+  }
+  const DAY = 86400000, TOTAL = 31, TODAY_IDX = 14;
+  const t0 = new Date(); t0.setHours(0,0,0,0);
+  const start0 = new Date(t0.getTime() - TODAY_IDX * DAY);
+  const days = Array.from({length: TOTAL}, (_, i) => new Date(start0.getTime() + i * DAY));
+  const todayPct = ((TODAY_IDX + 0.5) / TOTAL) * 100;
   const groups = {};
-  STATUS_DATA.forEach(s => { if(!groups[s.camp]) groups[s.camp]=[]; groups[s.camp].push(s); });
+  dated.forEach(s => { (groups[s.camp] = groups[s.camp] || []).push(s); });
   let html = '<div class="gantt-header"><div class="gantt-col-info">Criativo</div><div class="gantt-timeline">';
-  days.forEach((d,i) => {
-    const lbl = i===todayIdx ? 'HOJE' : d.getDate()+'/'+String(d.getMonth()+1).padStart(2,'0');
-    html += '<div class="gantt-day' + (i===todayIdx?' today':'') + '">' + lbl + '</div>';
+  days.forEach((d, i) => {
+    const lbl = i === TODAY_IDX ? 'HOJE' : d.getDate() + '/' + String(d.getMonth()+1).padStart(2,'0');
+    html += '<div class="gantt-day' + (i === TODAY_IDX ? ' today' : '') + '">' + lbl + '</div>';
   });
   html += '</div></div>';
   Object.entries(groups).forEach(([camp, items]) => {
-    html += '<div class="gantt-group-header"><div class="gg-title">' + camp + '</div>'
-      + '<div class="gg-badge">' + items.length + ' criativo' + (items.length>1?'s':'') + '</div></div>';
+    html += '<div class="gantt-group-header"><div class="gg-title">' + _escHtml(camp) + '</div>'
+      + '<div class="gg-badge">' + items.length + ' criativo' + (items.length > 1 ? 's' : '') + '</div></div>';
     items.forEach(s => {
-      const startDay = parseInt(s.start)||1;
-      const endDay = parseInt(s.end)||30;
-      const startPct = Math.max(0, Math.min(100, ((startDay-1)/30)*100*0.7));
-      const endPct = Math.max(startPct+5, Math.min(100, (endDay/30)*100*0.7+30));
-      const width = Math.max(8, endPct-startPct);
+      const a = (RU.parseDate(s.start) - start0) / DAY;
+      const b = (RU.parseDate(s.end) - start0) / DAY + 1;
+      const outside = b <= 0 || a >= TOTAL;
+      const l = Math.max(0, Math.min(TOTAL, a)), r = Math.max(0, Math.min(TOTAL, b));
+      const leftPct = (l / TOTAL) * 100, widthPct = Math.max(1.5, ((r - l) / TOTAL) * 100);
       html += '<div class="gantt-row">'
-        + '<div class="gantt-row-info">'
-        + '<div class="gr-name">' + s.criativo + '</div>'
-        + '<div class="gr-meta"><span>' + s.plat + '</span>' + badgeH(s.status) + '</div>'
-        + '</div>'
-        + '<div class="gantt-bar-area">'
-        + '<div class="gantt-today-line" style="left:' + todayPct + '%"></div>'
-        + '<div class="gantt-bar ' + s.status + '" style="left:' + startPct + '%;width:' + width + '%">'
-        + (s.id !== '—' ? s.id : s.status)
-        + '</div></div></div>';
+        + '<div class="gantt-row-info"><div class="gr-name">' + _escHtml(s.criativo) + '</div>'
+        + '<div class="gr-meta"><span>' + _escHtml(s.plat) + '</span>' + badgeH(s.status) + '</div></div>'
+        + '<div class="gantt-bar-area"><div class="gantt-today-line" style="left:' + todayPct + '%"></div>'
+        + (outside
+            ? '<div style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:9px;color:var(--ink-muted)">fora da janela · ' + RU.fmtDate(s.start) + ' → ' + RU.fmtDate(s.end) + '</div>'
+            : '<div class="gantt-bar ' + s.status + '" style="left:' + leftPct + '%;width:' + widthPct + '%">' + (s.id !== '—' ? _escHtml(s.id) : _escHtml(s.rawStatus || s.status)) + '</div>')
+        + '</div></div>';
     });
   });
   html += '<div class="gantt-legend">'
@@ -61,12 +80,21 @@ function renderGantt(){
     + '<div class="gl-item"><div class="gl-dot stand_by"></div>Stand By</div>'
     + '<div class="gl-item"><div class="gl-dot error"></div>Erro</div>'
     + '</div>';
-  document.getElementById('ganttWrap').innerHTML = html;
+  wrap.innerHTML = html;
 }
+
+async function stLoad(workspaceId, why){
+  if(!workspaceId){ STATUS_ROWS = []; STATUS_STATE = why === 'error' ? 'error' : 'nows'; renderStatus(); renderGantt(); return; }
+  STATUS_STATE = 'loading'; STATUS_ROWS = []; renderStatus(); renderGantt();
+  const r = await RU.loadImpl(workspaceId);
+  if(document.getElementById('stWorkspace').value !== workspaceId) return; // troca rápida de plano
+  STATUS_ROWS = r.rows; STATUS_STATE = r.ok ? 'ok' : 'error';
+  renderStatus(); renderGantt();
+}
+
 // ── INIT (Status) ──
 RU.ready(() => {
   if(window.__oauthReturnHandled) return;
   RU.trackPage('status');
-  renderStatus();
-  renderGantt();
+  RU.initWorkspaceSelect(document.getElementById('stWorkspace'), stLoad);
 });

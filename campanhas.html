@@ -14,169 +14,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link rel="stylesheet" href="assets/shared.css?v=20261118">
+<link rel="stylesheet" href="assets/shared.css?v=20261118c">
 </head>
-<body data-page="campanhas">
+<body data-page="campanhas" data-nofilters>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-<script src="assets/shell.js?v=20261118"></script>
+<script src="assets/shell.js?v=20261118c"></script>
 <div class="main" id="main">
   <div class="tab-page active" id="tab-campanhas">
     <div class="camp-split">
       <div class="camp-data">
-    <!-- KPIs -->
-    <div class="section-title">Resultados do Período</div>
-    <div class="section-sub">KPIs consolidados vs meta</div>
-    <div class="kpi-grid">
-      <div class="kpi feat">
-        <div class="kpi-lbl">Investimento</div>
-        <div class="kpi-val">R$284k</div>
-        <div class="kpi-delta up">↑ 12% vs ant.</div>
-        <div class="kpi-target">Meta R$310k</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-lbl">Impressões</div>
-        <div class="kpi-val">18,4M</div>
-        <div class="kpi-delta up">↑ 8%</div>
-        <div class="kpi-target">Meta 20M</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-lbl">Cliques</div>
-        <div class="kpi-val">342k</div>
-        <div class="kpi-delta dn">↓ 3%</div>
-        <div class="kpi-target">Meta 380k</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-lbl">CTR</div>
-        <div class="kpi-val">1,86%</div>
-        <div class="kpi-delta dn">↓ 0,2pp</div>
-        <div class="kpi-target">Ref. 2,0%</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-lbl">Leads</div>
-        <div class="kpi-val">4.820</div>
-        <div class="kpi-delta up">↑ 18%</div>
-        <div class="kpi-target">Meta 5.000</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-lbl">CPL</div>
-        <div class="kpi-val">R$58,9</div>
-        <div class="kpi-delta up">↑ eficiência</div>
-        <div class="kpi-target">Meta R$65</div>
-      </div>
-    </div>
-    <!-- PACING -->
-    <div class="section-title">Pacing de Volumes</div>
-    <div class="section-sub">Entrega realizada vs meta esperada para o período</div>
-    <div class="pacing-grid" id="pacingGrid"></div>
-    <!-- PERFORMANCE CHART -->
-    <div class="charts-row">
-      <div class="chart-box">
-        <div class="chart-title">Evolução de Performance</div>
-        <div class="chart-sub">Investimento e cliques — diário</div>
-        <div class="chart-canvas-wrap"><canvas id="chartLine" style="max-height:200px"></canvas></div>
-      </div>
-      <div class="chart-box">
-        <div class="chart-title">Distribuição por Plataforma</div>
-        <div class="chart-sub">% do investimento total</div>
-        <div class="chart-canvas-wrap"><canvas id="chartDough" style="max-height:200px"></canvas></div>
-      </div>
-    </div>
-    <!-- TABLE -->
-    <div class="tbox">
-      <div class="tbox-head">
-        <div class="tbox-title">Campanhas Ativas</div>
-        <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// clique para expandir</span>
-      </div>
-      <table><thead><tr>
-        <th>Campanha</th><th>Plataforma</th><th>Status</th>
-        <th>Investimento</th><th>% Meta</th><th>Impressões</th>
-        <th>Cliques</th><th>CTR</th><th>CPM</th><th>Leads</th><th>CPL</th>
-      </tr></thead>
-      <tbody id="campTable"></tbody></table>
-    </div>
-    <div class="divider"></div>
-    <!-- CRIATIVOS GERAL -->
-    <div class="section-title">Performance de Criativos</div>
-    <div class="section-sub">Todos os formatos e plataformas</div>
-    <!-- Collapsible: Geral -->
-    <div class="collapsible" id="coll-geral">
-      <div class="coll-header open" onclick="toggleColl('geral')">
-        <div>
-          <div class="coll-title">Visão Geral</div>
-          <div class="coll-meta">Todos os criativos · 16 ativos</div>
-        </div>
-        <span class="coll-arrow">▼</span>
-      </div>
-      <div class="coll-body open">
-        <div class="creative-grid" id="creativeGeneral"></div>
-      </div>
-    </div>
-    <!-- Collapsible: Vídeo -->
-    <div class="collapsible" id="coll-video">
-      <div class="coll-header" onclick="toggleColl('video')">
-        <div>
-          <div class="coll-title">Vídeo</div>
-          <div class="coll-meta">YouTube · TikTok · Meta Video · 6 ativos</div>
-        </div>
-        <span class="coll-arrow">▼</span>
-      </div>
-      <div class="coll-body">
-        <!-- KPIs vídeo -->
-        <div class="kpi-grid" style="margin-top:16px;grid-template-columns:repeat(5,1fr)">
-          <div class="kpi feat"><div class="kpi-lbl">Video Views</div><div class="kpi-val">2,1M</div><div class="kpi-delta up">↑ 14%</div></div>
-          <div class="kpi"><div class="kpi-lbl">VTR</div><div class="kpi-val">38,2%</div><div class="kpi-delta up">↑ 4pp</div></div>
-          <div class="kpi"><div class="kpi-lbl">VCR (100%)</div><div class="kpi-val">18,4%</div><div class="kpi-delta dn">↓ 1pp</div></div>
-          <div class="kpi"><div class="kpi-lbl">CPV</div><div class="kpi-val">R$0,42</div><div class="kpi-delta up">↑ eficiência</div></div>
-          <div class="kpi"><div class="kpi-lbl">Impressões</div><div class="kpi-val">5,5M</div><div class="kpi-delta up">↑ 9%</div></div>
-        </div>
-        <!-- Funil de vídeo -->
-        <div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px">
-          <div>
-            <div class="section-sub" style="margin-bottom:12px">Funil de visualização</div>
-            <div class="video-funnel" id="videoFunnel"></div>
-          </div>
-          <div>
-            <div class="section-sub" style="margin-bottom:12px">Criativos de vídeo</div>
-            <div class="creative-grid" style="grid-template-columns:1fr 1fr" id="creativeVideo"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Collapsible: Social -->
-    <div class="collapsible" id="coll-social">
-      <div class="coll-header" onclick="toggleColl('social')">
-        <div>
-          <div class="coll-title">Social</div>
-          <div class="coll-meta">Meta · TikTok · LinkedIn · 8 ativos</div>
-        </div>
-        <span class="coll-arrow">▼</span>
-      </div>
-      <div class="coll-body">
-        <div class="kpi-grid" style="margin-top:16px;grid-template-columns:repeat(5,1fr)">
-          <div class="kpi feat"><div class="kpi-lbl">Engajamentos</div><div class="kpi-val">284k</div><div class="kpi-delta up">↑ 22%</div></div>
-          <div class="kpi"><div class="kpi-lbl">Taxa Eng.</div><div class="kpi-val">3,8%</div><div class="kpi-delta up">↑ 0,6pp</div></div>
-          <div class="kpi"><div class="kpi-lbl">Likes</div><div class="kpi-val">198k</div><div class="kpi-delta up">↑ 18%</div></div>
-          <div class="kpi"><div class="kpi-lbl">Comentários</div><div class="kpi-val">12,4k</div><div class="kpi-delta up">↑ 31%</div></div>
-          <div class="kpi"><div class="kpi-lbl">Salvamentos</div><div class="kpi-val">8,2k</div><div class="kpi-delta up">↑ 44%</div></div>
-        </div>
-        <div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px">
-          <div>
-            <div class="section-sub" style="margin-bottom:12px">Pirâmide de engajamento</div>
-            <div class="social-pyramid" id="socialPyramid"></div>
-          </div>
-          <div>
-            <div class="section-sub" style="margin-bottom:12px">Criativos sociais</div>
-            <div class="creative-grid" style="grid-template-columns:1fr 1fr" id="creativeSocial"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="divider"></div>
-    <!-- Gantt summary -->
-    <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">Resumo de Implementação <button onclick="location.href='status.html'" style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;background:none;border:1px solid var(--border);padding:5px 12px;cursor:pointer;color:var(--ink-mid);transition:all .2s" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-mid)'">Ver Status →</button></div>
-    <div class="section-sub">Status do pipeline de criativos</div>
+    <div class="section-title">Resumo de Implementação</div>
+    <div class="section-sub">Situação das linhas do plano de mídia escolhido <span style="text-transform:none">(escolha o plano no seletor ao lado)</span></div>
     <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
       <div class="kpi feat"><div class="kpi-lbl">Implementados</div><div class="kpi-val" id="ov-stI">—</div></div>
       <div class="kpi"><div class="kpi-lbl">Na fila</div><div class="kpi-val" id="ov-stP">—</div></div>
@@ -184,15 +34,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       <div class="kpi"><div class="kpi-lbl">Stand by</div><div class="kpi-val" id="ov-stS">—</div></div>
     </div>
     <div class="tbox" style="margin-bottom:24px">
-      <div class="tbox-head"><div class="tbox-title">Status por Criativo</div><span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// últimas atualizações</span></div>
-      <table><thead><tr><th>Criativo</th><th>Plataforma</th><th>Campanha</th><th>Status</th><th>Atualizado</th></tr></thead>
+      <div class="tbox-head">
+        <div class="tbox-title">Campanhas do Plano</div>
+        <button onclick="location.href='status.html'" style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;background:none;border:none;text-decoration:underline;cursor:pointer;color:var(--ink-mid)">Ver linha do tempo →</button>
+      </div>
+      <table><thead><tr>
+        <th>Campanha</th><th>Plataforma</th><th>Status</th><th>Linhas</th><th>Início</th><th>Fim</th>
+      </tr></thead>
+      <tbody id="campTable"></tbody></table>
+    </div>
+    <div class="tbox" style="margin-bottom:24px">
+      <div class="tbox-head"><div class="tbox-title">Status por Criativo</div><span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// primeiras linhas do plano</span></div>
+      <table><thead><tr><th>Criativo</th><th>Plataforma</th><th>Campanha</th><th>Status</th></tr></thead>
       <tbody id="ov-statusTable"></tbody></table>
     </div>
-    <div class="divider"></div>
-    <!-- Top 3 criativos x audiência -->
-    <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">Top 3 Criativos × Audiência</div>
-    <div class="section-sub">Combinações com melhor performance no período</div>
-    <div id="ov-top3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:24px"></div>
+    <div class="tbox" style="margin-bottom:24px">
+      <div class="tbox-head"><div class="tbox-title">Desempenho de Mídia</div><span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.1em">// em breve</span></div>
+      <div style="padding:20px;font-family:var(--mono);font-size:10px;color:var(--ink-muted);line-height:1.7">Investimento, impressões, cliques, leads, pacing e performance de criativos e audiências aparecem aqui quando os dados das plataformas (Google Ads, Meta, TikTok) passarem a chegar no BigQuery. Hoje o BigQuery só recebe as linhas do plano de mídia.</div>
+    </div>
       </div>
       <aside class="camp-side">
     <!-- SUBIR NOVO PLANO -->
@@ -236,7 +95,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   </div>
 </div>
 
-<script src="assets/core.js?v=20261118"></script>
-<script src="assets/pages/campanhas.js?v=20261118"></script>
+<script src="assets/core.js?v=20261118c"></script>
+<script src="assets/pages/campanhas.js?v=20261118c"></script>
 </body>
 </html>

@@ -34,30 +34,77 @@ RU.ready = function(fn){
   if(document.readyState === 'complete') fn(); else window.addEventListener('load', fn);
 };
 
-const STATUS_DATA=[
-  {criativo:'Banner_300x250_V1',plat:'Google Ads',camp:'Awareness Q1',status:'implemented',id:'12839401',start:'01 Mar',end:'31 Mar',upd:'há 2h'},
-  {criativo:'Banner_728x90_V1',plat:'Google Ads',camp:'Awareness Q1',status:'implemented',id:'12839402',start:'01 Mar',end:'31 Mar',upd:'há 2h'},
-  {criativo:'Stories_1080x1920',plat:'Meta Ads',camp:'Performance — Leads',status:'implemented',id:'23948112',start:'03 Mar',end:'31 Mar',upd:'há 2h'},
-  {criativo:'Feed_1080x1080',plat:'Meta Ads',camp:'Retargeting',status:'implemented',id:'23948113',start:'05 Mar',end:'28 Mar',upd:'há 3h'},
-  {criativo:'Carrossel_V2',plat:'Meta Ads',camp:'Retargeting',status:'implemented',id:'23948120',start:'10 Mar',end:'31 Mar',upd:'há 3h'},
-  {criativo:'Video_15s_V2',plat:'YouTube',camp:'Video Reach',status:'stand_by',id:'—',start:'15 Mar',end:'31 Mar',upd:'há 1h'},
-  {criativo:'Bumper_6s',plat:'YouTube',camp:'Video Reach',status:'stand_by',id:'—',start:'15 Mar',end:'31 Mar',upd:'há 1h'},
-  {criativo:'TopView_TK',plat:'TikTok Ads',camp:'TikTok — Gen Z',status:'implemented',id:'TK8812944',start:'01 Mar',end:'30 Mar',upd:'há 4h'},
-  {criativo:'InFeed_TK_V1',plat:'TikTok Ads',camp:'TikTok — Gen Z',status:'implemented',id:'TK8812945',start:'01 Mar',end:'30 Mar',upd:'há 4h'},
-  {criativo:'InMail_B2B',plat:'LinkedIn',camp:'LinkedIn B2B',status:'error',id:'—',start:'08 Mar',end:'31 Mar',upd:'há 30min'},
-  {criativo:'Prospecting_728x90',plat:'DV360',camp:'Prospecting DV360',status:'pending',id:'—',start:'27 Mar',end:'30 Abr',upd:'—'},
-  {criativo:'Prospecting_300x600',plat:'DV360',camp:'Prospecting DV360',status:'pending',id:'—',start:'27 Mar',end:'30 Abr',upd:'—'},
-];
+// ── DADOS REAIS DE IMPLEMENTAÇÃO (GET /status/campaigns) ──
+// Cada linha vem da tabela de implementação do BigQuery, filtrada pelo workspace.
+// Nada aqui é de exemplo: sem workspace/sem linhas → listas vazias.
+RU.SOURCE_LABEL = { google: 'Google Ads', google_ads: 'Google Ads', googleads: 'Google Ads', meta: 'Meta Ads', facebook: 'Meta Ads', instagram: 'Meta Ads', tiktok: 'TikTok Ads', youtube: 'YouTube', linkedin: 'LinkedIn', dv360: 'DV360' };
+RU.normStatus = function(raw){
+  const t = String(raw || '').trim().toLowerCase();
+  if(t === 'implemented') return 'implemented';
+  if(t.indexOf('error') === 0) return 'error';
+  if(t === 'stand by' || t === 'stand_by' || t === 'standby') return 'stand_by';
+  return 'pending'; // "ready to setup" e qualquer outro valor ainda não implementado
+};
+RU.fmtDate = function(v){
+  if(!v) return '—';
+  const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? (m[3] + '/' + m[2] + '/' + m[1]) : String(v);
+};
+RU.parseDate = function(v){
+  const m = String(v || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? new Date(+m[1], +m[2]-1, +m[3]) : null;
+};
+RU.normImpl = function(r){
+  const src = String(r.source || '').trim();
+  return {
+    criativo: r.creative_name || '—',
+    plat: RU.SOURCE_LABEL[src.toLowerCase()] || src || '—',
+    camp: r.campaign_name || '—',
+    medium: r.medium || '—',
+    status: RU.normStatus(r.status),
+    rawStatus: r.status || '',
+    id: r.platform_ad_id || r.platform_campaign_id || '—',
+    row_id: r.row_id || '',
+    start: r.start_date || '',
+    end: r.end_date || '',
+  };
+};
+RU.implCache = {};
+// Devolve {ok, rows:[...normalizadas]}. ok=false quando o backend não respondeu.
+RU.loadImpl = async function(workspaceId){
+  if(!workspaceId) return { ok: true, rows: [] };
+  try{
+    const res = await fetch(API_BASE + '/status/campaigns?workspace_id=' + encodeURIComponent(workspaceId), { headers: authHeaders() });
+    if(!res.ok) return { ok: false, rows: [] };
+    const data = await res.json();
+    return { ok: true, rows: (data.campaigns || []).map(RU.normImpl) };
+  }catch(e){ return { ok: false, rows: [] }; }
+};
+// Workspace escolhido (compartilhado entre páginas via localStorage).
+RU.getWs = function(){ try{ return localStorage.getItem('riseup_ws') || ''; }catch(e){ return ''; } };
+RU.setWs = function(id){ try{ localStorage.setItem('riseup_ws', id || ''); }catch(e){} };
+// Preenche um <select> com os planos de mídia (GET /plan/workspaces) e chama onChange(workspaceId).
+RU.initWorkspaceSelect = async function(selectEl, onChange){
+  if(!selectEl) return;
+  selectEl.innerHTML = '<option value="">Carregando...</option>';
+  let list = [], failed = false;
+  try{
+    const res = await fetch(API_BASE + '/plan/workspaces', { headers: authHeaders() });
+    if(res.ok) list = await res.json(); else failed = true;
+  }catch(e){ failed = true; }
+  if(failed){ selectEl.innerHTML = '<option value="">Não foi possível carregar os planos</option>'; onChange('', 'error'); return; }
+  if(!list.length){ selectEl.innerHTML = '<option value="">Nenhum plano de mídia criado</option>'; onChange('', 'nows'); return; }
+  selectEl.innerHTML = list.map(w => '<option value="' + _escHtml(w.workspace_id) + '">' + _escHtml(w.client_name || w.workspace_id) + '</option>').join('');
+  const saved = RU.getWs();
+  selectEl.value = list.some(w => w.workspace_id === saved) ? saved : list[0].workspace_id;
+  RU.setWs(selectEl.value);
+  selectEl.onchange = () => { RU.setWs(selectEl.value); onChange(selectEl.value); };
+  onChange(selectEl.value);
+};
+// Plataformas com integração real (as demais não aparecem como "conectáveis").
 const PLATS=[
   {name:'Google Drive',on:true,alwaysOn:true},
-  {name:'Google Ads',on:true},{name:'Meta Ads',on:true},{name:'TikTok Ads',on:true},
-  {name:'YouTube',on:true},{name:'DV360',on:false},{name:'LinkedIn',on:false},
-  {name:'Pinterest',on:false},{name:'Amazon Ads',on:false},{name:'GA4',on:true},
-];
-const USERS=[
-  {name:'Leonardo Gardezani',email:'leo@riseupmtech.com',role:'Admin'},
-  {name:'Ana Souza',email:'ana@riseupmtech.com',role:'Aprovador'},
-  {name:'Carlos Lima',email:'carlos@riseupmtech.com',role:'Leitura'},
+  {name:'Google Ads',on:false},{name:'Meta Ads',on:false},{name:'TikTok Ads',on:false},
 ];
 // ── TABS ──
 function togglePanel(){
@@ -141,8 +188,6 @@ function badgeH(s){
 }
 function fmt(n){return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'k':n.toFixed(0);}
 function refreshAll(){toast('Filtros aplicados','ok');}
-const imp30  = [0.4,0.5,0.4,0.6,0.6,0.6,0.7,0.5,0.7,0.8,0.7,0.6,0.9,0.8,0.7,1.0,0.9,0.8,1.1,1.0,0.9,1.1,1.1,1.0,1.2,1.1,1.0,1.3,1.2,1.1];
-const leads30= [84,98,76,120,134,128,148,110,138,160,150,118,172,156,140,188,170,152,204,184,164,218,198,178,232,212,190,248,226,204];
 // ── DESDOBRADOR DE PEÇAS ──
 // Espelha api/creative_deploy.py + services/creative_ai_engine.py (backend)
 // — ver desdobrador-arquitetura.md. A fila (DESD_QUEUE) vem 100% de
@@ -168,7 +213,7 @@ const API_BASE = document.querySelector('#rp-config .fi[value*="southamerica-eas
 // definidas) e adiciona as funções de conectar/desconectar plataforma e
 // gerenciar membros. Backend real: api/connect.py + api/workspace.py +
 // core/rbac.py — sem login (JWT) implementado neste arquivo ainda, então os
-// fetches caem no modo demo local até isso existir (mesmo padrão do resto
+// (histórico: antes havia modo demo local; foi removido, hoje só dados reais)
 // do arquivo, ex. desdUploadKvToBackend).
 
 // Login real via Google OAuth acontece no app.html (tela dark/matrix —
@@ -325,13 +370,7 @@ async function _fetchWithRetry(url, options, retries = 1, delayMs = 700){
 }
 
 function connectPlatform(name, key) {
-  if (!key) { // sem integração real ainda (YouTube, DV360, LinkedIn, Pinterest, Amazon Ads, GA4)
-    const p = PLATS.find(x => x.name === name);
-    if (p) p.on = true;
-    renderConns();
-    toast('✓ ' + name + ' conectado (demo — integração real ainda não existe)', 'ok');
-    return;
-  }
+  if (!key) return;
   if(!connCompany.can_manage){ toast('Conectar plataformas exige papel editor ou admin', 'er'); return; }
   // OAuth real precisa abrir em nova aba (o backend redireciona pro provedor).
   // Bug corrigido nesta sessão: window.open() é navegação de aba comum, NÃO
@@ -376,24 +415,12 @@ async function disconnectPlatform(name, key) {
       return;
     } catch (e) { toast('✕ Não foi possível desconectar agora', 'er'); return; }
   }
-  const p = PLATS.find(x => x.name === name);
-  if (p) p.on = false;
-  renderConns();
-  toast('✓ ' + name + ' desconectado (demo)', 'ok');
 }
 
 // ── USUÁRIOS (papéis: analista / editor / admin) ───────────────────────
 
 const ROLE_LABEL = { admin: 'Admin', editor: 'Editor', analista: 'Analista' };
 const ROLE_BADGE_CLASS = { admin: 'b-g', editor: 'b-b', analista: 'b-gr' };
-
-// Substitui o array USERS antigo (papéis "Admin"/"Aprovador"/"Leitura" não
-// batiam com a hierarquia pedida) — mesmo dado, papéis remapeados.
-const USERS_V2 = [
-  { name: 'Leonardo Gardezani', email: 'leo@riseupmtech.com', role: 'admin' },
-  { name: 'Ana Souza', email: 'ana@riseupmtech.com', role: 'editor' },
-  { name: 'Carlos Lima', email: 'carlos@riseupmtech.com', role: 'analista' },
-];
 
 async function renderUsers() {
   const el = document.getElementById('userList');
@@ -404,10 +431,13 @@ async function renderUsers() {
   try {
     const res = await fetch(API_BASE + '/workspace/members', { headers: authHeaders() });
     if (res.ok) { const data = await res.json(); members = data.members; }
-  } catch (e) { /* segue no modo demo */ }
-
-  const list = members || USERS_V2;
-  const usingBackend = !!members;
+  } catch (e) { /* tratado abaixo */ }
+  if (!members) {
+    el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--warn);padding:12px 0">Não foi possível carregar os usuários agora.</div>';
+    return;
+  }
+  const list = members;
+  const usingBackend = true;
 
   el.innerHTML = list.map(u => {
     const name = u.name || u.email;
@@ -443,10 +473,7 @@ async function updateMemberRole(email, role, usingBackend) {
       return;
     }
   }
-  const u = USERS_V2.find(x => x.email === email);
-  if (u) u.role = role;
-  renderUsers();
-  toast('✓ Papel de ' + email + ' atualizado (demo)', 'ok');
+  toast('✕ Não foi possível atualizar o papel agora', 'er');
 }
 
 async function removeMember(email, usingBackend) {
@@ -464,10 +491,7 @@ async function removeMember(email, usingBackend) {
       return;
     }
   }
-  const idx = USERS_V2.findIndex(x => x.email === email);
-  if (idx >= 0) USERS_V2.splice(idx, 1);
-  renderUsers();
-  toast('✓ ' + email + ' removido (demo)', 'ok');
+  toast('✕ Não foi possível remover agora', 'er');
 }
 
 async function inviteMember() {
@@ -483,11 +507,11 @@ async function inviteMember() {
       headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
       body: JSON.stringify({ email, role }),
     });
-    if (!res.ok) throw new Error('backend indisponível');
+    if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.detail || 'falha ao convidar'); }
     toast('✓ ' + email + ' convidado como ' + ROLE_LABEL[role], 'ok');
   } catch (e) {
-    USERS_V2.push({ name: email.split('@')[0], email, role });
-    toast('✓ ' + email + ' convidado como ' + ROLE_LABEL[role] + ' (demo)', 'ok');
+    toast('✕ ' + (e.message || 'Não foi possível convidar agora'), 'er');
+    return;
   }
   if (emailEl) emailEl.value = '';
   renderUsers();

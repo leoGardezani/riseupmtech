@@ -1,56 +1,10 @@
 /* Rise Up MTech — Criativos (gerado da separação do operations.html em páginas, 18/nov/2026) */
 
 // ── REPO DATA ──
-const REPO_ASSETS = [
-  {id:1,name:'Banner_300x250_V1',camp:'Awareness Q1',plat:'Google Ads',type:'image',date:'01 Mar 2025',
-   img:'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&h=338&fit=crop',
-   dims:'300×250px',size:'48KB',fmt:'JPG',version:'v1',kv:'KV_Awareness_Q1',tags:['IAB','Display','300x250'],approved:true},
-  {id:2,name:'Banner_728x90_V1',camp:'Awareness Q1',plat:'Google Ads',type:'image',date:'01 Mar 2025',
-   img:'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=728&h=90&fit=crop',
-   dims:'728×90px',size:'32KB',fmt:'JPG',version:'v1',kv:'KV_Awareness_Q1',tags:['IAB','Leaderboard'],approved:true},
-  {id:3,name:'Banner_160x600_V1',camp:'Awareness Q1',plat:'Google Ads',type:'image',date:'02 Mar 2025',
-   img:'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=160&h=600&fit=crop',
-   dims:'160×600px',size:'38KB',fmt:'JPG',version:'v1',kv:'KV_Awareness_Q1',tags:['IAB','Skyscraper'],approved:true},
-  {id:4,name:'Responsive_HTML5_V1',camp:'Awareness Q1',plat:'Google Ads',type:'html5',date:'03 Mar 2025',
-   img:'https://images.unsplash.com/photo-1558655146-d09347e92766?w=600&h=338&fit=crop',
-   dims:'Responsivo',size:'120KB',fmt:'HTML5 ZIP',version:'v1',kv:'KV_Awareness_Q1',tags:['HTML5','Animado'],approved:true},
-  {id:5,name:'Feed_1080x1080_V1',camp:'Performance — Leads',plat:'Meta Ads',type:'image',date:'04 Mar 2025',
-   img:'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=600&h=600&fit=crop',
-   dims:'1080×1080px',size:'210KB',fmt:'JPG',version:'v1',kv:'KV_Leads_V1',tags:['Meta','Feed','1:1'],approved:true},
-  {id:6,name:'Stories_1080x1920_V1',camp:'Performance — Leads',plat:'Meta Ads',type:'image',date:'04 Mar 2025',
-   img:'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=338&h=600&fit=crop',
-   dims:'1080×1920px',size:'284KB',fmt:'JPG',version:'v2',kv:'KV_Leads_V1',tags:['Meta','Stories','9:16'],approved:true},
-  {id:7,name:'Carrossel_1080x1080_V2',camp:'Retargeting',plat:'Meta Ads',type:'image',date:'05 Mar 2025',
-   img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=600&fit=crop',
-   dims:'1080×1080px',size:'196KB',fmt:'JPG',version:'v2',kv:'KV_Retargeting',tags:['Meta','Carrossel'],approved:true},
-  {id:8,name:'Reels_1080x1920_V1',camp:'Retargeting',plat:'Meta Ads',type:'video',date:'06 Mar 2025',
-   img:'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=338&h=600&fit=crop',
-   dims:'1080×1920px',size:'8,4MB',fmt:'MP4 · 15s',version:'v1',kv:'KV_Retargeting',tags:['Meta','Reels','Vídeo'],approved:true},
-  {id:9,name:'TopView_1080x1920_V1',camp:'TikTok — Gen Z',plat:'TikTok Ads',type:'video',date:'07 Mar 2025',
-   img:'https://images.unsplash.com/photo-1558655146-d09347e92766?w=338&h=600&fit=crop',
-   dims:'1080×1920px',size:'12,2MB',fmt:'MP4 · 30s',version:'v1',kv:'KV_GenZ',tags:['TikTok','TopView','Vídeo'],approved:true},
-  {id:10,name:'InFeed_1080x1920_V1',camp:'TikTok — Gen Z',plat:'TikTok Ads',type:'video',date:'07 Mar 2025',
-   img:'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=338&h=600&fit=crop',
-   dims:'1080×1920px',size:'9,8MB',fmt:'MP4 · 15s',version:'v1',kv:'KV_GenZ',tags:['TikTok','InFeed','Vídeo'],approved:true},
-  {id:11,name:'PreRoll_1920x1080_V1',camp:'Performance — Leads',plat:'YouTube',type:'video',date:'08 Mar 2025',
-   img:'https://images.unsplash.com/photo-1551817958-11e40576f80e?w=600&h=338&fit=crop',
-   dims:'1920×1080px',size:'18,4MB',fmt:'MP4 · 15s',version:'v1',kv:'KV_Leads_V1',tags:['YouTube','PreRoll','Vídeo'],approved:true},
-  {id:12,name:'Bumper_1920x1080_V1',camp:'Awareness Q1',plat:'YouTube',type:'video',date:'08 Mar 2025',
-   img:'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&h=338&fit=crop',
-   dims:'1920×1080px',size:'6,2MB',fmt:'MP4 · 6s',version:'v1',kv:'KV_Awareness_Q1',tags:['YouTube','Bumper','Vídeo'],approved:true},
-  {id:13,name:'OOH_Outdoor_6x3m',camp:'Awareness Q1',plat:'OOH',type:'image',date:'10 Mar 2025',
-   img:'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&h=300&fit=crop',
-   dims:'6000×3000px',size:'14MB',fmt:'TIFF 300dpi',version:'v1',kv:'KV_Awareness_Q1',tags:['OOH','Outdoor'],approved:true},
-  {id:14,name:'OOH_MidiaMóvel_V1',camp:'Awareness Q1',plat:'OOH',type:'image',date:'10 Mar 2025',
-   img:'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop',
-   dims:'3000×2000px',size:'8,4MB',fmt:'TIFF 300dpi',version:'v1',kv:'KV_Awareness_Q1',tags:['OOH','Mídia Móvel'],approved:true},
-  {id:15,name:'Radio_30s_V1',camp:'Awareness Q1',plat:'Rádio',type:'audio',date:'12 Mar 2025',
-   img:'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&h=338&fit=crop',
-   dims:'—',size:'2,8MB',fmt:'MP3 · 30s · 320kbps',version:'v1',kv:'KV_Awareness_Q1',tags:['Rádio','30s'],approved:true},
-  {id:16,name:'Radio_15s_V1',camp:'Performance — Leads',plat:'Rádio',type:'audio',date:'12 Mar 2025',
-   img:'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&h=338&fit=crop',
-   dims:'—',size:'1,4MB',fmt:'MP3 · 15s · 320kbps',version:'v1',kv:'KV_Leads_V1',tags:['Rádio','15s'],approved:true},
-];
+// Repositório de assets aprovados: o backend ainda não tem endpoint de listagem
+// (só de pendentes, GET /desdobrador/pending), então a lista fica vazia — sem
+// exemplos inventados. Quando o endpoint existir, é só preencher este array.
+const REPO_ASSETS = [];
 let PENDING_ASSETS = [];
 let repoTypeFilter = '';
 function typeIcon(t){return {image:'🖼',video:'▶',html5:'⟨/⟩',audio:'♪',text:'📝'}[t]||'📄';}
@@ -77,7 +31,7 @@ function renderRepo(assets){
   if(!grid) return;
   if(!assets.length){
     grid.innerHTML = '<div style="grid-column:1/-1;padding:60px;text-align:center;background:var(--bg)">'
-      + '<div style="font-family:var(--fh);font-size:18px;text-transform:uppercase;color:var(--ink-muted);font-weight:700">Nenhum criativo encontrado</div></div>';
+      + '<div style="font-family:var(--fh);font-size:18px;text-transform:uppercase;color:var(--ink-muted);font-weight:700">Nenhum asset aprovado ainda</div></div>';
     return;
   }
   grid.innerHTML = '';
@@ -437,9 +391,9 @@ function openDetail(id){
 }
 function closeDetail(e){if(e.target===document.getElementById('detailModal'))closeDetailBtn();}
 function closeDetailBtn(){document.getElementById('detailModal').classList.remove('open');}
-function downloadAsset(id){const a=REPO_ASSETS.find(x=>x.id===id);toast('Baixando '+a.name,'ok');}
-function copyLink(id){const a=REPO_ASSETS.find(x=>x.id===id);toast('Link copiado: '+a.name,'ok');}
-function sendToPlatform(id){const a=REPO_ASSETS.find(x=>x.id===id);toast('Enviando para '+a.plat+'...','ok');}
+function downloadAsset(id){const a=REPO_ASSETS.find(x=>x.id===id);if(a)toast('Download ainda não disponível para '+a.name,'er');}
+function copyLink(id){const a=REPO_ASSETS.find(x=>x.id===id);if(a)toast('Link ainda não disponível para '+a.name,'er');}
+function sendToPlatform(id){const a=REPO_ASSETS.find(x=>x.id===id);if(a)toast('Envio ainda não disponível para '+a.plat,'er');}
 // ── UPLOAD DIRETO (novo nesta sessão) ──────────────────────────────────
 // Espelha o padrão da fila do Desdobrador, mas com include_media=true (a
 // query já exclui vídeo/áudio por padrão pro fluxo de IA — aqui é

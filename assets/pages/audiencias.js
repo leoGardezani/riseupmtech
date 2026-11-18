@@ -996,37 +996,17 @@ function audDiscard(){
   toast('Sugestão descartada', '');
 }
 // ── AUDIENCE DATA ──
-const AUD_DATA=[
-  {name:'Interesse — Tecnologia',plat:'Meta Ads',size:'2,4M pessoas',criativos:[
-    {name:'Feed_1080x1080',ctr:'4,2%',cpm:'R$11',leads:'420',score:95},
-    {name:'Stories_1080x1920',ctr:'3,8%',cpm:'R$10',leads:'380',score:88},
-    {name:'Carrossel_V2',ctr:'5,1%',cpm:'R$10',leads:'510',score:99},
-  ]},
-  {name:'Remarketing — Site',plat:'Meta Ads',size:'180k pessoas',criativos:[
-    {name:'Feed_1080x1080',ctr:'6,8%',cpm:'R$19',leads:'840',score:99},
-    {name:'Carrossel_V2',ctr:'7,2%',cpm:'R$18',leads:'920',score:99},
-    {name:'Stories_1080x1920',ctr:'4,9%',cpm:'R$20',leads:'340',score:80},
-  ]},
-  {name:'Lookalike 1% — Leads',plat:'Meta Ads',size:'480k pessoas',criativos:[
-    {name:'Stories_1080x1920',ctr:'2,8%',cpm:'R$12',leads:'280',score:72},
-    {name:'Feed_1080x1080',ctr:'2,1%',cpm:'R$13',leads:'210',score:58},
-    {name:'Carrossel_V2',ctr:'3,4%',cpm:'R$11',leads:'340',score:80},
-  ]},
-  {name:'In-Market — Software B2B',plat:'Google Ads',size:'820k pessoas',criativos:[
-    {name:'Banner_300x250_V1',ctr:'2,4%',cpm:'R$15',leads:'240',score:68},
-    {name:'Banner_728x90',ctr:'1,8%',cpm:'R$14',leads:'180',score:52},
-  ]},
-  {name:'Gen Z — 18-24',plat:'TikTok Ads',size:'3,2M pessoas',criativos:[
-    {name:'TopView_TK',ctr:'1,8%',cpm:'R$7',leads:'88',score:62},
-    {name:'InFeed_TK_V1',ctr:'1,4%',cpm:'R$8',leads:'66',score:48},
-  ]},
-];
-const HEATMAP_CREATIVES=['Feed_1080','Stories','Carrossel','Banner_300','TopView_TK'];
-const HEATMAP_DATA=[[4.2,3.8,5.1,null,null],[6.8,4.9,7.2,null,null],[2.1,2.8,3.4,null,null],[null,null,null,2.4,null],[null,null,null,null,1.8]];
-const HEATMAP_AUDS=['Interesse — Tec.','Remarketing','Lookalike 1%','In-Market B2B','Gen Z 18-24'];
+// Performance por audiência × criativo: ainda não há fonte no backend (precisa de métricas de mídia
+// no BigQuery). Sem exemplos inventados: vazio até existir dado real.
+const AUD_DATA=[];
+const HEATMAP_CREATIVES=[];
+const HEATMAP_DATA=[];
+const HEATMAP_AUDS=[];
+const AUD_NO_PERF = '<div style="padding:22px 20px;font-family:var(--mono);font-size:10px;color:var(--ink-muted);line-height:1.7">Sem dados de desempenho ainda. Aparece aqui quando as métricas das plataformas passarem a chegar no BigQuery.</div>';
 function renderAudHeatmap(){
   const el = document.getElementById('audHeatmap');
   if(!el) return;
+  if(!HEATMAP_DATA.length){ el.innerHTML = '<tbody><tr><td>' + AUD_NO_PERF + '</td></tr></tbody>'; return; }
   const maxVal = 7.5;
   function cellColor(v){
     if(v === null) return 'background:var(--bg3);color:var(--ink-muted)';
@@ -1059,6 +1039,7 @@ function renderAudCards(){
   const el = document.getElementById('audCards');
   if(!el) return;
   el.innerHTML = '';
+  if(!AUD_DATA.length){ el.innerHTML = '<div style="background:var(--bg)">' + AUD_NO_PERF + '</div>'; return; }
   AUD_DATA.forEach(a => {
     const best = [...a.criativos].sort((x,y) => y.score - x.score)[0];
     const div = document.createElement('div');
