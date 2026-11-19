@@ -18,11 +18,17 @@ function pfMessage(){
   return 'Ainda não há dados de desempenho para este plano no período. Eles aparecem aqui quando as métricas das plataformas chegarem.';
 }
 
+// Acima do esperado = vermelho, dentro (±15%) = verde, abaixo do esperado = amarelo.
+function pfPaceInfo(p){
+  const diff = Math.abs(p - 1) * 100, n = diff.toLocaleString('pt-BR', {maximumFractionDigits: 1});
+  if(p > 1.15) return {col: '#b91c1c', arrow: '▲', txt: n + '% acima do esperado', short: n + '% acima'};
+  if(p < 0.85) return {col: '#b45309', arrow: '▼', txt: n + '% abaixo do esperado', short: n + '% abaixo'};
+  return {col: '#15803d', arrow: '●', txt: 'dentro do esperado' + (diff >= 0.05 ? ' (' + (p > 1 ? '+' : '−') + n + '%)' : ''), short: 'no ritmo'};
+}
 function pfPacing(p){
   if(p == null) return '<span style="color:var(--ink-muted)">—</span>';
-  const col = p < 0.85 ? '#b45309' : (p > 1.15 ? '#b91c1c' : '#15803d');
-  const lbl = p < 0.85 ? 'abaixo' : (p > 1.15 ? 'acima' : 'no ritmo');
-  return '<span style="color:' + col + ';font-weight:600">' + pfPct(p) + '</span> <span style="font-size:9px;color:var(--ink-muted)">' + lbl + '</span>';
+  const i = pfPaceInfo(p);
+  return '<span style="color:' + i.col + ';font-weight:600">' + pfPct(p) + '</span> <span style="font-size:9px;color:' + i.col + '">' + i.arrow + ' ' + i.short + '</span>';
 }
 
 const PF_METRICS = [['spend','Investimento',pfMoney],['impressions','Impressões',pfInt],['reach','Alcance',pfInt],
@@ -84,7 +90,10 @@ function pfRender(){
   delta('d-ctr', pfDiv(t.clk, t.imp), pv && pfDiv(pv.clk, pv.imp), 'up');
   delta('d-cpm', pfDiv(t.spend * 1000, t.imp), pv && pfDiv(pv.spend * 1000, pv.imp), 'down'); delta('d-cpc', pfDiv(t.spend, t.clk), pv && pfDiv(pv.spend, pv.clk), 'down');
   delta('d-vv', t.vv, pv && pv.vv, 'up'); delta('d-leads', t.leads, pv && pv.leads, 'up'); delta('d-conv', t.conv, pv && pv.conv, 'up');
-  set('k-pace', po.spend && po.spend.pacing != null ? pfPct(po.spend.pacing) : '—');
+  const pp = po.spend && po.spend.pacing != null ? po.spend.pacing : null, pe = document.getElementById('k-pace'), pd = document.getElementById('d-pace');
+  set('k-pace', pp != null ? pfPct(pp) : '—');
+  if(pp != null){ const i = pfPaceInfo(pp); pe.style.color = i.col; pd.style.color = i.col; pd.textContent = i.arrow + ' ' + i.txt; }
+  else { pe.style.color = ''; pd.textContent = ''; }
   const totalRow = '<tr style="background:var(--bg-soft,#f7f7f5)"><td class="td-bold">Total do plano</td><td class="td-mono">—</td>'
     + PF_METRICS.map(m => '<td>' + pfPacing(po[m[0]] ? po[m[0]].pacing : null) + '</td>').join('') + '</tr>';
   document.getElementById('pfMatrix').innerHTML = totalRow + PF.by_campaign.map(c => {
