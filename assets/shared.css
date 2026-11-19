@@ -443,3 +443,18 @@
   .gantt-legend{flex-wrap:wrap;gap:10px 16px;padding:12px 14px;}
 }
 .tbox>.tbox-head{position:sticky;left:0;box-sizing:border-box;}
+
+/* Filtros padronizados: rótulo em cima, mesma altura/aparência em todas as páginas. */
+.fbar{display:flex;flex-wrap:wrap;gap:12px 14px;align-items:flex-end;margin:0 0 18px;}
+.ffld{display:flex;flex-direction:column;gap:5px;min-width:0;margin:0;flex:0 1 200px;}
+.ffld.wide{flex-basis:260px;} .ffld.grow{flex:1 1 240px;}
+.ffld>span{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-mid);}
+.fbar-actions{display:flex;gap:10px;align-items:center;min-height:40px;margin-left:auto;flex-wrap:wrap;}
+select.fs_, select.repo-filter-sel:not(.active), .fbar input.bt-search{height:40px;box-sizing:border-box;border-radius:0;-webkit-appearance:none;appearance:none;font-family:var(--ff);font-size:13px;letter-spacing:0;color:var(--ink);padding:0 34px 0 12px;border:1px solid var(--border);}
+select.fs_, select.repo-filter-sel:not(.active){width:100%;background:var(--bg2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E") no-repeat right 12px center;}
+.fbar input.bt-search{width:100%;padding-right:12px;}
+@media(max-width:700px){
+  .ffld,.ffld.wide,.ffld.grow{flex:1 1 calc(50% - 7px);}
+  .ffld.wide,.ffld.grow{flex-basis:100%;}
+  .fbar-actions{flex:1 1 100%;margin-left:0;}
+}

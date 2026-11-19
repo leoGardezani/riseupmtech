@@ -20,24 +20,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .pf-fld select{width:auto;min-width:150px;margin:0;}
   @media(max-width:700px){.pf-filters{width:100%;display:grid;grid-template-columns:1fr 1fr;}.pf-fld select{width:100%;min-width:0;}}
 </style>
-<link rel="stylesheet" href="assets/shared.css?v=20261119f">
+<link rel="stylesheet" href="assets/shared.css?v=20261119g">
 </head>
 <body data-page="performance" data-nofilters>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<script src="assets/shell.js?v=20261119f"></script>
+<script src="assets/shell.js?v=20261119g"></script>
 <div class="main" id="main">
   <div class="tab-page active" id="tab-performance">
-    <div style="display:flex;flex-direction:column;align-items:flex-start;gap:0">
-      <div>
-        <div class="section-title">Performance</div>
-        <div class="section-sub">Métricas de mídia e pacing do plano escolhido</div>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-start">
-        <select class="fs_" id="pfDays" style="width:auto;min-width:150px;margin-bottom:16px">
-          <option value="7">Últimos 7 dias</option><option value="30" selected>Últimos 30 dias</option><option value="90">Últimos 90 dias</option>
-        </select>
-        <select class="fs_" id="pfWorkspace" style="width:auto;min-width:220px;margin-bottom:16px"><option value="">Carregando...</option></select>
-      </div>
+    <div>
+      <div class="section-title">Performance</div>
+      <div class="section-sub">Métricas de mídia e pacing do plano escolhido</div>
+    </div>
+    <div class="fbar">
+      <label class="ffld"><span>Período</span><select class="fs_" id="pfDays"><option value="7">Últimos 7 dias</option><option value="30" selected>Últimos 30 dias</option><option value="90">Últimos 90 dias</option></select></label>
+      <label class="ffld wide"><span>Workspace</span><select class="fs_" id="pfWorkspace"><option value="">Carregando...</option></select></label>
     </div>
 
     <div class="kpi-grid" style="grid-template-columns:repeat(6,1fr)">
@@ -118,7 +114,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   </div>
 </div>
 
-<script src="assets/core.js?v=20261119f"></script>
-<script src="assets/pages/performance.js?v=20261119f"></script>
+<script src="assets/core.js?v=20261119g"></script>
+<script src="assets/pages/performance.js?v=20261119g"></script>
 </body>
 </html>
