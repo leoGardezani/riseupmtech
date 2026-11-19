@@ -74,6 +74,15 @@ function pfRender(){
     return '<tr><td class="td-bold">' + _escHtml(c.campaign_name || '—') + '</td><td class="td-mono">' + _escHtml(pfSrc(c.source)) + '</td>'
       + PF_METRICS.map(m => '<td>' + pfPacing(pm[m[0]]) + '</td>').join('') + '</tr>';
   }).join('');
+  const none = '<tr><td colspan="12"><div style="padding:24px 20px;font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Sem dados no período.</div></td></tr>';
+  document.getElementById('pfSource').innerHTML = PF.by_source && PF.by_source.length ? PF.by_source.map(r =>
+    pfRow(r, '<tr><td class="td-bold">' + _escHtml(pfSrc(r.source)) + '</td>') + '<td class="td-mono">' + pfMoney(pfDiv(r.spend, r.clicks)) + '</td></tr>').join('') : none;
+  document.getElementById('pfCamp').innerHTML = PF.by_campaign && PF.by_campaign.length ? PF.by_campaign.map(c =>
+    '<tr><td class="td-bold">' + _escHtml(c.campaign_name || '—') + '</td><td class="td-mono">' + _escHtml(pfSrc(c.source)) + '</td>'
+    + '<td class="td-mono">' + pfMoney(c.spend) + '</td><td class="td-mono">' + pfMoney(c.planned) + '</td>'
+    + '<td class="td-mono">' + pfInt(c.impressions) + '</td><td class="td-mono">' + pfInt(c.reach) + '</td>'
+    + '<td class="td-mono">' + pfDec(pfDiv(c.impressions, c.reach)) + '</td><td class="td-mono">' + pfInt(c.clicks) + '</td>'
+    + '<td class="td-mono">' + pfPct(pfDiv(c.clicks, c.impressions)) + '</td></tr>').join('') : none;
   const tail = r => '<td class="td-mono">' + pfMoney(pfDiv(r.spend, r.clicks)) + '</td><td class="td-mono">' + pfInt(r.leads) + '</td></tr>';
   const lst = (arr, f) => arr && arr.length ? arr.map(f).join('') : '<tr><td colspan="12"><div style="padding:24px 20px;font-family:var(--mono);font-size:10px;color:var(--ink-muted)">Sem dados no período.</div></td></tr>';
   document.getElementById('pfCreative').innerHTML = lst(PF.by_creative, r =>
@@ -109,7 +118,8 @@ function pfSide(){
 function pfChart(){
   if(PF_STATE !== 'ok') return;
   const mb = document.getElementById('pfMetricBar').value, ml = document.getElementById('pfMetricLine').value;
-  const labels = PF.daily.map(d => RU.fmtDate(d.date));
+  const narrow = window.innerWidth < 700;
+  const labels = PF.daily.map(d => { const m = String(d.date).slice(0, 10).split('-'); return m.length === 3 ? m[2] + '/' + m[1] : RU.fmtDate(d.date); });
   const vals = m => PF.daily.map(d => Number(d[m]) || 0);
   pfSide();
   if(PF_CHART) PF_CHART.destroy();
@@ -127,9 +137,9 @@ function pfChart(){
             afterBody: items => { if(!items.length) return []; const d = PF.daily[items[0].dataIndex]; const t = {};
               Object.keys(d).forEach(k => { t[k] = Number(d[k]) || 0; });
               return PF_ALL.map(m => m[1] + ': ' + pfVal(m[0], t)); } } }},
-      scales: {x: {grid: {display: false}, ticks: {maxTicksLimit: 10}},
-        y: {beginAtZero: true, position: 'left', title: {display: true, text: PF_LABEL[mb], font: {size: 10}}},
-        y1: {beginAtZero: true, position: 'right', grid: {drawOnChartArea: false}, title: {display: true, text: PF_LABEL[ml], font: {size: 10}}}}}
+      scales: {x: {grid: {display: false}, ticks: {maxTicksLimit: narrow ? 5 : 10, maxRotation: 0, minRotation: 0, autoSkip: true, font: {size: narrow ? 9 : 11}}},
+        y: {beginAtZero: true, position: 'left', ticks: {font: {size: narrow ? 9 : 11}, maxTicksLimit: 5}, title: {display: !narrow, text: PF_LABEL[mb], font: {size: 10}}},
+        y1: {beginAtZero: true, position: 'right', grid: {drawOnChartArea: false}, ticks: {font: {size: narrow ? 9 : 11}, maxTicksLimit: 5}, title: {display: !narrow, text: PF_LABEL[ml], font: {size: 10}}}}}
   });
 }
 
