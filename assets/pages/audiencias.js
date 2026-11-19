@@ -501,7 +501,10 @@ function renderAudCreatedTable(){
   const tbody = document.getElementById('audCreatedTable');
   if(!tbody) return;
   if(!AUD_CREATED_SESSION.length){
-    tbody.innerHTML = '<tr><td colspan="9" style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);text-align:center;padding:16px">nenhuma audiência criada nesta sessão ainda</td></tr>';
+    // A mensagem fica centralizada na área visível do quadro (mesmo quando a tabela é mais larga e rola).
+    const box = tbody.closest('.tbox');
+    const w = box ? box.clientWidth : 0;
+    tbody.innerHTML = '<tr><td colspan="9" style="padding:0"><div style="position:sticky;left:0;box-sizing:border-box;' + (w ? 'width:' + w + 'px;' : '') + 'font-family:var(--mono);font-size:10px;color:var(--ink-muted);text-align:center;padding:16px">nenhuma audiência criada nesta sessão ainda</div></td></tr>';
     return;
   }
   tbody.innerHTML = AUD_CREATED_SESSION.map((a, idx) => `
