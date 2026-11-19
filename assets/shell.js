@@ -14,7 +14,7 @@
 (function(){
   var pend = false;
   function freezeTable(tb){
-    var box = tb.closest('.tbox, .gantt-wrap'); if(!box || tb.classList.contains('tstack') || tb.classList.contains('bt-table')) return;
+    var box = tb.closest('.h-tscroll, .tbox, .gantt-wrap'); if(!box || tb.classList.contains('tstack') || tb.classList.contains('bt-table')) return;
     var first = tb.querySelector('tr'); if(!first) return;
     var cols = first.children.length;
     var attr = tb.getAttribute('data-freeze');
