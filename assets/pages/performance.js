@@ -18,11 +18,11 @@ function pfMessage(){
   return 'Ainda não há dados de desempenho para este plano no período. Eles aparecem aqui quando as métricas das plataformas chegarem.';
 }
 
-// Acima do esperado = vermelho, dentro (±15%) = verde, abaixo do esperado = amarelo.
+// Acima do esperado = vermelho, dentro (±25%) = verde, abaixo do esperado = amarelo.
 function pfPaceInfo(p){
   const diff = Math.abs(p - 1) * 100, n = diff.toLocaleString('pt-BR', {maximumFractionDigits: 1});
-  if(p > 1.15) return {col: '#b91c1c', arrow: '▲', txt: n + '% acima do esperado', short: n + '% acima'};
-  if(p < 0.85) return {col: '#b45309', arrow: '▼', txt: n + '% abaixo do esperado', short: n + '% abaixo'};
+  if(p > 1.25) return {col: '#b91c1c', arrow: '▲', txt: n + '% acima do esperado', short: n + '% acima'};
+  if(p < 0.75) return {col: '#b45309', arrow: '▼', txt: n + '% abaixo do esperado', short: n + '% abaixo'};
   return {col: '#15803d', arrow: '●', txt: 'dentro do esperado' + (diff >= 0.05 ? ' (' + (p > 1 ? '+' : '−') + n + '%)' : ''), short: 'no ritmo'};
 }
 function pfPacing(p){
