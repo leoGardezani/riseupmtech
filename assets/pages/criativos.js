@@ -528,7 +528,7 @@ async function upfSubmit(){
     upfFile = null;
     upfSelectedRowIds = new Set();
     document.getElementById('upfCreativeName').value = '';
-    document.getElementById('upfUzText').textContent = 'Clique ou arraste o arquivo pronto';
+    document.getElementById('upfUzText').innerHTML = '<span class="uz-d">Clique ou arraste o arquivo pronto</span><span class="uz-m">Toque para enviar o arquivo</span>';
     document.getElementById('upfFileInput').value = '';
     await upfLoadQueue();
     loadPendingFromBackend(); // a peça enviada já aparece na fila de aprovação
