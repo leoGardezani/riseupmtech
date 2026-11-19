@@ -442,3 +442,4 @@
   .gr-dates{display:block;font-family:var(--mono);font-size:9px;color:var(--ink-muted);letter-spacing:.04em;}
   .gantt-legend{flex-wrap:wrap;gap:10px 16px;padding:12px 14px;}
 }
+.tbox>.tbox-head{position:sticky;left:0;box-sizing:border-box;}

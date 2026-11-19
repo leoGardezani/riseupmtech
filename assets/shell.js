@@ -8,3 +8,41 @@
     if(a.getAttribute('data-nav') === cur) a.classList.add('on');
   });
 })();
+
+/* Tabelas largas: as primeiras colunas (dimensões) ficam travadas enquanto o resto rola. Usa data-freeze="N" na <table>
+   (0 = não travar); sem o atributo, trava a 1ª coluna quando a tabela tem mais de 3 colunas e precisa rolar. */
+(function(){
+  var pend = false;
+  function freezeTable(tb){
+    var box = tb.closest('.tbox, .gantt-wrap'); if(!box || tb.classList.contains('tstack') || tb.classList.contains('bt-table')) return;
+    var first = tb.querySelector('tr'); if(!first) return;
+    var cols = first.children.length;
+    var attr = tb.getAttribute('data-freeze');
+    var n = attr == null ? (cols > 3 ? 1 : 0) : parseInt(attr, 10) || 0;
+    var rows = tb.querySelectorAll('tr');
+    var on = n > 0 && tb.scrollWidth > box.clientWidth + 1;
+    var head = tb.querySelector('thead tr') || first, left = [], x = 0;
+    if(on){ for(var i = 0; i < n && i < head.children.length; i++){ left.push(x); x += head.children[i].offsetWidth; } n = left.length; }
+    rows.forEach(function(tr){
+      for(var i = 0; i < tr.children.length && i < 6; i++){
+        var c = tr.children[i];
+        var live = on && i < n && c.colSpan === 1 && tr.children.length >= cols;
+        if(live){
+          var bg = getComputedStyle(tr).backgroundColor;
+          if(!bg || bg === 'transparent' || bg.indexOf('rgba(0, 0, 0, 0)') === 0) bg = c.tagName === 'TH' ? 'var(--bg2)' : 'var(--bg)';
+          c.style.position = 'sticky'; c.style.left = left[i] + 'px'; c.style.zIndex = '2'; c.style.backgroundColor = bg;
+          c.style.boxShadow = i === n - 1 ? '1px 0 0 var(--border)' : '';
+          c.setAttribute('data-frozen', '1');
+        }else if(c.getAttribute('data-frozen')){
+          c.style.position = c.style.left = c.style.zIndex = c.style.backgroundColor = c.style.boxShadow = '';
+          c.removeAttribute('data-frozen');
+        }
+      }
+    });
+  }
+  function run(){ pend = false; document.querySelectorAll('.tbox table').forEach(freezeTable); }
+  function sched(){ if(!pend){ pend = true; requestAnimationFrame(run); } }
+  new MutationObserver(sched).observe(document.body, {childList: true, subtree: true});
+  window.addEventListener('resize', sched);
+  window.addEventListener('load', sched);
+})();
