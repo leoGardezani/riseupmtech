@@ -58,6 +58,8 @@ RU.parseDate = function(v){
   const m = String(v || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
   return m ? new Date(+m[1], +m[2]-1, +m[3]) : null;
 };
+RU.FMT_LABEL = {image:'Imagem', video:'Vídeo', html5:'HTML5', audio:'Áudio', text:'Texto', motion:'Motion', carousel:'Carrossel'};
+RU.fmtLabel = function(t){ const k = String(t || '').trim().toLowerCase(); return k ? (RU.FMT_LABEL[k] || (k.charAt(0).toUpperCase() + k.slice(1))) : ''; };
 RU.normImpl = function(r){
   const src = String(r.source || '').trim();
   return {
@@ -65,6 +67,8 @@ RU.normImpl = function(r){
     plat: RU.SOURCE_LABEL[src.toLowerCase()] || src || '—',
     camp: r.campaign_name || '—',
     medium: r.medium || '—',
+    format: RU.fmtLabel(r.creative_type),
+    size: r.creative_size || '',
     status: RU.normStatus(r.status),
     rawStatus: r.status || '',
     id: r.platform_ad_id || r.platform_campaign_id || '—',

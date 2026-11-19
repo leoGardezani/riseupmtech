@@ -14,13 +14,15 @@ function stMessage(){
 function renderStatus(){
   const tb = document.getElementById('statusTable');
   if(!STATUS_ROWS.length){
-    tb.innerHTML = '<tr><td colspan="7">' + stEmpty(stMessage()) + '</td></tr>';
+    tb.innerHTML = '<tr><td colspan="9">' + stEmpty(stMessage()) + '</td></tr>';
   }else{
     tb.innerHTML = STATUS_ROWS.map(s =>
       '<tr>'
       + '<td class="td-bold" data-label="Criativo">' + _escHtml(s.criativo) + '</td>'
       + '<td class="td-mono" data-label="Plataforma">' + _escHtml(s.plat) + '</td>'
       + '<td data-label="Campanha" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _escHtml(s.camp) + '</td>'
+      + '<td data-col="fs" data-label="Formato">' + _escHtml(s.format || '—') + '</td>'
+      + '<td data-col="fs" data-label="Tamanho" class="td-mono">' + _escHtml(s.size || '—') + '</td>'
       + '<td data-label="Status" title="' + _escHtml(s.rawStatus) + '">' + badgeH(s.status) + '</td>'
       + '<td data-label="ID na plataforma" class="td-mono" style="color:var(--ink-muted)">' + _escHtml(s.id) + '</td>'
       + '<td data-label="Início" class="td-mono">' + RU.fmtDate(s.start) + '</td>'
@@ -28,6 +30,8 @@ function renderStatus(){
       + '</tr>'
     ).join('');
   }
+  const hasFs = STATUS_ROWS.some(s => s.format || s.size);
+  const tbl = document.getElementById('stTable'); if(tbl) tbl.classList.toggle('st-nofs', !hasFs);
   const n = st => STATUS_ROWS.length ? STATUS_ROWS.filter(s => s.status === st).length : '—';
   document.getElementById('stI').textContent = n('implemented');
   document.getElementById('stP').textContent = n('pending');
@@ -67,6 +71,7 @@ function renderGantt(){
       html += '<div class="gantt-row">'
         + '<div class="gantt-row-info"><div class="gr-name">' + _escHtml(s.criativo) + '</div>'
         + '<div class="gr-meta"><span>' + _escHtml(s.plat) + '</span>' + badgeH(s.status) + '</div>'
+        + ((s.format || s.size) ? '<div class="gr-meta"><span>' + _escHtml([s.format, s.size].filter(Boolean).join(' · ')) + '</span></div>' : '')
         + '<div class="gr-dates">' + RU.fmtDate(s.start) + ' → ' + RU.fmtDate(s.end) + '</div></div>'
         + '<div class="gantt-bar-area"><div class="gantt-today-line" style="left:' + todayPct + '%"></div>'
         + (outside

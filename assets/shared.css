@@ -477,3 +477,5 @@ select.fs_, select.repo-filter-sel:not(.active){width:100%;background:var(--bg2)
 
 .uz-m{display:none;}
 @media(max-width:700px){.uz-d{display:none;}.uz-m{display:inline;}.uz .uz-hint{display:none;}}
+
+.st-nofs [data-col="fs"]{display:none !important;}
