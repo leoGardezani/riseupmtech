@@ -19,21 +19,20 @@ function pfMessage(){
 }
 
 // Acima do esperado = vermelho, dentro (±25%) = verde, abaixo do esperado = amarelo.
-// Escala de cor contínua: amarelo (abaixo) → verde (dentro) → laranja → vermelho (acima).
+// Escala de cor contínua: amarelo (abaixo de 75%) → verde (75% a 100%) → laranja → vermelho (acima de 100%; 125% já é estouro).
 function pfPaceHue(p){
   const L = (x, x0, x1, y0, y1) => y0 + (y1 - y0) * Math.min(1, Math.max(0, (x - x0) / (x1 - x0)));
   if(p < 0.75) return L(p, 0, 0.75, 30, 50);
-  if(p < 0.95) return L(p, 0.75, 0.95, 50, 142);
-  if(p <= 1.05) return 142;
-  if(p <= 1.25) return L(p, 1.05, 1.25, 142, 30);
-  return L(p, 1.25, 1.75, 30, 0);
+  if(p < 0.9) return L(p, 0.75, 0.9, 50, 142);
+  if(p <= 1) return 142;
+  return L(p, 1, 1.25, 142, 0);
 }
 function pfPaceInfo(p){
   const diff = Math.abs(p - 1) * 100, n = diff.toLocaleString('pt-BR', {maximumFractionDigits: 1});
   const col = 'hsl(' + Math.round(pfPaceHue(p)) + ',78%,33%)';
-  if(p > 1.25) return {col, arrow: '▲', txt: n + '% acima do esperado', short: n + '% acima'};
+  if(p > 1.005) return {col, arrow: '▲', txt: n + '% acima do esperado', short: n + '% acima'};
   if(p < 0.75) return {col, arrow: '▼', txt: n + '% abaixo do esperado', short: n + '% abaixo'};
-  return {col, arrow: '●', txt: 'dentro do esperado' + (diff >= 0.05 ? ' (' + (p > 1 ? '+' : '−') + n + '%)' : ''), short: 'no ritmo'};
+  return {col, arrow: '●', txt: 'dentro do esperado', short: 'no ritmo'};
 }
 function pfPacing(p){
   if(p == null) return '<span style="color:var(--ink-muted)">—</span>';
