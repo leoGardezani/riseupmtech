@@ -128,21 +128,27 @@ function pfTotals(){
   return t;
 }
 function pfSide(){
-  const t = pfTotals();
-  document.getElementById('pfSide').innerHTML = '<div class="pf-side-t">Totais do período</div>'
+  const d = PF_SEL != null && PF.daily[PF_SEL];
+  let t, title;
+  if(d){ t = {}; Object.keys(d).forEach(k => { t[k] = Number(d[k]) || 0; }); title = 'Dia ' + RU.fmtDate(d.date); }
+  else{ t = pfTotals(); title = 'Totais do período'; }
+  document.getElementById('pfSide').innerHTML = '<div class="pf-side-t">' + title + '</div>'
     + PF_ALL.map(m => '<div class="pf-side-row"><span>' + m[1] + '</span><b>' + pfVal(m[0], t) + '</b></div>').join('');
 }
 
-// Celular: em vez do balão, mostra o cartão do dia abaixo do gráfico; fecha no × ou ao tocar fora.
-function pfHideDay(){ const el = document.getElementById('pfDay'); if(el) el.style.display = 'none'; }
-function pfShowDay(i){
-  const d = PF && PF.daily && PF.daily[i]; const el = document.getElementById('pfDay'); if(!d || !el) return;
-  const t = {}; Object.keys(d).forEach(k => { t[k] = Number(d[k]) || 0; });
-  el.innerHTML = '<div class="pf-day-h"><span>' + RU.fmtDate(d.date) + '</span><button type="button" aria-label="Fechar" onclick="pfHideDay()">×</button></div>'
-    + '<div class="pf-day-g">' + PF_ALL.map(m => '<div><span>' + m[1] + '</span><b>' + pfVal(m[0], t) + '</b></div>').join('') + '</div>';
-  el.style.display = 'block';
+// Seleção de um dia: os "Totais do período" passam a mostrar o dia (hover no desktop, toque no celular) e a barra fica destacada.
+let PF_SEL = null;
+function pfSelect(i){
+  if(i === PF_SEL) return;
+  PF_SEL = i; pfSide();
+  if(PF_CHART && PF){
+    const n = PF.daily.length;
+    PF_CHART.data.datasets[0].backgroundColor = Array.from({length: n}, (_, k) => k === i ? 'rgba(17,17,17,.6)' : 'rgba(17,17,17,.18)');
+    PF_CHART.data.datasets[1].pointRadius = Array.from({length: n}, (_, k) => k === i ? 4 : 0);
+    PF_CHART.update('none');
+  }
 }
-document.addEventListener('click', e => { const el = document.getElementById('pfDay'); if(el && el.style.display !== 'none' && !e.target.closest('#pfChart, #pfDay')) pfHideDay(); });
+document.addEventListener('click', e => { if(PF_SEL != null && !e.target.closest('#pfChart')) pfSelect(null); });
 
 function pfChart(){
   if(PF_STATE !== 'ok') return;
@@ -150,6 +156,7 @@ function pfChart(){
   const narrow = window.innerWidth < 700;
   const labels = PF.daily.map(d => { const m = String(d.date).slice(0, 10).split('-'); return m.length === 3 ? m[2] + '/' + m[1] : RU.fmtDate(d.date); });
   const vals = m => PF.daily.map(d => Number(d[m]) || 0);
+  PF_SEL = null;
   pfSide();
   if(PF_CHART) PF_CHART.destroy();
   PF_CHART = new Chart(document.getElementById('pfChart'), {
@@ -158,9 +165,9 @@ function pfChart(){
       {type: 'line', label: PF_LABEL[ml], data: vals(ml), borderColor: '#111', backgroundColor: '#111', tension: .25, pointRadius: 0, borderWidth: 2, yAxisID: 'y1', order: 1}
     ]},
     options: {responsive: true, maintainAspectRatio: false, interaction: {mode: 'index', intersect: false},
-      onClick: (ev, els, chart) => { if(!narrow) return; const hit = chart.getElementsAtEventForMode(ev, 'index', {intersect: false}, false); if(hit.length) pfShowDay(hit[0].index); },
+      onClick: (ev, els, chart) => { const h = chart.getElementsAtEventForMode(ev, 'index', {intersect: false}, false); pfSelect(h.length ? h[0].index : null); },
       plugins: {legend: {display: true, position: 'bottom', labels: {boxWidth: 12, font: {size: 10}}},
-        tooltip: {enabled: !narrow, filter: i => i.datasetIndex === 0, displayColors: false, padding: 12, bodyFont: {family: 'monospace', size: 11}, titleFont: {size: 12},
+        tooltip: {enabled: false, filter: i => i.datasetIndex === 0, displayColors: false, padding: 12, bodyFont: {family: 'monospace', size: 11}, titleFont: {size: 12},
           callbacks: {
             label: () => [],
             title: items => items.length ? RU.fmtDate(PF.daily[items[0].dataIndex].date) : '',
@@ -171,6 +178,9 @@ function pfChart(){
         y: {beginAtZero: true, position: 'left', ticks: {font: {size: narrow ? 9 : 11}, maxTicksLimit: 5}, title: {display: !narrow, text: PF_LABEL[mb], font: {size: 10}}},
         y1: {beginAtZero: true, position: 'right', grid: {drawOnChartArea: false}, ticks: {font: {size: narrow ? 9 : 11}, maxTicksLimit: 5}, title: {display: !narrow, text: PF_LABEL[ml], font: {size: 10}}}}}
   });
+  const cv = document.getElementById('pfChart');
+  cv.onmousemove = e => { if(narrow || !PF_CHART) return; const h = PF_CHART.getElementsAtEventForMode(e, 'index', {intersect: false}, false); pfSelect(h.length ? h[0].index : null); };
+  cv.onmouseleave = () => { if(!narrow) pfSelect(null); };
 }
 
 async function pfLoad(wsId, why){
