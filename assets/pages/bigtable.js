@@ -76,6 +76,44 @@ function btDownload(type){
     toast('Excel exportado', 'ok');
   }
 }
+// ── Exportar para o Drive do usuário ──
+function btDriveMsg(html, actionLabel, action){
+  const el = document.getElementById('btDriveMsg'); if(!el) return;
+  el.innerHTML = '<span>' + html + '</span>' + (actionLabel ? '<button type="button" class="bt-btn" id="btDriveAct">' + actionLabel + '</button>' : '') + '<button type="button" class="bt-drive-x" aria-label="Fechar">×</button>';
+  el.style.display = 'flex';
+  el.querySelector('.bt-drive-x').onclick = () => { el.style.display = 'none'; };
+  if(actionLabel) el.querySelector('#btDriveAct').onclick = action;
+}
+async function btExportDrive(){
+  if(!btFiltered.length){ toast('Nada para exportar', 'er'); return; }
+  const btn = document.getElementById('btDriveBtn'); btn.disabled = true; const old = btn.textContent; btn.textContent = 'Enviando…';
+  const headers = ['Criativo','Plataforma','Campanha','Meio','Status','ID na plataforma','Início','Fim','Row ID'];
+  const rows = btFiltered.map(r => [r.criativo, r.plat, r.camp, r.medium, r.rawStatus || r.status, r.id === '—' ? '' : r.id, r.start, r.end, r.row_id].map(v => String(v == null ? '' : v)));
+  const wsSel = document.getElementById('btWorkspace'); const wsName = wsSel && wsSel.selectedOptions[0] ? wsSel.selectedOptions[0].textContent : '';
+  const d = new Date(); const stamp = String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+  try{
+    const res = await fetch(API_BASE + '/export/drive', {method: 'POST', headers: Object.assign({'Content-Type': 'application/json'}, authHeaders()),
+      body: JSON.stringify({title: 'Big Table — ' + (wsName || 'Rise Up') + ' — ' + stamp, headers, rows})});
+    if(res.ok){
+      const data = await res.json();
+      btDriveMsg('Planilha criada no seu Google Drive.', 'Abrir planilha', () => window.open(data.url, '_blank', 'noopener'));
+      toast('Exportado para o Drive', 'ok');
+    }else{
+      let body = {}; try{ body = await res.json(); }catch(e){}
+      const det = body && body.detail;
+      if(res.status === 401 && det && det.code === 'needs_google_auth'){
+        btDriveMsg('Para exportar, autorize o acesso ao seu Google Drive.', 'Conectar Google Drive', () => { try{ localStorage.setItem('riseup_return', 'bigtable.html'); }catch(e){} location.href = API_BASE + '/auth/login'; });
+      }else if(res.status === 404 || res.status === 405){
+        btDriveMsg('A exportação para o Drive ainda não foi ativada para a sua conta.');
+      }else{
+        btDriveMsg('Não foi possível exportar para o Drive agora. Tente de novo em instantes.');
+      }
+    }
+  }catch(e){
+    btDriveMsg('Não foi possível exportar para o Drive agora. Verifique a conexão e tente de novo.');
+  }
+  btn.disabled = false; btn.textContent = old;
+}
 async function btLoad(workspaceId, why){
   if(!workspaceId){ BT_ALL_DATA = []; btFiltered = []; btState = why === 'error' ? 'error' : 'nows'; btFillFilters(); btRender(); return; }
   BT_ALL_DATA = []; btFiltered = []; btState = 'loading'; btRender();

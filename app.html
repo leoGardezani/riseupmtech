@@ -880,7 +880,10 @@ window.addEventListener('load',()=>{
   if(p.get('token')){
     localStorage.setItem('riseup_token',p.get('token'));
     localStorage.setItem('riseup_user',JSON.stringify({name:decodeURIComponent(p.get('name')||''),email:decodeURIComponent(p.get('email')||'')}));
-    location.href='operations.html';
+    // Voltar para a página que pediu a autorização (ex.: exportar para o Drive), só páginas do próprio site.
+    let back='operations.html';
+    try{const r=localStorage.getItem('riseup_return');localStorage.removeItem('riseup_return');if(r&&/^[a-z]+\.html$/.test(r))back=r;}catch(e){}
+    location.href=back;
     return;
   }
   // Novo nesta sessão — /auth/magic-link/verify redireciona pra cá com

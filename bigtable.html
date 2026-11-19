@@ -13,13 +13,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/shared.css?v=20261119m">
+<link rel="stylesheet" href="assets/shared.css?v=20261119n">
 </head>
 <body data-page="bigtable" data-nofilters>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-<script src="assets/shell.js?v=20261119m"></script>
+<script src="assets/shell.js?v=20261119n"></script>
 <div class="main" id="main">
   <div class="tab-page active" id="tab-bigtable">
     <div class="section-title">Big Table</div>
@@ -33,8 +33,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="bt-info" id="bt-info" style="margin-left:0">— linhas</span>
         <button class="bt-btn ghost" onclick="btDownload('csv')">↓ CSV</button>
         <button class="bt-btn" onclick="btDownload('xlsx')">↓ Excel</button>
+        <button class="bt-btn ghost" id="btDriveBtn" onclick="btExportDrive()">↑ Drive</button>
       </div>
     </div>
+    <div id="btDriveMsg" class="bt-drive-msg" style="display:none"></div>
     <div class="bt-wrap">
       <table class="bt-table" id="btTable">
         <thead>
@@ -57,7 +59,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   </div>
 </div>
 
-<script src="assets/core.js?v=20261119m"></script>
-<script src="assets/pages/bigtable.js?v=20261119m"></script>
+<script src="assets/core.js?v=20261119n"></script>
+<script src="assets/pages/bigtable.js?v=20261119n"></script>
 </body>
 </html>
