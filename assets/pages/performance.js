@@ -1,5 +1,6 @@
 /* Rise Up MTech — Performance: métricas e pacing a partir de GET /performance/summary. */
 
+let PF_PREV = null; // somas do período anterior (mesmo tamanho), só para comparação
 let PF = null, PF_STATE = 'loading', PF_CHART = null; // loading | ok | error | nows | nodata | soon
 
 const pfInt = v => (v == null ? '—' : Math.round(v).toLocaleString('pt-BR'));
@@ -48,6 +49,7 @@ function pfRender(){
   const empty = '<tr><td colspan="10"><div style="padding:24px 20px;font-family:var(--mono);font-size:10px;color:var(--ink-muted)">' + pfMessage() + '</div></td></tr>';
   if(!ok){
     ['k-spend','k-imp','k-reach','k-freq','k-clk','k-ctr','k-cpm','k-cpc','k-vv','k-leads','k-conv','k-pace'].forEach(id => set(id, '—'));
+    document.querySelectorAll('[id^="d-"]').forEach(e => { e.textContent = ''; });
     document.getElementById('pfSource').innerHTML = empty;
     document.getElementById('pfCamp').innerHTML = empty;
     document.getElementById('pfMatrix').innerHTML = empty;
@@ -66,6 +68,22 @@ function pfRender(){
   set('k-cpm', pfMoney(pfDiv(t.spend * 1000, t.imp))); set('k-cpc', pfMoney(pfDiv(t.spend, t.clk)));
   set('k-vv', pfInt(t.vv)); set('k-leads', pfInt(t.leads)); set('k-conv', pfInt(t.conv));
   const po = PF.pacing_overall || {};
+  // comparação com o período anterior de mesmo tamanho
+  const sumP = k => (PF_PREV || []).reduce((a, d) => a + (Number(d[k]) || 0), 0);
+  const pv = PF_PREV ? {spend: sumP('spend'), imp: sumP('impressions'), reach: sumP('reach'), clk: sumP('clicks'), vv: sumP('video_views'), leads: sumP('leads'), conv: sumP('conversions')} : null;
+  const delta = (id, cur, prev, mode) => { // mode: 'neutral' | 'up' (maior é melhor) | 'down' (menor é melhor)
+    const el = document.getElementById(id); if(!el) return;
+    if(!pv || prev == null || cur == null || !isFinite(prev) || !isFinite(cur) || prev === 0){ el.textContent = pv ? 'sem base anterior' : ''; el.className = 'kpi-delta'; el.style.color = 'var(--ink-muted)'; return; }
+    const ch = (cur - prev) / Math.abs(prev), up = ch > 0.0005, dn = ch < -0.0005;
+    el.textContent = (up ? '▲ ' : dn ? '▼ ' : '= ') + (Math.abs(ch) * 100).toLocaleString('pt-BR', {maximumFractionDigits: 1}) + '% vs. anterior';
+    const good = mode === 'neutral' ? null : (mode === 'up' ? up : dn), bad = mode === 'neutral' ? null : (mode === 'up' ? dn : up);
+    el.className = 'kpi-delta'; el.style.color = good ? 'var(--success)' : bad ? 'var(--danger)' : 'var(--ink-muted)';
+  };
+  delta('d-spend', t.spend, pv && pv.spend, 'neutral'); delta('d-imp', t.imp, pv && pv.imp, 'up'); delta('d-reach', t.reach, pv && pv.reach, 'up');
+  delta('d-freq', pfDiv(t.imp, t.reach), pv && pfDiv(pv.imp, pv.reach), 'neutral'); delta('d-clk', t.clk, pv && pv.clk, 'up');
+  delta('d-ctr', pfDiv(t.clk, t.imp), pv && pfDiv(pv.clk, pv.imp), 'up');
+  delta('d-cpm', pfDiv(t.spend * 1000, t.imp), pv && pfDiv(pv.spend * 1000, pv.imp), 'down'); delta('d-cpc', pfDiv(t.spend, t.clk), pv && pfDiv(pv.spend, pv.clk), 'down');
+  delta('d-vv', t.vv, pv && pv.vv, 'up'); delta('d-leads', t.leads, pv && pv.leads, 'up'); delta('d-conv', t.conv, pv && pv.conv, 'up');
   set('k-pace', po.spend && po.spend.pacing != null ? pfPct(po.spend.pacing) : '—');
   const totalRow = '<tr style="background:var(--bg-soft,#f7f7f5)"><td class="td-bold">Total do plano</td><td class="td-mono">—</td>'
     + PF_METRICS.map(m => '<td>' + pfPacing(po[m[0]] ? po[m[0]].pacing : null) + '</td>').join('') + '</tr>';
@@ -153,6 +171,18 @@ async function pfLoad(wsId, why){
     if(!res.ok) throw new Error(res.status);
     PF = await res.json();
     PF_STATE = PF.has_data ? 'ok' : 'nodata';
+    PF_PREV = null;
+    try{ // período anterior: busca o dobro de dias e separa pelo calendário (sem mudar o serviço)
+      const r2 = await fetch(API_BASE + '/performance/summary?workspace_id=' + encodeURIComponent(wsId) + '&days=' + (days * 2), {headers: authHeaders()});
+      if(r2.ok){
+        const d2 = await r2.json();
+        const cut = new Date(); cut.setHours(0,0,0,0); cut.setDate(cut.getDate() - (Number(days) - 1));
+        const iso = x => x.getFullYear() + '-' + String(x.getMonth()+1).padStart(2,'0') + '-' + String(x.getDate()).padStart(2,'0');
+        const c = iso(cut);
+        const prev = (d2.daily || []).filter(d => String(d.date).slice(0,10) < c);
+        PF_PREV = prev.length ? prev : null;
+      }
+    }catch(e){ PF_PREV = null; }
   }catch(e){ PF = null; PF_STATE = 'error'; }
   pfRender();
 }
