@@ -133,6 +133,17 @@ function pfSide(){
     + PF_ALL.map(m => '<div class="pf-side-row"><span>' + m[1] + '</span><b>' + pfVal(m[0], t) + '</b></div>').join('');
 }
 
+// Celular: em vez do balão, mostra o cartão do dia abaixo do gráfico; fecha no × ou ao tocar fora.
+function pfHideDay(){ const el = document.getElementById('pfDay'); if(el) el.style.display = 'none'; }
+function pfShowDay(i){
+  const d = PF && PF.daily && PF.daily[i]; const el = document.getElementById('pfDay'); if(!d || !el) return;
+  const t = {}; Object.keys(d).forEach(k => { t[k] = Number(d[k]) || 0; });
+  el.innerHTML = '<div class="pf-day-h"><span>' + RU.fmtDate(d.date) + '</span><button type="button" aria-label="Fechar" onclick="pfHideDay()">×</button></div>'
+    + '<div class="pf-day-g">' + PF_ALL.map(m => '<div><span>' + m[1] + '</span><b>' + pfVal(m[0], t) + '</b></div>').join('') + '</div>';
+  el.style.display = 'block';
+}
+document.addEventListener('click', e => { const el = document.getElementById('pfDay'); if(el && el.style.display !== 'none' && !e.target.closest('#pfChart, #pfDay')) pfHideDay(); });
+
 function pfChart(){
   if(PF_STATE !== 'ok') return;
   const mb = document.getElementById('pfMetricBar').value, ml = document.getElementById('pfMetricLine').value;
@@ -147,8 +158,9 @@ function pfChart(){
       {type: 'line', label: PF_LABEL[ml], data: vals(ml), borderColor: '#111', backgroundColor: '#111', tension: .25, pointRadius: 0, borderWidth: 2, yAxisID: 'y1', order: 1}
     ]},
     options: {responsive: true, maintainAspectRatio: false, interaction: {mode: 'index', intersect: false},
+      onClick: (ev, els, chart) => { if(!narrow) return; const hit = chart.getElementsAtEventForMode(ev, 'index', {intersect: false}, false); if(hit.length) pfShowDay(hit[0].index); },
       plugins: {legend: {display: true, position: 'bottom', labels: {boxWidth: 12, font: {size: 10}}},
-        tooltip: {filter: i => i.datasetIndex === 0, displayColors: false, padding: 12, bodyFont: {family: 'monospace', size: 11}, titleFont: {size: 12},
+        tooltip: {enabled: !narrow, filter: i => i.datasetIndex === 0, displayColors: false, padding: 12, bodyFont: {family: 'monospace', size: 11}, titleFont: {size: 12},
           callbacks: {
             label: () => [],
             title: items => items.length ? RU.fmtDate(PF.daily[items[0].dataIndex].date) : '',
