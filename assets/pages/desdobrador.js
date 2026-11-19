@@ -160,11 +160,11 @@ function renderDesdQueue(){
   tbody.innerHTML = DESD_QUEUE.map(r => `
     <tr class="desd-queue-row${desdState.selectedRowIds.has(r.row_id)?' active':''}" onclick="desdToggleQueueRow('${r.row_id}')">
       <td><input type="checkbox" class="desd-queue-check" ${desdState.selectedRowIds.has(r.row_id)?'checked':''} onclick="event.stopPropagation();desdToggleQueueRow('${r.row_id}')"></td>
-      <td class="td-bold">${_escHtml(r.campaign_name)}</td>
-      <td class="td-mono">${_escHtml(r.brand)}</td>
-      <td class="td-mono">${_escHtml(r.source)}</td>
-      <td class="td-mono">${_escHtml(r.creative_size)}</td>
-      <td class="td-mono">${_escHtml(r.delivery_date || '')}</td>
+      <td class="td-bold" data-label="Campanha">${_escHtml(r.campaign_name)}</td>
+      <td class="td-mono" data-label="Marca">${_escHtml(r.brand)}</td>
+      <td class="td-mono" data-label="Plataforma">${_escHtml(r.source)}</td>
+      <td class="td-mono" data-label="Formato pedido">${_escHtml(r.creative_size)}</td>
+      <td class="td-mono" data-label="Entrega">${_escHtml(r.delivery_date || '')}</td>
     </tr>`).join('');
 }
 

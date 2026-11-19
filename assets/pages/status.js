@@ -18,13 +18,13 @@ function renderStatus(){
   }else{
     tb.innerHTML = STATUS_ROWS.map(s =>
       '<tr>'
-      + '<td class="td-bold">' + _escHtml(s.criativo) + '</td>'
-      + '<td class="td-mono">' + _escHtml(s.plat) + '</td>'
-      + '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _escHtml(s.camp) + '</td>'
-      + '<td title="' + _escHtml(s.rawStatus) + '">' + badgeH(s.status) + '</td>'
-      + '<td class="td-mono" style="color:var(--ink-muted)">' + _escHtml(s.id) + '</td>'
-      + '<td class="td-mono">' + RU.fmtDate(s.start) + '</td>'
-      + '<td class="td-mono">' + RU.fmtDate(s.end) + '</td>'
+      + '<td class="td-bold" data-label="Criativo">' + _escHtml(s.criativo) + '</td>'
+      + '<td class="td-mono" data-label="Plataforma">' + _escHtml(s.plat) + '</td>'
+      + '<td data-label="Campanha" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _escHtml(s.camp) + '</td>'
+      + '<td data-label="Status" title="' + _escHtml(s.rawStatus) + '">' + badgeH(s.status) + '</td>'
+      + '<td data-label="ID na plataforma" class="td-mono" style="color:var(--ink-muted)">' + _escHtml(s.id) + '</td>'
+      + '<td data-label="Início" class="td-mono">' + RU.fmtDate(s.start) + '</td>'
+      + '<td data-label="Fim" class="td-mono">' + RU.fmtDate(s.end) + '</td>'
       + '</tr>'
     ).join('');
   }
@@ -66,7 +66,8 @@ function renderGantt(){
       const leftPct = (l / TOTAL) * 100, widthPct = Math.max(1.5, ((r - l) / TOTAL) * 100);
       html += '<div class="gantt-row">'
         + '<div class="gantt-row-info"><div class="gr-name">' + _escHtml(s.criativo) + '</div>'
-        + '<div class="gr-meta"><span>' + _escHtml(s.plat) + '</span>' + badgeH(s.status) + '</div></div>'
+        + '<div class="gr-meta"><span>' + _escHtml(s.plat) + '</span>' + badgeH(s.status) + '</div>'
+        + '<div class="gr-dates">' + RU.fmtDate(s.start) + ' → ' + RU.fmtDate(s.end) + '</div></div>'
         + '<div class="gantt-bar-area"><div class="gantt-today-line" style="left:' + todayPct + '%"></div>'
         + (outside
             ? '<div style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:9px;color:var(--ink-muted)">fora da janela · ' + RU.fmtDate(s.start) + ' → ' + RU.fmtDate(s.end) + '</div>'

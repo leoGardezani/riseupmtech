@@ -412,3 +412,33 @@
   @media(max-width:960px){.rp-pages{display:block;}}
 .fg{min-width:0;} input.fi[type=date]{min-width:0;width:100%;max-width:100%;box-sizing:border-box;}
 @media(max-width:700px){input.fi[type=date]{min-height:42px;}}
+
+/* Celular: telas em coluna única, tabelas em cartões e Gantt compacto (sem rolagem lateral). */
+.gr-dates{display:none;}
+@media(max-width:900px){
+  .desd-layout{grid-template-columns:minmax(0,1fr);}
+  .desd-col{padding:16px;}
+  .desd-preview-grid,.desd-assign-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));}
+}
+@media(max-width:700px){
+  table.tstack{display:block;width:100%;}
+  table.tstack thead{display:none;}
+  table.tstack tbody{display:block;}
+  table.tstack tr{display:block;padding:12px 16px;border-bottom:1px solid var(--border-d);}
+  table.tstack td{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:3px 0 !important;border:0 !important;text-align:right;max-width:none !important;white-space:normal !important;overflow:visible !important;}
+  table.tstack td::before{content:attr(data-label);flex-shrink:0;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);text-align:left;}
+  table.tstack td[colspan]{display:block;text-align:center;}
+  table.tstack td[colspan]::before{content:none;}
+  table.tstack td.td-bold{font-size:14px;}
+  .tbox:has(table.tstack){overflow-x:visible;}
+  /* Gantt: cada linha vira um cartão com a barra ocupando a largura toda */
+  .gantt-wrap{overflow:visible;}
+  .gantt-header{display:none;}
+  .gantt-group-header{padding:10px 14px;}
+  .gantt-row{display:block;padding:10px 14px 12px;min-height:0;}
+  .gantt-row-info{width:auto;border-right:0;padding:0 0 6px;gap:4px;}
+  .gantt-bar-area{min-width:0;width:100%;height:26px;background:linear-gradient(var(--border-d),var(--border-d)) center/100% 1px no-repeat;}
+  .gantt-bar{height:16px;font-size:8px;padding:0 4px;}
+  .gr-dates{display:block;font-family:var(--mono);font-size:9px;color:var(--ink-muted);letter-spacing:.04em;}
+  .gantt-legend{flex-wrap:wrap;gap:10px 16px;padding:12px 14px;}
+}
