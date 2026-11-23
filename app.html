@@ -872,7 +872,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
 const API=localStorage.getItem('riseup_api')||'https://riseup-backend-509219529113.southamerica-east1.run.app';
-let S={token:localStorage.getItem('riseup_token'),role:localStorage.getItem('riseup_role')||'editor',user:null,ws:JSON.parse(localStorage.getItem('riseup_ws')||'null'),file:null,delT:null,
+let S={token:localStorage.getItem('riseup_token'),role:localStorage.getItem('riseup_role')||'editor',user:null,ws:(function(){try{var v=JSON.parse(localStorage.getItem('riseup_ws')||'null');return v&&typeof v==='object'?v:null;}catch(e){return null;}})(),file:null,delT:null,
   users:[{id:1,name:'Leonardo Gardezani',email:'leonardo.gardezani@gmail.com',role:'admin',status:'active',since:'18/03/2026'}]};
 
 window.addEventListener('load',()=>{

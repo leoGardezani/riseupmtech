@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rise Up MTech — Insights</title>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NG9TFZ74');</script>
+<!-- End Google Tag Manager -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  .ins-list{display:flex;flex-direction:column;gap:14px;margin-top:24px}
+  .ins-card{border:1px solid var(--border);background:var(--bg2);border-left-width:4px}
+  .ins-card.sev-alerta{border-left-color:hsl(0,70%,42%)}
+  .ins-card.sev-atencao{border-left-color:hsl(38,90%,48%)}
+  .ins-card.sev-oportunidade{border-left-color:hsl(142,60%,36%)}
+  .ins-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:14px 20px 6px}
+  .ins-title{font-family:var(--fh);font-weight:700;font-size:15px}
+  .ins-sub{font-family:var(--mono);font-size:10px;color:var(--ink-muted);letter-spacing:.06em;margin-top:3px}
+  .ins-tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .ins-tag{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--border);color:var(--ink-muted);white-space:nowrap}
+  .ins-body{padding:6px 20px 12px;font-size:13px;line-height:1.55}
+  .ins-body ul{margin:6px 0 0 18px;padding:0}
+  .ins-block{padding:10px 20px;border-top:1px solid var(--border)}
+  .ins-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px}
+  .ins-peers{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px}
+  .ins-peers th,.ins-peers td{text-align:left;padding:3px 8px 3px 0;border-bottom:1px solid var(--border);font-weight:400}
+  .ins-peers th{color:var(--ink-muted)}
+  .ins-actions{display:flex;gap:10px;padding:12px 20px;border-top:1px solid var(--border);align-items:center;flex-wrap:wrap}
+  .ins-actions .note{font-family:var(--mono);font-size:9px;color:var(--ink-muted);letter-spacing:.04em;flex:1;min-width:200px}
+  .ins-btn{font-family:var(--fh);font-weight:600;font-size:12px;padding:7px 16px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
+  .ins-btn.ghost{background:none;color:var(--ink)}
+  .ins-btn[disabled]{opacity:.5;cursor:default}
+  .ins-done{font-family:var(--mono);font-size:10px;color:var(--ink-muted)}
+</style>
+<link rel="stylesheet" href="assets/shared.css?v=20261119u">
+</head>
+<body data-page="insights" data-nofilters>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NG9TFZ74" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script src="assets/shell.js?v=20261119u"></script>
+<div class="main" id="main">
+  <div class="tab-page active" id="tab-insights">
+    <div>
+      <div class="section-title">Insights</div>
+      <div class="section-sub">Otimizações sugeridas a partir dos dados das plataformas — você aceita ou recusa</div>
+    </div>
+    <div class="fbar">
+      <label class="ffld"><span>Mostrar</span><select class="fs_" id="insStatus"><option value="novo" selected>Aguardando decisão</option><option value="aceito">Aceitos</option><option value="recusado">Recusados</option><option value="expirado">Expirados</option></select></label>
+      <label class="ffld wide"><span>Workspace</span><select class="fs_" id="insWorkspace"><option value="">Carregando...</option></select></label>
+    </div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi feat"><div class="kpi-lbl">Na lista</div><div class="kpi-val" id="insN">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Alertas</div><div class="kpi-val" id="insA">—</div></div>
+      <div class="kpi"><div class="kpi-lbl">Impacto estimado</div><div class="kpi-val" id="insI">—</div></div>
+    </div>
+    <div class="ins-list" id="insList"></div>
+  </div>
+</div>
+
+<script src="assets/core.js?v=20261119u"></script>
+<script src="assets/pages/insights.js?v=20261119u"></script>
+</body>
+</html>

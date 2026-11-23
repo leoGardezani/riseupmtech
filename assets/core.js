@@ -89,8 +89,8 @@ RU.loadImpl = async function(workspaceId){
   }catch(e){ return { ok: false, rows: [] }; }
 };
 // Workspace escolhido (compartilhado entre páginas via localStorage).
-RU.getWs = function(){ try{ return localStorage.getItem('riseup_ws') || ''; }catch(e){ return ''; } };
-RU.setWs = function(id){ try{ localStorage.setItem('riseup_ws', id || ''); }catch(e){} };
+RU.getWs = function(){ try{ return localStorage.getItem('riseup_ws_sel') || ''; }catch(e){ return ''; } };
+RU.setWs = function(id){ try{ localStorage.setItem('riseup_ws_sel', id || ''); }catch(e){} };
 // Preenche um <select> com os planos de mídia (GET /plan/workspaces) e chama onChange(workspaceId).
 RU.initWorkspaceSelect = async function(selectEl, onChange){
   if(!selectEl) return;
