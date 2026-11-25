@@ -126,7 +126,15 @@ async function inDecide(btn){
   try{
     const res = await fetch(API_BASE + '/insights/' + encodeURIComponent(id) + '/decision?workspace_id=' + encodeURIComponent(ws), {
       method: 'POST', headers: Object.assign({'Content-Type': 'application/json'}, authHeaders()), body: JSON.stringify({decision: d})});
-    if(res.ok){ toast(d === 'aceitar' ? 'Decisão registrada: aceito' : 'Decisão registrada: recusado', 'ok'); INS = INS.filter(i => i.insight_id !== id); inRender(); return; }
+    if(res.ok){
+      let msg = d === 'aceitar' ? 'Decisão registrada: aceito' : 'Decisão registrada: recusado', kind = 'ok';
+      if(d === 'aceitar'){
+        const ap = ((await res.json().catch(() => ({}))).applied) || null;
+        if(ap && ap.status === 'applied') msg = 'Aceito e aplicado: campanha pausada na plataforma.';
+        else if(ap && ap.status === 'already_paused') msg = 'Aceito. A campanha já estava pausada.';
+        else if(ap && ap.status === 'error'){ msg = 'Aceito, mas não foi possível pausar na plataforma: ' + (ap.message || 'erro'); kind = 'er'; }
+      }
+      toast(msg, kind); INS = INS.filter(i => i.insight_id !== id); inRender(); return; }
     toast(res.status === 403 ? 'Só editores e admins podem decidir um insight.' : res.status === 404 ? 'Este insight já foi decidido ou não existe mais.' : 'Não foi possível registrar agora. Tente de novo.', 'er');
   }catch(e){ toast('Não foi possível registrar agora. Tente de novo.', 'er'); }
   card.querySelectorAll('.ins-btn').forEach(b => { b.disabled = false; });
