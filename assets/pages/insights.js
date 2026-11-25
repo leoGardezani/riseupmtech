@@ -40,6 +40,12 @@ function inBody(i){
       + inNum(n.ratio, 1) + '× a mediana de campanhas parecidas (' + inMoney(n.reference_median) + '), e isso se repete há pelo menos '
       + inNum(n.persist_days) + ' dias. Ela tem ' + inNum(n.days_active) + ' dias de entrega e gasta cerca de ' + inMoney(n.daily_spend) + ' por dia.</div>';
   }
+  if(i.type === 'M8_trocar_otimizacao'){
+    const a = f.action || {}, lbl = IN_METRIC[n.metric] || n.metric;
+    return '<div class="ins-body">O <b>' + _escHtml(lbl) + '</b> está em <b>' + inMoney(n.cost) + '</b> (' + inNum(n.ratio, 1) + '× a mediana de campanhas parecidas, ' + inMoney(n.reference_median)
+      + ') há pelo menos ' + inNum(n.persist_days) + ' dias, mas a taxa de engajamento está dentro do esperado (' + inNum(n.engagement_ratio, 2) + '× a mediana). '
+      + 'Ou seja, o problema não parece ser criativo nem público: <b>trocar a otimização de ' + _escHtml(a.from_label || a.from_goal) + ' para ' + _escHtml(a.to_label || a.to_goal) + '</b> tende a baixar o custo.</div>';
+  }
   if(i.type === 'M4_budget'){
     const rs = inReasons(n);
     return '<div class="ins-body">' + (rs.length ? '<ul>' + rs.map(r => '<li>' + _escHtml(r.charAt(0).toUpperCase() + r.slice(1)) + '.</li>').join('') + '</ul>' : '') + '</div>';
@@ -50,6 +56,7 @@ function inBody(i){
 function inTitle(i){
   const n = (i.fact || {}).numbers || {};
   if(i.type === 'M1_pausar') return 'Considere pausar: custo acima do esperado';
+  if(i.type === 'M8_trocar_otimizacao') return 'Considere trocar a otimização da campanha';
   if(i.type === 'M4_budget') return n.threshold_pct === 100 ? 'Budget do plano esgotado' : 'Atenção ao budget do plano';
   return i.type;
 }
@@ -71,6 +78,9 @@ function inReference(i){
 function inEstimate(i){
   const e = (i.fact || {}).estimates || {};
   if(!e.horizon_days) return '';
+  if(i.type === 'M8_trocar_otimizacao') return '<div class="ins-block"><div class="ins-lbl">O que esperar se aceitar · estimativa</div>'
+    + 'Custo de referência: <b>' + inMoney(e.target_cost) + '</b>. Em ' + inNum(e.horizon_days) + ' dias, o excesso de custo atual equivale a cerca de <b>' + inMoney(e.excess_cost_brl) + '</b>. '
+    + '<span class="ins-sub">A troca reinicia o aprendizado da plataforma (cerca de 7 dias) e o resultado não é garantido.</span></div>';
   const v = e.volume_given_up || {};
   return '<div class="ins-block"><div class="ins-lbl">O que esperar se aceitar · estimativa</div>'
     + 'Pausando por ' + inNum(e.horizon_days) + ' dias: libera cerca de <b>' + inMoney(e.budget_freed_brl) + '</b> de verba; '
@@ -86,7 +96,7 @@ function inCard(i){
   const actions = open
     ? '<div class="ins-actions"><button class="ins-btn" data-ins="' + _escHtml(i.insight_id) + '" data-d="aceitar">Aceitar</button>'
       + '<button class="ins-btn ghost" data-ins="' + _escHtml(i.insight_id) + '" data-d="recusar">Recusar</button>'
-      + '<span class="note">// por enquanto, aceitar só registra a sua decisão: a mudança na plataforma ainda é feita por você</span></div>'
+      + '<span class="note">// aceitar aplica na plataforma (pausa ou troca de otimização); revisão de orçamento só fica registrada</span></div>'
     : '<div class="ins-actions"><span class="ins-done">' + _escHtml(({aceito: 'Aceito', recusado: 'Recusado', expirado: 'Expirado: o problema deixou de aparecer'})[i.status] || i.status)
       + (i.decided_by ? ' por ' + _escHtml(i.decided_by) : '') + (i.decided_at ? ' em ' + inDate(i.decided_at) : '') + '</span></div>';
   return '<div class="ins-card sev-' + _escHtml(i.severity) + '">'
