@@ -708,6 +708,7 @@ function audValidationNote(v){
     const r = v[k]; if(!r) return;
     if(r.checked === false) linhas.push('⚠ ' + nomes[k] + ' sem validação: ' + (r.reason || 'não foi possível conferir com a plataforma') + '. Confira antes de implementar.');
     const rem = (r.removed || []).concat(r.removed_irrelevant || []);
+    if(r.checked !== false && r.total != null) linhas.push('· ' + nomes[k] + ': ' + r.total + ' itens' + (r.added_to_reach_minimum ? ' (' + r.added_to_reach_minimum + ' incluídos para chegar ao mínimo de 20)' : '') + '.');
     if(rem.length) linhas.push('· ' + nomes[k] + ': ' + rem.length + ' item(ns) removido(s) por não existir ou não combinar com o público (' + rem.slice(0,4).join(', ') + (rem.length > 4 ? '…' : '') + ').');
   });
   return linhas;
