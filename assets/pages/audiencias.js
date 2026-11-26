@@ -699,6 +699,20 @@ function audCloseDetailModal(){
   document.getElementById('audDetailModalOverlay').style.display = 'none';
 }
 
+// Resumo da validação feita pelo backend contra as plataformas: avisa o que NÃO foi validado e o que foi removido.
+function audValidationNote(v){
+  v = v || {};
+  const nomes = {meta:'Meta', tiktok:'TikTok', google_ads:'Google Ads'};
+  const linhas = [];
+  Object.keys(nomes).forEach(function(k){
+    const r = v[k]; if(!r) return;
+    if(r.checked === false) linhas.push('⚠ ' + nomes[k] + ' sem validação: ' + (r.reason || 'não foi possível conferir com a plataforma') + '. Confira antes de implementar.');
+    const rem = (r.removed || []).concat(r.removed_irrelevant || []);
+    if(rem.length) linhas.push('· ' + nomes[k] + ': ' + rem.length + ' item(ns) removido(s) por não existir ou não combinar com o público (' + rem.slice(0,4).join(', ') + (rem.length > 4 ? '…' : '') + ').');
+  });
+  return linhas;
+}
+
 async function audGenerateSuggestion(){
   const btn = document.getElementById('audGenerateBtn');
   const box = document.getElementById('audResultBox');
@@ -730,10 +744,12 @@ async function audGenerateSuggestion(){
     audLastPromptText = promptText;  // guardado pra dar contexto nos ajustes (ver audApplyRefinement)
     document.getElementById('audNameInput').value = '';
     audRenderSuggestion(data.suggestions);
+    const vNotes = audValidationNote(data.validation);
 
     box.style.display = 'block';
     box.scrollIntoView({behavior:'smooth', block:'nearest'});
-    if(statusEl) statusEl.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--success)">✓ Sugestão gerada — revise antes de aprovar</div>';
+    if(statusEl) statusEl.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--success)">✓ Sugestão gerada — revise antes de aprovar</div>'
+      + vNotes.map(function(l){ return '<div style="font-family:var(--mono);font-size:10px;color:var(--warn,#b8860b);margin-top:3px">' + _escHtml(l) + '</div>'; }).join('');
   }catch(e){
     if(statusEl) statusEl.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--danger)">✕ ' + _escHtml(e.message || 'Falha ao gerar sugestão') + '</div>';
   }
@@ -822,6 +838,8 @@ async function audApplyRefinement(){
     audRenderSuggestion(data.suggestions);
     input.value = '';
     toast('✓ Ajuste aplicado', 'ok');
+    const rNotes = audValidationNote(data.validation);
+    if(statusEl && rNotes.length) statusEl.innerHTML = rNotes.map(function(l){ return '<div style="font-family:var(--mono);font-size:10px;color:var(--warn,#b8860b);margin-top:3px">' + _escHtml(l) + '</div>'; }).join('');
   }catch(e){
     toast('✕ ' + (e.message || 'Falha ao aplicar o ajuste'), 'er');
   }
